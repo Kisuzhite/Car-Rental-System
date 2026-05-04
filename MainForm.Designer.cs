@@ -1,0 +1,965 @@
+namespace Car_Rental_System
+{
+    partial class MainForm
+    {
+        private System.ComponentModel.IContainer components = null;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        private void InitializeComponent()
+        {
+            DataGridViewCellStyle dataGridViewCellStyle7 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle8 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle9 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle10 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle11 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle12 = new DataGridViewCellStyle();
+            sidebarPanel = new Panel();
+            logoutButton = new Button();
+            reportsButton = new Button();
+            returnsButton = new Button();
+            rentalsButton = new Button();
+            customersButton = new Button();
+            carsButton = new Button();
+            dashboardButton = new Button();
+            appTitleLabel = new Label();
+            topPanel = new Panel();
+            staffBadgeLabel = new Label();
+            dateLabel = new Label();
+            pageTitleLabel = new Label();
+            contentPanel = new Panel();
+            recentPanel = new Panel();
+            recentRentalsGrid = new DataGridView();
+            recentTitleLabel = new Label();
+            mainTable = new TableLayoutPanel();
+            quickRentalPanel = new Panel();
+            clearButton = new Button();
+            createRentalButton = new Button();
+            totalAmountTextBox = new TextBox();
+            totalAmountLabel = new Label();
+            dailyRateTextBox = new TextBox();
+            dailyRateLabel = new Label();
+            returnDatePicker = new DateTimePicker();
+            returnDateLabel = new Label();
+            rentalDatePicker = new DateTimePicker();
+            rentalDateLabel = new Label();
+            selectedCarComboBox = new ComboBox();
+            selectedCarLabel = new Label();
+            customerNameTextBox = new TextBox();
+            customerNameLabel = new Label();
+            quickRentalTitleLabel = new Label();
+            availabilityPanel = new Panel();
+            carsGrid = new DataGridView();
+            availabilityHeaderPanel = new Panel();
+            searchTextBox = new TextBox();
+            availableCarsTitleLabel = new Label();
+            statsTable = new TableLayoutPanel();
+            totalCarsCard = new Panel();
+            totalCarsValueLabel = new Label();
+            totalCarsTextLabel = new Label();
+            availableCarsCard = new Panel();
+            availableCarsValueLabel = new Label();
+            availableCarsTextLabel = new Label();
+            rentedCarsCard = new Panel();
+            rentedCarsValueLabel = new Label();
+            rentedCarsTextLabel = new Label();
+            incomeCard = new Panel();
+            incomeValueLabel = new Label();
+            incomeTextLabel = new Label();
+            sidebarPanel.SuspendLayout();
+            topPanel.SuspendLayout();
+            contentPanel.SuspendLayout();
+            recentPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)recentRentalsGrid).BeginInit();
+            mainTable.SuspendLayout();
+            quickRentalPanel.SuspendLayout();
+            availabilityPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)carsGrid).BeginInit();
+            availabilityHeaderPanel.SuspendLayout();
+            statsTable.SuspendLayout();
+            totalCarsCard.SuspendLayout();
+            availableCarsCard.SuspendLayout();
+            rentedCarsCard.SuspendLayout();
+            incomeCard.SuspendLayout();
+            SuspendLayout();
+            // 
+            // sidebarPanel
+            // 
+            sidebarPanel.BackColor = Color.FromArgb(52, 58, 64);
+            sidebarPanel.Controls.Add(logoutButton);
+            sidebarPanel.Controls.Add(reportsButton);
+            sidebarPanel.Controls.Add(returnsButton);
+            sidebarPanel.Controls.Add(rentalsButton);
+            sidebarPanel.Controls.Add(customersButton);
+            sidebarPanel.Controls.Add(carsButton);
+            sidebarPanel.Controls.Add(dashboardButton);
+            sidebarPanel.Controls.Add(appTitleLabel);
+            sidebarPanel.Dock = DockStyle.Left;
+            sidebarPanel.Location = new Point(0, 0);
+            sidebarPanel.Margin = new Padding(3, 4, 3, 4);
+            sidebarPanel.Name = "sidebarPanel";
+            sidebarPanel.Size = new Size(274, 960);
+            sidebarPanel.TabIndex = 0;
+            // 
+            // logoutButton
+            // 
+            logoutButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            logoutButton.BackColor = Color.FromArgb(255, 204, 0);
+            logoutButton.FlatAppearance.BorderColor = Color.FromArgb(255, 204, 0);
+            logoutButton.FlatAppearance.BorderSize = 0;
+            logoutButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(255, 204, 0);
+            logoutButton.FlatStyle = FlatStyle.Flat;
+            logoutButton.Font = new Font("Segoe UI", 10F);
+            logoutButton.ForeColor = Color.FromArgb(52, 58, 64);
+            logoutButton.Location = new Point(23, 872);
+            logoutButton.Margin = new Padding(3, 4, 3, 4);
+            logoutButton.Name = "logoutButton";
+            logoutButton.Padding = new Padding(18, 0, 0, 0);
+            logoutButton.Size = new Size(229, 56);
+            logoutButton.TabIndex = 8;
+            logoutButton.Text = "Logout";
+            logoutButton.UseVisualStyleBackColor = false;
+            logoutButton.Click += LogoutButton_Click;
+            // 
+            // reportsButton
+            // 
+            reportsButton.BackColor = Color.FromArgb(52, 58, 64);
+            reportsButton.FlatAppearance.BorderSize = 0;
+            reportsButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(29, 78, 216);
+            reportsButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(37, 99, 235);
+            reportsButton.FlatStyle = FlatStyle.Flat;
+            reportsButton.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            reportsButton.ForeColor = Color.White;
+            reportsButton.Location = new Point(23, 493);
+            reportsButton.Margin = new Padding(3, 4, 3, 4);
+            reportsButton.Name = "reportsButton";
+            reportsButton.Padding = new Padding(18, 0, 0, 0);
+            reportsButton.Size = new Size(229, 56);
+            reportsButton.TabIndex = 7;
+            reportsButton.Text = "Reports";
+            reportsButton.TextAlign = ContentAlignment.MiddleLeft;
+            reportsButton.UseVisualStyleBackColor = false;
+            reportsButton.Click += NavigationButton_Click;
+            // 
+            // returnsButton
+            // 
+            returnsButton.BackColor = Color.FromArgb(52, 58, 64);
+            returnsButton.FlatAppearance.BorderSize = 0;
+            returnsButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(29, 78, 216);
+            returnsButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(37, 99, 235);
+            returnsButton.FlatStyle = FlatStyle.Flat;
+            returnsButton.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            returnsButton.ForeColor = Color.White;
+            returnsButton.Location = new Point(23, 427);
+            returnsButton.Margin = new Padding(3, 4, 3, 4);
+            returnsButton.Name = "returnsButton";
+            returnsButton.Padding = new Padding(18, 0, 0, 0);
+            returnsButton.Size = new Size(229, 56);
+            returnsButton.TabIndex = 6;
+            returnsButton.Text = "Return Car";
+            returnsButton.TextAlign = ContentAlignment.MiddleLeft;
+            returnsButton.UseVisualStyleBackColor = false;
+            returnsButton.Click += NavigationButton_Click;
+            // 
+            // rentalsButton
+            // 
+            rentalsButton.BackColor = Color.FromArgb(52, 58, 64);
+            rentalsButton.FlatAppearance.BorderSize = 0;
+            rentalsButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(29, 78, 216);
+            rentalsButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(37, 99, 235);
+            rentalsButton.FlatStyle = FlatStyle.Flat;
+            rentalsButton.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            rentalsButton.ForeColor = Color.White;
+            rentalsButton.Location = new Point(23, 360);
+            rentalsButton.Margin = new Padding(3, 4, 3, 4);
+            rentalsButton.Name = "rentalsButton";
+            rentalsButton.Padding = new Padding(18, 0, 0, 0);
+            rentalsButton.Size = new Size(229, 56);
+            rentalsButton.TabIndex = 5;
+            rentalsButton.Text = "Rentals";
+            rentalsButton.TextAlign = ContentAlignment.MiddleLeft;
+            rentalsButton.UseVisualStyleBackColor = false;
+            rentalsButton.Click += NavigationButton_Click;
+            // 
+            // customersButton
+            // 
+            customersButton.BackColor = Color.FromArgb(52, 58, 64);
+            customersButton.FlatAppearance.BorderSize = 0;
+            customersButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(29, 78, 216);
+            customersButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(37, 99, 235);
+            customersButton.FlatStyle = FlatStyle.Flat;
+            customersButton.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            customersButton.ForeColor = Color.White;
+            customersButton.Location = new Point(23, 293);
+            customersButton.Margin = new Padding(3, 4, 3, 4);
+            customersButton.Name = "customersButton";
+            customersButton.Padding = new Padding(18, 0, 0, 0);
+            customersButton.Size = new Size(229, 56);
+            customersButton.TabIndex = 4;
+            customersButton.Text = "Customers";
+            customersButton.TextAlign = ContentAlignment.MiddleLeft;
+            customersButton.UseVisualStyleBackColor = false;
+            customersButton.Click += NavigationButton_Click;
+            // 
+            // carsButton
+            // 
+            carsButton.BackColor = Color.FromArgb(52, 58, 64);
+            carsButton.FlatAppearance.BorderSize = 0;
+            carsButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(29, 78, 216);
+            carsButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(37, 99, 235);
+            carsButton.FlatStyle = FlatStyle.Flat;
+            carsButton.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            carsButton.ForeColor = Color.White;
+            carsButton.Location = new Point(23, 227);
+            carsButton.Margin = new Padding(3, 4, 3, 4);
+            carsButton.Name = "carsButton";
+            carsButton.Padding = new Padding(18, 0, 0, 0);
+            carsButton.Size = new Size(229, 56);
+            carsButton.TabIndex = 3;
+            carsButton.Text = "Cars";
+            carsButton.TextAlign = ContentAlignment.MiddleLeft;
+            carsButton.UseVisualStyleBackColor = false;
+            carsButton.Click += NavigationButton_Click;
+            // 
+            // dashboardButton
+            // 
+            dashboardButton.BackColor = Color.FromArgb(37, 99, 235);
+            dashboardButton.FlatAppearance.BorderColor = Color.White;
+            dashboardButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(29, 78, 216);
+            dashboardButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(37, 99, 235);
+            dashboardButton.FlatStyle = FlatStyle.Flat;
+            dashboardButton.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            dashboardButton.ForeColor = Color.White;
+            dashboardButton.Location = new Point(23, 160);
+            dashboardButton.Margin = new Padding(3, 4, 3, 4);
+            dashboardButton.Name = "dashboardButton";
+            dashboardButton.Padding = new Padding(18, 0, 0, 0);
+            dashboardButton.Size = new Size(229, 56);
+            dashboardButton.TabIndex = 2;
+            dashboardButton.Text = "Dashboard";
+            dashboardButton.TextAlign = ContentAlignment.MiddleLeft;
+            dashboardButton.UseVisualStyleBackColor = false;
+            dashboardButton.Click += NavigationButton_Click;
+            // 
+            // appTitleLabel
+            // 
+            appTitleLabel.Font = new Font("Inter", 16.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            appTitleLabel.ForeColor = Color.White;
+            appTitleLabel.Location = new Point(23, 27);
+            appTitleLabel.Name = "appTitleLabel";
+            appTitleLabel.Size = new Size(195, 92);
+            appTitleLabel.TabIndex = 0;
+            appTitleLabel.Text = "Auto Avenue Car Rental";
+            // 
+            // topPanel
+            // 
+            topPanel.BackColor = Color.White;
+            topPanel.Controls.Add(staffBadgeLabel);
+            topPanel.Controls.Add(dateLabel);
+            topPanel.Controls.Add(pageTitleLabel);
+            topPanel.Dock = DockStyle.Top;
+            topPanel.Location = new Point(274, 0);
+            topPanel.Margin = new Padding(3, 4, 3, 4);
+            topPanel.Name = "topPanel";
+            topPanel.Size = new Size(1097, 112);
+            topPanel.TabIndex = 1;
+            // 
+            // staffBadgeLabel
+            // 
+            staffBadgeLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            staffBadgeLabel.BackColor = Color.FromArgb(255, 204, 0);
+            staffBadgeLabel.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            staffBadgeLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            staffBadgeLabel.Location = new Point(903, 24);
+            staffBadgeLabel.Name = "staffBadgeLabel";
+            staffBadgeLabel.Size = new Size(160, 40);
+            staffBadgeLabel.TabIndex = 2;
+            staffBadgeLabel.Text = "Owner Account";
+            staffBadgeLabel.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // dateLabel
+            // 
+            dateLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            dateLabel.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            dateLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            dateLabel.Location = new Point(677, 27);
+            dateLabel.Name = "dateLabel";
+            dateLabel.Size = new Size(206, 32);
+            dateLabel.TabIndex = 1;
+            dateLabel.Text = "May 2, 2026";
+            dateLabel.TextAlign = ContentAlignment.MiddleRight;
+            // 
+            // pageTitleLabel
+            // 
+            pageTitleLabel.AutoSize = true;
+            pageTitleLabel.Font = new Font("Inter", 19.8000011F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            pageTitleLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            pageTitleLabel.Location = new Point(32, 29);
+            pageTitleLabel.Name = "pageTitleLabel";
+            pageTitleLabel.Size = new Size(203, 49);
+            pageTitleLabel.TabIndex = 0;
+            pageTitleLabel.Text = "Dashboard";
+            // 
+            // contentPanel
+            // 
+            contentPanel.BackColor = Color.White;
+            contentPanel.Controls.Add(recentPanel);
+            contentPanel.Controls.Add(mainTable);
+            contentPanel.Controls.Add(statsTable);
+            contentPanel.Dock = DockStyle.Fill;
+            contentPanel.Location = new Point(274, 112);
+            contentPanel.Margin = new Padding(3, 4, 3, 4);
+            contentPanel.Name = "contentPanel";
+            contentPanel.Padding = new Padding(32, 37, 32, 37);
+            contentPanel.Size = new Size(1097, 848);
+            contentPanel.TabIndex = 2;
+            // 
+            // recentPanel
+            // 
+            recentPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            recentPanel.BackColor = Color.White;
+            recentPanel.BorderStyle = BorderStyle.Fixed3D;
+            recentPanel.Controls.Add(recentRentalsGrid);
+            recentPanel.Controls.Add(recentTitleLabel);
+            recentPanel.Location = new Point(32, 637);
+            recentPanel.Margin = new Padding(3, 4, 3, 4);
+            recentPanel.Name = "recentPanel";
+            recentPanel.Padding = new Padding(21, 19, 21, 24);
+            recentPanel.Size = new Size(1033, 173);
+            recentPanel.TabIndex = 2;
+            // 
+            // recentRentalsGrid
+            // 
+            recentRentalsGrid.AllowUserToAddRows = false;
+            recentRentalsGrid.AllowUserToDeleteRows = false;
+            dataGridViewCellStyle7.BackColor = Color.White;
+            recentRentalsGrid.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle7;
+            recentRentalsGrid.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            recentRentalsGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            recentRentalsGrid.BackgroundColor = Color.White;
+            recentRentalsGrid.BorderStyle = BorderStyle.None;
+            recentRentalsGrid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            recentRentalsGrid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            dataGridViewCellStyle8.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle8.BackColor = Color.FromArgb(52, 58, 64);
+            dataGridViewCellStyle8.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            dataGridViewCellStyle8.ForeColor = Color.White;
+            dataGridViewCellStyle8.SelectionBackColor = Color.FromArgb(52, 58, 64);
+            dataGridViewCellStyle8.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle8.WrapMode = DataGridViewTriState.True;
+            recentRentalsGrid.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle8;
+            recentRentalsGrid.ColumnHeadersHeight = 32;
+            dataGridViewCellStyle9.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle9.BackColor = Color.White;
+            dataGridViewCellStyle9.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            dataGridViewCellStyle9.ForeColor = Color.FromArgb(52, 58, 64);
+            dataGridViewCellStyle9.SelectionBackColor = Color.FromArgb(0, 123, 255);
+            dataGridViewCellStyle9.SelectionForeColor = Color.White;
+            dataGridViewCellStyle9.WrapMode = DataGridViewTriState.False;
+            recentRentalsGrid.DefaultCellStyle = dataGridViewCellStyle9;
+            recentRentalsGrid.EnableHeadersVisualStyles = false;
+            recentRentalsGrid.GridColor = Color.FromArgb(52, 58, 64);
+            recentRentalsGrid.Location = new Point(21, 64);
+            recentRentalsGrid.Margin = new Padding(3, 4, 3, 4);
+            recentRentalsGrid.Name = "recentRentalsGrid";
+            recentRentalsGrid.ReadOnly = true;
+            recentRentalsGrid.RowHeadersVisible = false;
+            recentRentalsGrid.RowHeadersWidth = 51;
+            recentRentalsGrid.RowTemplate.Height = 36;
+            recentRentalsGrid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            recentRentalsGrid.Size = new Size(988, 81);
+            recentRentalsGrid.TabIndex = 1;
+            // 
+            // recentTitleLabel
+            // 
+            recentTitleLabel.AutoSize = true;
+            recentTitleLabel.Font = new Font("Inter SemiBold", 13.2000008F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            recentTitleLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            recentTitleLabel.Location = new Point(21, 19);
+            recentTitleLabel.Name = "recentTitleLabel";
+            recentTitleLabel.Size = new Size(181, 32);
+            recentTitleLabel.TabIndex = 0;
+            recentTitleLabel.Text = "Recent Rentals";
+            // 
+            // mainTable
+            // 
+            mainTable.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            mainTable.ColumnCount = 2;
+            mainTable.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 366F));
+            mainTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            mainTable.Controls.Add(quickRentalPanel, 0, 0);
+            mainTable.Controls.Add(availabilityPanel, 1, 0);
+            mainTable.Location = new Point(32, 208);
+            mainTable.Margin = new Padding(3, 4, 3, 4);
+            mainTable.Name = "mainTable";
+            mainTable.RowCount = 1;
+            mainTable.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            mainTable.Size = new Size(1033, 400);
+            mainTable.TabIndex = 1;
+            // 
+            // quickRentalPanel
+            // 
+            quickRentalPanel.BackColor = Color.White;
+            quickRentalPanel.BorderStyle = BorderStyle.Fixed3D;
+            quickRentalPanel.Controls.Add(clearButton);
+            quickRentalPanel.Controls.Add(createRentalButton);
+            quickRentalPanel.Controls.Add(totalAmountTextBox);
+            quickRentalPanel.Controls.Add(totalAmountLabel);
+            quickRentalPanel.Controls.Add(dailyRateTextBox);
+            quickRentalPanel.Controls.Add(dailyRateLabel);
+            quickRentalPanel.Controls.Add(returnDatePicker);
+            quickRentalPanel.Controls.Add(returnDateLabel);
+            quickRentalPanel.Controls.Add(rentalDatePicker);
+            quickRentalPanel.Controls.Add(rentalDateLabel);
+            quickRentalPanel.Controls.Add(selectedCarComboBox);
+            quickRentalPanel.Controls.Add(selectedCarLabel);
+            quickRentalPanel.Controls.Add(customerNameTextBox);
+            quickRentalPanel.Controls.Add(customerNameLabel);
+            quickRentalPanel.Controls.Add(quickRentalTitleLabel);
+            quickRentalPanel.Dock = DockStyle.Fill;
+            quickRentalPanel.Location = new Point(0, 0);
+            quickRentalPanel.Margin = new Padding(0, 0, 21, 0);
+            quickRentalPanel.Name = "quickRentalPanel";
+            quickRentalPanel.Size = new Size(345, 400);
+            quickRentalPanel.TabIndex = 0;
+            // 
+            // clearButton
+            // 
+            clearButton.BackColor = Color.White;
+            clearButton.FlatAppearance.BorderColor = Color.FromArgb(52, 58, 64);
+            clearButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(255, 204, 0);
+            clearButton.FlatStyle = FlatStyle.Flat;
+            clearButton.Font = new Font("Inter Medium", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            clearButton.ForeColor = Color.FromArgb(52, 58, 64);
+            clearButton.Location = new Point(224, 344);
+            clearButton.Margin = new Padding(3, 4, 3, 4);
+            clearButton.Name = "clearButton";
+            clearButton.Size = new Size(96, 37);
+            clearButton.TabIndex = 14;
+            clearButton.Text = "Clear";
+            clearButton.UseVisualStyleBackColor = false;
+            clearButton.Click += ClearButton_Click;
+            // 
+            // createRentalButton
+            // 
+            createRentalButton.BackColor = Color.FromArgb(0, 123, 255);
+            createRentalButton.FlatAppearance.BorderSize = 0;
+            createRentalButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(0, 123, 255);
+            createRentalButton.FlatStyle = FlatStyle.Flat;
+            createRentalButton.Font = new Font("Inter Medium", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            createRentalButton.ForeColor = Color.White;
+            createRentalButton.Location = new Point(23, 344);
+            createRentalButton.Margin = new Padding(3, 4, 3, 4);
+            createRentalButton.Name = "createRentalButton";
+            createRentalButton.Size = new Size(192, 37);
+            createRentalButton.TabIndex = 13;
+            createRentalButton.Text = "Create Rental";
+            createRentalButton.UseVisualStyleBackColor = false;
+            createRentalButton.Click += CreateRentalButton_Click;
+            // 
+            // totalAmountTextBox
+            // 
+            totalAmountTextBox.BorderStyle = BorderStyle.FixedSingle;
+            totalAmountTextBox.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            totalAmountTextBox.Location = new Point(183, 296);
+            totalAmountTextBox.Margin = new Padding(3, 4, 3, 4);
+            totalAmountTextBox.Name = "totalAmountTextBox";
+            totalAmountTextBox.ReadOnly = true;
+            totalAmountTextBox.Size = new Size(137, 28);
+            totalAmountTextBox.TabIndex = 12;
+            totalAmountTextBox.Text = "P 2,500";
+            // 
+            // totalAmountLabel
+            // 
+            totalAmountLabel.AutoSize = true;
+            totalAmountLabel.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            totalAmountLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            totalAmountLabel.Location = new Point(183, 272);
+            totalAmountLabel.Name = "totalAmountLabel";
+            totalAmountLabel.Size = new Size(104, 22);
+            totalAmountLabel.TabIndex = 11;
+            totalAmountLabel.Text = "Total Amount";
+            // 
+            // dailyRateTextBox
+            // 
+            dailyRateTextBox.BorderStyle = BorderStyle.FixedSingle;
+            dailyRateTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            dailyRateTextBox.Location = new Point(23, 296);
+            dailyRateTextBox.Margin = new Padding(3, 4, 3, 4);
+            dailyRateTextBox.Name = "dailyRateTextBox";
+            dailyRateTextBox.Size = new Size(137, 28);
+            dailyRateTextBox.TabIndex = 10;
+            dailyRateTextBox.Text = "2500";
+            dailyRateTextBox.TextChanged += DateOrRate_Changed;
+            // 
+            // dailyRateLabel
+            // 
+            dailyRateLabel.AutoSize = true;
+            dailyRateLabel.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            dailyRateLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            dailyRateLabel.Location = new Point(23, 272);
+            dailyRateLabel.Name = "dailyRateLabel";
+            dailyRateLabel.Size = new Size(81, 22);
+            dailyRateLabel.TabIndex = 9;
+            dailyRateLabel.Text = "Daily Rate";
+            // 
+            // returnDatePicker
+            // 
+            returnDatePicker.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            returnDatePicker.Format = DateTimePickerFormat.Short;
+            returnDatePicker.Location = new Point(183, 231);
+            returnDatePicker.Margin = new Padding(3, 4, 3, 4);
+            returnDatePicker.Name = "returnDatePicker";
+            returnDatePicker.Size = new Size(137, 26);
+            returnDatePicker.TabIndex = 8;
+            returnDatePicker.ValueChanged += DateOrRate_Changed;
+            // 
+            // returnDateLabel
+            // 
+            returnDateLabel.AutoSize = true;
+            returnDateLabel.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            returnDateLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            returnDateLabel.Location = new Point(183, 207);
+            returnDateLabel.Name = "returnDateLabel";
+            returnDateLabel.Size = new Size(95, 22);
+            returnDateLabel.TabIndex = 7;
+            returnDateLabel.Text = "Return Date";
+            // 
+            // rentalDatePicker
+            // 
+            rentalDatePicker.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            rentalDatePicker.Format = DateTimePickerFormat.Short;
+            rentalDatePicker.Location = new Point(23, 231);
+            rentalDatePicker.Margin = new Padding(3, 4, 3, 4);
+            rentalDatePicker.Name = "rentalDatePicker";
+            rentalDatePicker.Size = new Size(137, 26);
+            rentalDatePicker.TabIndex = 6;
+            rentalDatePicker.ValueChanged += DateOrRate_Changed;
+            // 
+            // rentalDateLabel
+            // 
+            rentalDateLabel.AutoSize = true;
+            rentalDateLabel.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            rentalDateLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            rentalDateLabel.Location = new Point(23, 207);
+            rentalDateLabel.Name = "rentalDateLabel";
+            rentalDateLabel.Size = new Size(92, 22);
+            rentalDateLabel.TabIndex = 5;
+            rentalDateLabel.Text = "Rental Date";
+            // 
+            // selectedCarComboBox
+            // 
+            selectedCarComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            selectedCarComboBox.Font = new Font("Segoe UI", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            selectedCarComboBox.FormattingEnabled = true;
+            selectedCarComboBox.Location = new Point(23, 163);
+            selectedCarComboBox.Margin = new Padding(3, 4, 3, 4);
+            selectedCarComboBox.Name = "selectedCarComboBox";
+            selectedCarComboBox.Size = new Size(297, 31);
+            selectedCarComboBox.TabIndex = 4;
+            selectedCarComboBox.SelectedIndexChanged += SelectedCarComboBox_SelectedIndexChanged;
+            // 
+            // selectedCarLabel
+            // 
+            selectedCarLabel.AutoSize = true;
+            selectedCarLabel.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            selectedCarLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            selectedCarLabel.Location = new Point(23, 139);
+            selectedCarLabel.Name = "selectedCarLabel";
+            selectedCarLabel.Size = new Size(35, 22);
+            selectedCarLabel.TabIndex = 3;
+            selectedCarLabel.Text = "Car";
+            // 
+            // customerNameTextBox
+            // 
+            customerNameTextBox.BorderStyle = BorderStyle.FixedSingle;
+            customerNameTextBox.Font = new Font("Segoe UI", 9.5F);
+            customerNameTextBox.Location = new Point(23, 96);
+            customerNameTextBox.Margin = new Padding(3, 4, 3, 4);
+            customerNameTextBox.Name = "customerNameTextBox";
+            customerNameTextBox.PlaceholderText = "Customer full name";
+            customerNameTextBox.Size = new Size(297, 29);
+            customerNameTextBox.TabIndex = 2;
+            // 
+            // customerNameLabel
+            // 
+            customerNameLabel.AutoSize = true;
+            customerNameLabel.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            customerNameLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            customerNameLabel.Location = new Point(23, 72);
+            customerNameLabel.Name = "customerNameLabel";
+            customerNameLabel.Size = new Size(51, 22);
+            customerNameLabel.TabIndex = 1;
+            customerNameLabel.Text = "Name";
+            // 
+            // quickRentalTitleLabel
+            // 
+            quickRentalTitleLabel.AutoSize = true;
+            quickRentalTitleLabel.Font = new Font("Inter SemiBold", 13.2000008F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            quickRentalTitleLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            quickRentalTitleLabel.Location = new Point(21, 21);
+            quickRentalTitleLabel.Name = "quickRentalTitleLabel";
+            quickRentalTitleLabel.Size = new Size(154, 32);
+            quickRentalTitleLabel.TabIndex = 0;
+            quickRentalTitleLabel.Text = "Quick Rental";
+            // 
+            // availabilityPanel
+            // 
+            availabilityPanel.BackColor = Color.White;
+            availabilityPanel.Controls.Add(carsGrid);
+            availabilityPanel.Controls.Add(availabilityHeaderPanel);
+            availabilityPanel.Dock = DockStyle.Fill;
+            availabilityPanel.Location = new Point(366, 0);
+            availabilityPanel.Margin = new Padding(0);
+            availabilityPanel.Name = "availabilityPanel";
+            availabilityPanel.Size = new Size(667, 400);
+            availabilityPanel.TabIndex = 1;
+            // 
+            // carsGrid
+            // 
+            carsGrid.AllowUserToAddRows = false;
+            carsGrid.AllowUserToDeleteRows = false;
+            dataGridViewCellStyle10.BackColor = Color.White;
+            carsGrid.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle10;
+            carsGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            carsGrid.BackgroundColor = Color.White;
+            carsGrid.BorderStyle = BorderStyle.Fixed3D;
+            carsGrid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            carsGrid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            dataGridViewCellStyle11.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle11.BackColor = Color.FromArgb(52, 58, 64);
+            dataGridViewCellStyle11.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            dataGridViewCellStyle11.ForeColor = Color.White;
+            dataGridViewCellStyle11.SelectionBackColor = Color.FromArgb(52, 58, 64);
+            dataGridViewCellStyle11.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle11.WrapMode = DataGridViewTriState.True;
+            carsGrid.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle11;
+            carsGrid.ColumnHeadersHeight = 34;
+            dataGridViewCellStyle12.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle12.BackColor = Color.White;
+            dataGridViewCellStyle12.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            dataGridViewCellStyle12.ForeColor = Color.FromArgb(52, 58, 64);
+            dataGridViewCellStyle12.SelectionBackColor = Color.FromArgb(0, 123, 255);
+            dataGridViewCellStyle12.SelectionForeColor = Color.White;
+            dataGridViewCellStyle12.WrapMode = DataGridViewTriState.False;
+            carsGrid.DefaultCellStyle = dataGridViewCellStyle12;
+            carsGrid.Dock = DockStyle.Fill;
+            carsGrid.EnableHeadersVisualStyles = false;
+            carsGrid.GridColor = Color.FromArgb(52, 58, 64);
+            carsGrid.Location = new Point(0, 80);
+            carsGrid.Margin = new Padding(3, 4, 3, 4);
+            carsGrid.Name = "carsGrid";
+            carsGrid.ReadOnly = true;
+            carsGrid.RowHeadersVisible = false;
+            carsGrid.RowHeadersWidth = 51;
+            carsGrid.RowTemplate.Height = 38;
+            carsGrid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            carsGrid.Size = new Size(667, 320);
+            carsGrid.TabIndex = 1;
+            carsGrid.CellClick += CarsGrid_CellClick;
+            // 
+            // availabilityHeaderPanel
+            // 
+            availabilityHeaderPanel.BorderStyle = BorderStyle.Fixed3D;
+            availabilityHeaderPanel.Controls.Add(searchTextBox);
+            availabilityHeaderPanel.Controls.Add(availableCarsTitleLabel);
+            availabilityHeaderPanel.Dock = DockStyle.Top;
+            availabilityHeaderPanel.Location = new Point(0, 0);
+            availabilityHeaderPanel.Margin = new Padding(3, 4, 3, 4);
+            availabilityHeaderPanel.Name = "availabilityHeaderPanel";
+            availabilityHeaderPanel.Padding = new Padding(21, 19, 21, 11);
+            availabilityHeaderPanel.Size = new Size(667, 80);
+            availabilityHeaderPanel.TabIndex = 0;
+            // 
+            // searchTextBox
+            // 
+            searchTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            searchTextBox.BorderStyle = BorderStyle.FixedSingle;
+            searchTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            searchTextBox.Location = new Point(385, 24);
+            searchTextBox.Margin = new Padding(3, 4, 3, 4);
+            searchTextBox.Name = "searchTextBox";
+            searchTextBox.PlaceholderText = "Search plate or model";
+            searchTextBox.Size = new Size(258, 28);
+            searchTextBox.TabIndex = 1;
+            searchTextBox.TextChanged += SearchTextBox_TextChanged;
+            // 
+            // availableCarsTitleLabel
+            // 
+            availableCarsTitleLabel.AutoSize = true;
+            availableCarsTitleLabel.Font = new Font("Inter SemiBold", 13.2000008F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            availableCarsTitleLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            availableCarsTitleLabel.Location = new Point(21, 21);
+            availableCarsTitleLabel.Name = "availableCarsTitleLabel";
+            availableCarsTitleLabel.Size = new Size(172, 32);
+            availableCarsTitleLabel.TabIndex = 0;
+            availableCarsTitleLabel.Text = "Available Cars";
+            // 
+            // statsTable
+            // 
+            statsTable.ColumnCount = 4;
+            statsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            statsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            statsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            statsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+            statsTable.Controls.Add(totalCarsCard, 0, 0);
+            statsTable.Controls.Add(availableCarsCard, 1, 0);
+            statsTable.Controls.Add(rentedCarsCard, 2, 0);
+            statsTable.Controls.Add(incomeCard, 3, 0);
+            statsTable.Dock = DockStyle.Top;
+            statsTable.Location = new Point(32, 37);
+            statsTable.Margin = new Padding(3, 4, 3, 4);
+            statsTable.Name = "statsTable";
+            statsTable.RowCount = 1;
+            statsTable.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            statsTable.Size = new Size(1033, 141);
+            statsTable.TabIndex = 0;
+            // 
+            // totalCarsCard
+            // 
+            totalCarsCard.BackColor = Color.White;
+            totalCarsCard.BorderStyle = BorderStyle.Fixed3D;
+            totalCarsCard.Controls.Add(totalCarsValueLabel);
+            totalCarsCard.Controls.Add(totalCarsTextLabel);
+            totalCarsCard.Dock = DockStyle.Fill;
+            totalCarsCard.Location = new Point(0, 0);
+            totalCarsCard.Margin = new Padding(0, 0, 14, 0);
+            totalCarsCard.Name = "totalCarsCard";
+            totalCarsCard.Size = new Size(244, 141);
+            totalCarsCard.TabIndex = 0;
+            // 
+            // totalCarsValueLabel
+            // 
+            totalCarsValueLabel.AutoSize = true;
+            totalCarsValueLabel.Font = new Font("Inter SemiBold", 22.2F, FontStyle.Bold);
+            totalCarsValueLabel.ForeColor = Color.FromArgb(0, 123, 255);
+            totalCarsValueLabel.Location = new Point(18, 56);
+            totalCarsValueLabel.Name = "totalCarsValueLabel";
+            totalCarsValueLabel.Size = new Size(47, 53);
+            totalCarsValueLabel.TabIndex = 1;
+            totalCarsValueLabel.Text = "0";
+            // 
+            // totalCarsTextLabel
+            // 
+            totalCarsTextLabel.AutoSize = true;
+            totalCarsTextLabel.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            totalCarsTextLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            totalCarsTextLabel.Location = new Point(21, 24);
+            totalCarsTextLabel.Name = "totalCarsTextLabel";
+            totalCarsTextLabel.Size = new Size(92, 24);
+            totalCarsTextLabel.TabIndex = 0;
+            totalCarsTextLabel.Text = "Total Cars";
+            // 
+            // availableCarsCard
+            // 
+            availableCarsCard.BackColor = Color.White;
+            availableCarsCard.BorderStyle = BorderStyle.Fixed3D;
+            availableCarsCard.Controls.Add(availableCarsValueLabel);
+            availableCarsCard.Controls.Add(availableCarsTextLabel);
+            availableCarsCard.Dock = DockStyle.Fill;
+            availableCarsCard.Location = new Point(258, 0);
+            availableCarsCard.Margin = new Padding(0, 0, 14, 0);
+            availableCarsCard.Name = "availableCarsCard";
+            availableCarsCard.Size = new Size(244, 141);
+            availableCarsCard.TabIndex = 1;
+            // 
+            // availableCarsValueLabel
+            // 
+            availableCarsValueLabel.AutoSize = true;
+            availableCarsValueLabel.Font = new Font("Inter SemiBold", 22.2F, FontStyle.Bold);
+            availableCarsValueLabel.ForeColor = Color.FromArgb(40, 167, 69);
+            availableCarsValueLabel.Location = new Point(18, 56);
+            availableCarsValueLabel.Name = "availableCarsValueLabel";
+            availableCarsValueLabel.Size = new Size(47, 53);
+            availableCarsValueLabel.TabIndex = 1;
+            availableCarsValueLabel.Text = "0";
+            // 
+            // availableCarsTextLabel
+            // 
+            availableCarsTextLabel.AutoSize = true;
+            availableCarsTextLabel.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            availableCarsTextLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            availableCarsTextLabel.Location = new Point(21, 24);
+            availableCarsTextLabel.Name = "availableCarsTextLabel";
+            availableCarsTextLabel.Size = new Size(125, 24);
+            availableCarsTextLabel.TabIndex = 0;
+            availableCarsTextLabel.Text = "Available Cars";
+            // 
+            // rentedCarsCard
+            // 
+            rentedCarsCard.BackColor = Color.White;
+            rentedCarsCard.BorderStyle = BorderStyle.Fixed3D;
+            rentedCarsCard.Controls.Add(rentedCarsValueLabel);
+            rentedCarsCard.Controls.Add(rentedCarsTextLabel);
+            rentedCarsCard.Dock = DockStyle.Fill;
+            rentedCarsCard.Location = new Point(516, 0);
+            rentedCarsCard.Margin = new Padding(0, 0, 14, 0);
+            rentedCarsCard.Name = "rentedCarsCard";
+            rentedCarsCard.Size = new Size(244, 141);
+            rentedCarsCard.TabIndex = 2;
+            // 
+            // rentedCarsValueLabel
+            // 
+            rentedCarsValueLabel.AutoSize = true;
+            rentedCarsValueLabel.Font = new Font("Inter SemiBold", 22.2F, FontStyle.Bold);
+            rentedCarsValueLabel.ForeColor = Color.FromArgb(255, 204, 0);
+            rentedCarsValueLabel.Location = new Point(18, 56);
+            rentedCarsValueLabel.Name = "rentedCarsValueLabel";
+            rentedCarsValueLabel.Size = new Size(47, 53);
+            rentedCarsValueLabel.TabIndex = 1;
+            rentedCarsValueLabel.Text = "0";
+            // 
+            // rentedCarsTextLabel
+            // 
+            rentedCarsTextLabel.AutoSize = true;
+            rentedCarsTextLabel.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            rentedCarsTextLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            rentedCarsTextLabel.Location = new Point(21, 24);
+            rentedCarsTextLabel.Name = "rentedCarsTextLabel";
+            rentedCarsTextLabel.Size = new Size(109, 24);
+            rentedCarsTextLabel.TabIndex = 0;
+            rentedCarsTextLabel.Text = "Rented Cars";
+            // 
+            // incomeCard
+            // 
+            incomeCard.BackColor = Color.White;
+            incomeCard.BorderStyle = BorderStyle.Fixed3D;
+            incomeCard.Controls.Add(incomeValueLabel);
+            incomeCard.Controls.Add(incomeTextLabel);
+            incomeCard.Dock = DockStyle.Fill;
+            incomeCard.Location = new Point(774, 0);
+            incomeCard.Margin = new Padding(0);
+            incomeCard.Name = "incomeCard";
+            incomeCard.Size = new Size(259, 141);
+            incomeCard.TabIndex = 3;
+            // 
+            // incomeValueLabel
+            // 
+            incomeValueLabel.AutoSize = true;
+            incomeValueLabel.Font = new Font("Inter SemiBold", 22.2F, FontStyle.Bold);
+            incomeValueLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            incomeValueLabel.Location = new Point(18, 60);
+            incomeValueLabel.Name = "incomeValueLabel";
+            incomeValueLabel.Size = new Size(138, 53);
+            incomeValueLabel.TabIndex = 1;
+            incomeValueLabel.Text = "P 0.00";
+            // 
+            // incomeTextLabel
+            // 
+            incomeTextLabel.AutoSize = true;
+            incomeTextLabel.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            incomeTextLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            incomeTextLabel.Location = new Point(21, 24);
+            incomeTextLabel.Name = "incomeTextLabel";
+            incomeTextLabel.Size = new Size(124, 24);
+            incomeTextLabel.TabIndex = 0;
+            incomeTextLabel.Text = "Monthly Sales";
+            // 
+            // MainForm
+            // 
+            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.White;
+            ClientSize = new Size(1371, 960);
+            Controls.Add(contentPanel);
+            Controls.Add(topPanel);
+            Controls.Add(sidebarPanel);
+            Font = new Font("Segoe UI", 9F);
+            Margin = new Padding(3, 4, 3, 4);
+            MinimumSize = new Size(1255, 851);
+            Name = "MainForm";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "Auto Avenue Car Rental";
+            Load += MainForm_Load;
+            sidebarPanel.ResumeLayout(false);
+            topPanel.ResumeLayout(false);
+            topPanel.PerformLayout();
+            contentPanel.ResumeLayout(false);
+            recentPanel.ResumeLayout(false);
+            recentPanel.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)recentRentalsGrid).EndInit();
+            mainTable.ResumeLayout(false);
+            quickRentalPanel.ResumeLayout(false);
+            quickRentalPanel.PerformLayout();
+            availabilityPanel.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)carsGrid).EndInit();
+            availabilityHeaderPanel.ResumeLayout(false);
+            availabilityHeaderPanel.PerformLayout();
+            statsTable.ResumeLayout(false);
+            totalCarsCard.ResumeLayout(false);
+            totalCarsCard.PerformLayout();
+            availableCarsCard.ResumeLayout(false);
+            availableCarsCard.PerformLayout();
+            rentedCarsCard.ResumeLayout(false);
+            rentedCarsCard.PerformLayout();
+            incomeCard.ResumeLayout(false);
+            incomeCard.PerformLayout();
+            ResumeLayout(false);
+        }
+
+        #endregion
+
+        private Panel sidebarPanel;
+        private Button logoutButton;
+        private Button reportsButton;
+        private Button returnsButton;
+        private Button rentalsButton;
+        private Button customersButton;
+        private Button carsButton;
+        private Button dashboardButton;
+        private Label appTitleLabel;
+        private Panel topPanel;
+        private Label staffBadgeLabel;
+        private Label dateLabel;
+        private Label pageTitleLabel;
+        private Panel contentPanel;
+        private Panel recentPanel;
+        private DataGridView recentRentalsGrid;
+        private Label recentTitleLabel;
+        private TableLayoutPanel mainTable;
+        private Panel quickRentalPanel;
+        private Button clearButton;
+        private Button createRentalButton;
+        private TextBox totalAmountTextBox;
+        private Label totalAmountLabel;
+        private TextBox dailyRateTextBox;
+        private Label dailyRateLabel;
+        private DateTimePicker returnDatePicker;
+        private Label returnDateLabel;
+        private DateTimePicker rentalDatePicker;
+        private Label rentalDateLabel;
+        private ComboBox selectedCarComboBox;
+        private Label selectedCarLabel;
+        private TextBox customerNameTextBox;
+        private Label customerNameLabel;
+        private Label quickRentalTitleLabel;
+        private Panel availabilityPanel;
+        private DataGridView carsGrid;
+        private Panel availabilityHeaderPanel;
+        private TextBox searchTextBox;
+        private Label availableCarsTitleLabel;
+        private TableLayoutPanel statsTable;
+        private Panel totalCarsCard;
+        private Label totalCarsValueLabel;
+        private Label totalCarsTextLabel;
+        private Panel availableCarsCard;
+        private Label availableCarsValueLabel;
+        private Label availableCarsTextLabel;
+        private Panel rentedCarsCard;
+        private Label rentedCarsValueLabel;
+        private Label rentedCarsTextLabel;
+        private Panel incomeCard;
+        private Label incomeValueLabel;
+        private Label incomeTextLabel;
+    }
+}
