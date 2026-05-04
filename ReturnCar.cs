@@ -67,6 +67,7 @@ namespace Car_Rental_System
 
                 DataGridViewHelper.HideColumn(activeRentalsGrid, "RentalId");
                 DataGridViewHelper.HideColumn(activeRentalsGrid, "CarId");
+                DataGridViewHelper.ApplyStatusFormatting(activeRentalsGrid);
                 activeRentalsGrid.ClearSelection();
                 ClearDetails();
                 DataGridViewHelper.ClearSelectionWhenReady(activeRentalsGrid);

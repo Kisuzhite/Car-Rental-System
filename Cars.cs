@@ -47,6 +47,7 @@ namespace Car_Rental_System
                 DataGridViewHelper.HideColumn(carsGrid, "CarId");
                 DataGridViewHelper.HideColumn(carsGrid, "ImagePath");
                 DataGridViewHelper.HideColumn(carsGrid, "Rentals");
+                DataGridViewHelper.ApplyStatusFormatting(carsGrid);
 
                 BeginInvoke(new Action(ClearForm));
             }

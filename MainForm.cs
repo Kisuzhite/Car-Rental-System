@@ -110,6 +110,7 @@ namespace Car_Rental_System
 
             carsGrid.Columns.Clear();
             carsGrid.DataSource = cars;
+            DataGridViewHelper.ApplyStatusFormatting(carsGrid);
             carsGrid.ClearSelection();
         }
 
@@ -133,6 +134,7 @@ namespace Car_Rental_System
 
             recentRentalsGrid.Columns.Clear();
             recentRentalsGrid.DataSource = rentals;
+            DataGridViewHelper.ApplyStatusFormatting(recentRentalsGrid);
             recentRentalsGrid.ClearSelection();
         }
 
@@ -205,7 +207,7 @@ namespace Car_Rental_System
 
             foreach (Button button in buttons)
             {
-                button.BackColor = Color.FromArgb(52, 58, 64);
+                button.BackColor = Color.FromArgb(31, 41, 55);
                 button.ForeColor = Color.White;
                 button.FlatAppearance.BorderSize = 0;
                 button.FlatAppearance.MouseOverBackColor = Color.FromArgb(37, 99, 235);

@@ -116,6 +116,7 @@ namespace Car_Rental_System
                 rentalsGrid.DataSource = rentals;
 
                 DataGridViewHelper.HideColumn(rentalsGrid, "RentalId");
+                DataGridViewHelper.ApplyStatusFormatting(rentalsGrid);
                 DataGridViewHelper.ClearSelectionWhenReady(rentalsGrid);
             }
             catch

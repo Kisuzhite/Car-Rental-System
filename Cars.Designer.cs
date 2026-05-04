@@ -80,7 +80,7 @@ namespace Car_Rental_System
             // 
             helperLabel.AutoSize = true;
             helperLabel.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            helperLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            helperLabel.ForeColor = Color.FromArgb(31, 41, 55);
             helperLabel.Location = new Point(35, 75);
             helperLabel.Name = "helperLabel";
             helperLabel.Size = new Size(423, 24);
@@ -91,7 +91,7 @@ namespace Car_Rental_System
             // 
             titleLabel.AutoSize = true;
             titleLabel.Font = new Font("Inter", 22.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            titleLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            titleLabel.ForeColor = Color.FromArgb(31, 41, 55);
             titleLabel.Location = new Point(32, 21);
             titleLabel.Name = "titleLabel";
             titleLabel.Size = new Size(289, 53);
@@ -100,7 +100,7 @@ namespace Car_Rental_System
             // 
             // bodyTable
             // 
-            bodyTable.BackColor = Color.White;
+            bodyTable.BackColor = Color.FromArgb(243, 244, 246);
             bodyTable.ColumnCount = 2;
             bodyTable.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 434F));
             bodyTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
@@ -119,7 +119,7 @@ namespace Car_Rental_System
             // detailsPanel
             // 
             detailsPanel.BackColor = Color.White;
-            detailsPanel.BorderStyle = BorderStyle.Fixed3D;
+            detailsPanel.BorderStyle = BorderStyle.FixedSingle;
             detailsPanel.Controls.Add(clearButton);
             detailsPanel.Controls.Add(deleteButton);
             detailsPanel.Controls.Add(updateButton);
@@ -153,11 +153,11 @@ namespace Car_Rental_System
             // clearButton
             // 
             clearButton.BackColor = Color.White;
-            clearButton.FlatAppearance.BorderColor = Color.FromArgb(52, 58, 64);
-            clearButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(255, 204, 0);
+            clearButton.FlatAppearance.BorderColor = Color.FromArgb(31, 41, 55);
+            clearButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(243, 244, 246);
             clearButton.FlatStyle = FlatStyle.Flat;
             clearButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            clearButton.ForeColor = Color.FromArgb(52, 58, 64);
+            clearButton.ForeColor = Color.FromArgb(31, 41, 55);
             clearButton.Location = new Point(213, 672);
             clearButton.Margin = new Padding(3, 4, 3, 4);
             clearButton.Name = "clearButton";
@@ -169,12 +169,12 @@ namespace Car_Rental_System
             // 
             // deleteButton
             // 
-            deleteButton.BackColor = Color.FromArgb(255, 204, 0);
+            deleteButton.BackColor = Color.FromArgb(220, 38, 38);
             deleteButton.FlatAppearance.BorderSize = 0;
-            deleteButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(255, 204, 0);
+            deleteButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(185, 28, 28);
             deleteButton.FlatStyle = FlatStyle.Flat;
             deleteButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            deleteButton.ForeColor = Color.FromArgb(52, 58, 64);
+            deleteButton.ForeColor = Color.White;
             deleteButton.Location = new Point(27, 672);
             deleteButton.Margin = new Padding(3, 4, 3, 4);
             deleteButton.Name = "deleteButton";
@@ -186,9 +186,9 @@ namespace Car_Rental_System
             // 
             // updateButton
             // 
-            updateButton.BackColor = Color.FromArgb(52, 58, 64);
+            updateButton.BackColor = Color.FromArgb(31, 41, 55);
             updateButton.FlatAppearance.BorderSize = 0;
-            updateButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(52, 58, 64);
+            updateButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(31, 41, 55);
             updateButton.FlatStyle = FlatStyle.Flat;
             updateButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             updateButton.ForeColor = Color.White;
@@ -203,9 +203,9 @@ namespace Car_Rental_System
             // 
             // addButton
             // 
-            addButton.BackColor = Color.FromArgb(0, 123, 255);
+            addButton.BackColor = Color.FromArgb(37, 99, 235);
             addButton.FlatAppearance.BorderSize = 0;
-            addButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(0, 123, 255);
+            addButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(37, 99, 235);
             addButton.FlatStyle = FlatStyle.Flat;
             addButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             addButton.ForeColor = Color.White;
@@ -220,9 +220,9 @@ namespace Car_Rental_System
             // 
             // browseImageButton
             // 
-            browseImageButton.BackColor = Color.FromArgb(0, 123, 255);
+            browseImageButton.BackColor = Color.FromArgb(37, 99, 235);
             browseImageButton.FlatAppearance.BorderSize = 0;
-            browseImageButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(0, 123, 255);
+            browseImageButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(37, 99, 235);
             browseImageButton.FlatStyle = FlatStyle.Flat;
             browseImageButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             browseImageButton.ForeColor = Color.White;
@@ -250,7 +250,7 @@ namespace Car_Rental_System
             // 
             imagePathLabel.AutoSize = true;
             imagePathLabel.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            imagePathLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            imagePathLabel.ForeColor = Color.FromArgb(31, 41, 55);
             imagePathLabel.Location = new Point(27, 472);
             imagePathLabel.Name = "imagePathLabel";
             imagePathLabel.Size = new Size(88, 22);
@@ -285,7 +285,7 @@ namespace Car_Rental_System
             // 
             statusLabel.AutoSize = true;
             statusLabel.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            statusLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            statusLabel.ForeColor = Color.FromArgb(31, 41, 55);
             statusLabel.Location = new Point(213, 232);
             statusLabel.Name = "statusLabel";
             statusLabel.Size = new Size(55, 22);
@@ -307,7 +307,7 @@ namespace Car_Rental_System
             // 
             dailyRateLabel.AutoSize = true;
             dailyRateLabel.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            dailyRateLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            dailyRateLabel.ForeColor = Color.FromArgb(31, 41, 55);
             dailyRateLabel.Location = new Point(27, 232);
             dailyRateLabel.Name = "dailyRateLabel";
             dailyRateLabel.Size = new Size(77, 22);
@@ -329,7 +329,7 @@ namespace Car_Rental_System
             // 
             colorLabel.AutoSize = true;
             colorLabel.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            colorLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            colorLabel.ForeColor = Color.FromArgb(31, 41, 55);
             colorLabel.Location = new Point(213, 157);
             colorLabel.Name = "colorLabel";
             colorLabel.Size = new Size(49, 22);
@@ -351,7 +351,7 @@ namespace Car_Rental_System
             // 
             yearLabel.AutoSize = true;
             yearLabel.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            yearLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            yearLabel.ForeColor = Color.FromArgb(31, 41, 55);
             yearLabel.Location = new Point(27, 157);
             yearLabel.Name = "yearLabel";
             yearLabel.Size = new Size(42, 22);
@@ -373,7 +373,7 @@ namespace Car_Rental_System
             // 
             modelLabel.AutoSize = true;
             modelLabel.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            modelLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            modelLabel.ForeColor = Color.FromArgb(31, 41, 55);
             modelLabel.Location = new Point(213, 83);
             modelLabel.Name = "modelLabel";
             modelLabel.Size = new Size(55, 22);
@@ -395,7 +395,7 @@ namespace Car_Rental_System
             // 
             brandLabel.AutoSize = true;
             brandLabel.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            brandLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            brandLabel.ForeColor = Color.FromArgb(31, 41, 55);
             brandLabel.Location = new Point(27, 83);
             brandLabel.Name = "brandLabel";
             brandLabel.Size = new Size(52, 22);
@@ -417,7 +417,7 @@ namespace Car_Rental_System
             // 
             plateLabel.AutoSize = true;
             plateLabel.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            plateLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            plateLabel.ForeColor = Color.FromArgb(31, 41, 55);
             plateLabel.Location = new Point(213, 8);
             plateLabel.Name = "plateLabel";
             plateLabel.Size = new Size(105, 22);
@@ -428,7 +428,7 @@ namespace Car_Rental_System
             // 
             sectionLabel.AutoSize = true;
             sectionLabel.Font = new Font("Inter SemiBold", 13.2000008F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            sectionLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            sectionLabel.ForeColor = Color.FromArgb(31, 41, 55);
             sectionLabel.Location = new Point(27, 29);
             sectionLabel.Name = "sectionLabel";
             sectionLabel.Size = new Size(136, 32);
@@ -451,40 +451,40 @@ namespace Car_Rental_System
             // 
             carsGrid.AllowUserToAddRows = false;
             carsGrid.AllowUserToDeleteRows = false;
-            dataGridViewCellStyle1.BackColor = Color.White;
+            dataGridViewCellStyle1.BackColor = Color.FromArgb(249, 250, 251);
             carsGrid.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
             carsGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             carsGrid.BackgroundColor = Color.White;
-            carsGrid.BorderStyle = BorderStyle.Fixed3D;
+            carsGrid.BorderStyle = BorderStyle.FixedSingle;
             carsGrid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
             carsGrid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
             dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = Color.FromArgb(52, 58, 64);
-            dataGridViewCellStyle2.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
+            dataGridViewCellStyle2.BackColor = Color.FromArgb(31, 41, 55);
+            dataGridViewCellStyle2.Font = new Font("Inter SemiBold", 9F, FontStyle.Bold);
             dataGridViewCellStyle2.ForeColor = Color.White;
-            dataGridViewCellStyle2.SelectionBackColor = Color.FromArgb(52, 58, 64);
-            dataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle2.SelectionBackColor = Color.FromArgb(31, 41, 55);
+            dataGridViewCellStyle2.SelectionForeColor = Color.White;
             dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
             carsGrid.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
-            carsGrid.ColumnHeadersHeight = 34;
+            carsGrid.ColumnHeadersHeight = 40;
             dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = Color.White;
             dataGridViewCellStyle3.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            dataGridViewCellStyle3.ForeColor = Color.FromArgb(52, 58, 64);
-            dataGridViewCellStyle3.SelectionBackColor = Color.FromArgb(0, 123, 255);
-            dataGridViewCellStyle3.SelectionForeColor = Color.White;
+            dataGridViewCellStyle3.ForeColor = Color.FromArgb(31, 41, 55);
+            dataGridViewCellStyle3.SelectionBackColor = Color.FromArgb(219, 234, 254);
+            dataGridViewCellStyle3.SelectionForeColor = Color.FromArgb(31, 41, 55);
             dataGridViewCellStyle3.WrapMode = DataGridViewTriState.False;
             carsGrid.DefaultCellStyle = dataGridViewCellStyle3;
             carsGrid.Dock = DockStyle.Fill;
             carsGrid.EnableHeadersVisualStyles = false;
-            carsGrid.GridColor = Color.FromArgb(52, 58, 64);
+            carsGrid.GridColor = Color.FromArgb(229, 231, 235);
             carsGrid.Location = new Point(0, 85);
             carsGrid.Margin = new Padding(3, 4, 3, 4);
             carsGrid.Name = "carsGrid";
             carsGrid.ReadOnly = true;
             carsGrid.RowHeadersVisible = false;
             carsGrid.RowHeadersWidth = 51;
-            carsGrid.RowTemplate.Height = 38;
+            carsGrid.RowTemplate.Height = 42;
             carsGrid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             carsGrid.Size = new Size(855, 661);
             carsGrid.TabIndex = 1;
@@ -492,7 +492,7 @@ namespace Car_Rental_System
             // 
             // listHeaderPanel
             // 
-            listHeaderPanel.BorderStyle = BorderStyle.Fixed3D;
+            listHeaderPanel.BorderStyle = BorderStyle.FixedSingle;
             listHeaderPanel.Controls.Add(searchTextBox);
             listHeaderPanel.Controls.Add(recordsLabel);
             listHeaderPanel.Dock = DockStyle.Top;
@@ -520,7 +520,7 @@ namespace Car_Rental_System
             // 
             recordsLabel.AutoSize = true;
             recordsLabel.Font = new Font("Inter SemiBold", 13.2000008F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            recordsLabel.ForeColor = Color.FromArgb(52, 58, 64);
+            recordsLabel.ForeColor = Color.FromArgb(31, 41, 55);
             recordsLabel.Location = new Point(23, 24);
             recordsLabel.Name = "recordsLabel";
             recordsLabel.Size = new Size(151, 32);

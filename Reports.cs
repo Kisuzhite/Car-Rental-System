@@ -83,6 +83,7 @@ namespace Car_Rental_System
             reportGrid.DataSource = history;
 
             DataGridViewHelper.HideColumn(reportGrid, "RentalId");
+            DataGridViewHelper.ApplyStatusFormatting(reportGrid);
             DataGridViewHelper.ClearSelectionWhenReady(reportGrid);
         }
     }
