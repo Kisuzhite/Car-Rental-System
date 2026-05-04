@@ -1,6 +1,5 @@
-using System.Data;
 using System.Globalization;
-using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 namespace Car_Rental_System
 {
@@ -8,6 +7,12 @@ namespace Car_Rental_System
     {
         private int? selectedRentalId;
         private int? selectedCarId;
+
+        // Store selected row data for calculations after grid binding changes
+        private DateOnly _selectedExpectedReturn;
+        private decimal _selectedDailyRate;
+        private decimal _selectedBaseAmount;
+        private DateOnly _selectedRentalDate;
 
         public ReturnCar()
         {
@@ -24,43 +29,41 @@ namespace Car_Rental_System
         {
             try
             {
-                using SqlConnection connection = DatabaseHelper.OpenConnection();
+                using var db = new AppDbContext();
 
-                string query = @"
-SELECT
-    r.RentalId,
-    r.CarId,
-    c.FullName AS Customer,
-    ca.PlateNumber + ' - ' + ca.Brand + ' ' + ca.Model AS Car,
-    r.RentalDate AS [Rental Date],
-    r.ExpectedReturnDate AS [Expected Return],
-    r.DailyRate AS [Daily Rate],
-    r.TotalAmount AS [Base Amount],
-    r.Status
-FROM Rentals r
-INNER JOIN Customers c ON c.CustomerId = r.CustomerId
-INNER JOIN Cars ca ON ca.CarId = r.CarId
-WHERE
-    r.Status = @ActiveStatus
-    AND (
-        @Search = ''
-        OR c.FullName LIKE @SearchText
-        OR ca.PlateNumber LIKE @SearchText
-        OR ca.Brand LIKE @SearchText
-        OR ca.Model LIKE @SearchText
-    )
-ORDER BY r.ExpectedReturnDate ASC;";
+                var query = db.Rentals
+                    .Where(r => r.Status == AppConstants.ActiveRentalStatus)
+                    .Include(r => r.Customer)
+                    .Include(r => r.Car)
+                    .AsQueryable();
 
-                using SqlCommand command = new(query, connection);
-                command.AddString("@ActiveStatus", AppConstants.ActiveRentalStatus, 20);
-                command.AddSearchParameters(search);
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    query = query.Where(r =>
+                        r.Customer.FullName.Contains(search) ||
+                        r.Car.PlateNumber.Contains(search) ||
+                        r.Car.Brand.Contains(search) ||
+                        r.Car.Model.Contains(search));
+                }
 
-                DataTable table = new();
-                using SqlDataAdapter adapter = new(command);
-                adapter.Fill(table);
+                var rentals = query
+                    .OrderBy(r => r.ExpectedReturnDate)
+                    .Select(r => new
+                    {
+                        r.RentalId,
+                        r.CarId,
+                        Customer = r.Customer.FullName,
+                        Car = r.Car.PlateNumber + " - " + r.Car.Brand + " " + r.Car.Model,
+                        RentalDate = r.RentalDate,
+                        ExpectedReturn = r.ExpectedReturnDate,
+                        DailyRate = r.DailyRate,
+                        BaseAmount = r.TotalAmount,
+                        r.Status
+                    })
+                    .ToList();
 
                 activeRentalsGrid.Columns.Clear();
-                activeRentalsGrid.DataSource = table;
+                activeRentalsGrid.DataSource = rentals;
 
                 DataGridViewHelper.HideColumn(activeRentalsGrid, "RentalId");
                 DataGridViewHelper.HideColumn(activeRentalsGrid, "CarId");
@@ -76,42 +79,48 @@ ORDER BY r.ExpectedReturnDate ASC;";
 
         private void ActiveRentalsGrid_SelectionChanged(object? sender, EventArgs e)
         {
-            if (activeRentalsGrid.CurrentRow?.DataBoundItem is not DataRowView row || !activeRentalsGrid.CurrentRow.Selected)
+            if (activeRentalsGrid.CurrentRow?.DataBoundItem == null || !activeRentalsGrid.CurrentRow.Selected)
             {
                 ClearDetails();
                 return;
             }
 
-            selectedRentalId = Convert.ToInt32(row["RentalId"]);
-            selectedCarId = Convert.ToInt32(row["CarId"]);
-            customerTextBox.Text = row["Customer"].ToString();
-            carTextBox.Text = row["Car"].ToString();
-            expectedReturnTextBox.Text = Convert.ToDateTime(row["Expected Return"]).ToShortDateString();
-            dailyRateTextBox.Text = Convert.ToDecimal(row["Daily Rate"]).ToString("N2");
-            baseAmountTextBox.Text = Convert.ToDecimal(row["Base Amount"]).ToString("N2");
-            CalculateFinalAmount(row);
+            dynamic row = activeRentalsGrid.CurrentRow.DataBoundItem;
+
+            selectedRentalId = (int)row.RentalId;
+            selectedCarId = (int)row.CarId;
+
+            _selectedRentalDate = (DateOnly)row.RentalDate;
+            _selectedExpectedReturn = (DateOnly)row.ExpectedReturn;
+            _selectedDailyRate = (decimal)row.DailyRate;
+            _selectedBaseAmount = (decimal)row.BaseAmount;
+
+            customerTextBox.Text = row.Customer;
+            carTextBox.Text = row.Car;
+            expectedReturnTextBox.Text = _selectedExpectedReturn.ToString("d", CultureInfo.CurrentCulture);
+            dailyRateTextBox.Text = _selectedDailyRate.ToString("N2");
+            baseAmountTextBox.Text = _selectedBaseAmount.ToString("N2");
+
+            CalculateFinalAmount();
         }
 
         private void ActualReturnDatePicker_ValueChanged(object? sender, EventArgs e)
         {
-            if (activeRentalsGrid.CurrentRow?.DataBoundItem is DataRowView row)
+            if (selectedRentalId != null)
             {
-                CalculateFinalAmount(row);
+                CalculateFinalAmount();
             }
         }
 
-        private void CalculateFinalAmount(DataRowView row)
+        private void CalculateFinalAmount()
         {
-            DateTime expectedReturn = Convert.ToDateTime(row["Expected Return"]);
-            decimal dailyRate = Convert.ToDecimal(row["Daily Rate"]);
-            decimal baseAmount = Convert.ToDecimal(row["Base Amount"]);
-            int lateDays = RentalCalculator.GetLateDays(expectedReturn, actualReturnDatePicker.Value);
-            decimal penalty = lateDays * dailyRate;
+            int lateDays = RentalCalculator.GetLateDays(_selectedExpectedReturn, actualReturnDatePicker.Value);
+            decimal penalty = lateDays * _selectedDailyRate;
             decimal finalAmount = RentalCalculator.CalculateFinalAmount(
-                expectedReturn,
+                _selectedExpectedReturn,
                 actualReturnDatePicker.Value,
-                dailyRate,
-                baseAmount);
+                _selectedDailyRate,
+                _selectedBaseAmount);
 
             lateDaysTextBox.Text = lateDays.ToString();
             penaltyTextBox.Text = penalty.ToString("N2");
@@ -126,14 +135,9 @@ ORDER BY r.ExpectedReturnDate ASC;";
                 return;
             }
 
-            if (activeRentalsGrid.CurrentRow?.DataBoundItem is not DataRowView row)
-            {
-                MessageBox.Show("Please select an active rental to return.", "No Rental Selected", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
+            DateOnly actualReturnDate = RentalCalculator.ToDateOnly(actualReturnDatePicker.Value);
 
-            DateTime rentalDate = Convert.ToDateTime(row["Rental Date"]);
-            if (actualReturnDatePicker.Value.Date < rentalDate.Date)
+            if (actualReturnDate < _selectedRentalDate)
             {
                 MessageBox.Show("Actual return date cannot be earlier than the rental date.", "Invalid Return Date", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
@@ -147,22 +151,16 @@ ORDER BY r.ExpectedReturnDate ASC;";
 
             try
             {
-                using SqlConnection connection = DatabaseHelper.OpenConnection();
-                using SqlTransaction transaction = connection.BeginTransaction();
+                using var db = new AppDbContext();
 
-                using SqlCommand rentalCommand = new(
-                    "UPDATE Rentals SET ActualReturnDate = @ActualReturnDate, TotalAmount = @TotalAmount, Status = @ReturnedStatus WHERE RentalId = @RentalId AND Status = @ActiveStatus;",
-                    connection,
-                    transaction);
-                rentalCommand.AddDate("@ActualReturnDate", actualReturnDatePicker.Value);
-                rentalCommand.AddMoney("@TotalAmount", finalAmount);
-                rentalCommand.AddString("@ReturnedStatus", AppConstants.ReturnedRentalStatus, 20);
-                rentalCommand.AddInt("@RentalId", selectedRentalId.Value);
-                rentalCommand.AddString("@ActiveStatus", AppConstants.ActiveRentalStatus, 20);
+                var rental = db.Rentals
+                    .Include(r => r.Car)
+                    .FirstOrDefault(r =>
+                        r.RentalId == selectedRentalId.Value &&
+                        r.Status == AppConstants.ActiveRentalStatus);
 
-                if (rentalCommand.ExecuteNonQuery() == 0)
+                if (rental == null)
                 {
-                    transaction.Rollback();
                     MessageBox.Show(
                         "This rental is no longer active.",
                         "Rental Already Closed",
@@ -172,12 +170,12 @@ ORDER BY r.ExpectedReturnDate ASC;";
                     return;
                 }
 
-                using SqlCommand carCommand = new("UPDATE Cars SET Status = @AvailableStatus WHERE CarId = @CarId;", connection, transaction);
-                carCommand.AddString("@AvailableStatus", AppConstants.AvailableStatus, 20);
-                carCommand.AddInt("@CarId", selectedCarId.Value);
-                carCommand.ExecuteNonQuery();
+                rental.ActualReturnDate = actualReturnDate;
+                rental.TotalAmount = finalAmount;
+                rental.Status = AppConstants.ReturnedRentalStatus;
+                rental.Car.Status = AppConstants.AvailableStatus;
 
-                transaction.Commit();
+                db.SaveChanges();
 
                 MessageBox.Show("Car returned successfully.", "Return Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LoadActiveRentals(searchTextBox.Text);
@@ -202,6 +200,10 @@ ORDER BY r.ExpectedReturnDate ASC;";
         {
             selectedRentalId = null;
             selectedCarId = null;
+            _selectedRentalDate = default;
+            _selectedExpectedReturn = default;
+            _selectedDailyRate = 0;
+            _selectedBaseAmount = 0;
             customerTextBox.Clear();
             carTextBox.Clear();
             expectedReturnTextBox.Clear();

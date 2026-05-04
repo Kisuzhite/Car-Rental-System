@@ -1,5 +1,5 @@
-﻿using System.Data;
-using Microsoft.Data.SqlClient;
+﻿using Car_Rental_System.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Car_Rental_System
 {
@@ -21,32 +21,32 @@ namespace Car_Rental_System
         {
             try
             {
-                using SqlConnection connection = DatabaseHelper.OpenConnection();
+                using var db = new AppDbContext();
 
-                string query = @"
-SELECT
-    CustomerId,
-    FullName AS [Full Name],
-    ContactNumber AS [Contact Number],
-    LicenseNumber AS [License Number],
-    Address
-FROM Customers
-WHERE
-    @Search = ''
-    OR FullName LIKE @SearchText
-    OR ContactNumber LIKE @SearchText
-    OR LicenseNumber LIKE @SearchText
-ORDER BY CustomerId DESC;";
+                var query = db.Customers.AsQueryable();
 
-                using SqlCommand command = new(query, connection);
-                command.AddSearchParameters(search);
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    query = query.Where(c =>
+                        c.FullName.Contains(search) ||
+                        c.ContactNumber.Contains(search) ||
+                        c.LicenseNumber.Contains(search));
+                }
 
-                DataTable table = new();
-                using SqlDataAdapter adapter = new(command);
-                adapter.Fill(table);
+                var customers = query
+                    .OrderByDescending(c => c.CustomerId)
+                    .Select(c => new
+                    {
+                        c.CustomerId,
+                        FullName = c.FullName,
+                        ContactNumber = c.ContactNumber,
+                        LicenseNumber = c.LicenseNumber,
+                        c.Address
+                    })
+                    .ToList();
 
                 customersGrid.Columns.Clear();
-                customersGrid.DataSource = table;
+                customersGrid.DataSource = customers;
 
                 DataGridViewHelper.HideColumn(customersGrid, "CustomerId");
                 BeginInvoke(new Action(ClearForm));
@@ -59,22 +59,22 @@ ORDER BY CustomerId DESC;";
 
         private void AddButton_Click(object? sender, EventArgs e)
         {
-            if (!ValidateInputs())
-            {
-                return;
-            }
+            if (!ValidateInputs()) return;
 
             try
             {
-                using SqlConnection connection = DatabaseHelper.OpenConnection();
+                using var db = new AppDbContext();
 
-                string query = @"
-INSERT INTO Customers (FullName, ContactNumber, LicenseNumber, Address)
-VALUES (@FullName, @ContactNumber, @LicenseNumber, @Address);";
+                var customer = new Customer
+                {
+                    FullName = nameTextBox.Text.Trim(),
+                    ContactNumber = contactTextBox.Text.Trim(),
+                    LicenseNumber = licenseTextBox.Text.Trim(),
+                    Address = addressTextBox.Text.Trim()
+                };
 
-                using SqlCommand command = new(query, connection);
-                AddCustomerParameters(command);
-                command.ExecuteNonQuery();
+                db.Customers.Add(customer);
+                db.SaveChanges();
 
                 MessageBox.Show("Customer added successfully.", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ClearForm();
@@ -94,27 +94,21 @@ VALUES (@FullName, @ContactNumber, @LicenseNumber, @Address);";
                 return;
             }
 
-            if (!ValidateInputs())
-            {
-                return;
-            }
+            if (!ValidateInputs()) return;
 
             try
             {
-                using SqlConnection connection = DatabaseHelper.OpenConnection();
+                using var db = new AppDbContext();
 
-                string query = @"
-UPDATE Customers
-SET FullName = @FullName,
-    ContactNumber = @ContactNumber,
-    LicenseNumber = @LicenseNumber,
-    Address = @Address
-WHERE CustomerId = @CustomerId;";
+                var customer = db.Customers.Find(selectedCustomerId.Value);
+                if (customer == null) return;
 
-                using SqlCommand command = new(query, connection);
-                AddCustomerParameters(command);
-                command.AddInt("@CustomerId", selectedCustomerId.Value);
-                command.ExecuteNonQuery();
+                customer.FullName = nameTextBox.Text.Trim();
+                customer.ContactNumber = contactTextBox.Text.Trim();
+                customer.LicenseNumber = licenseTextBox.Text.Trim();
+                customer.Address = addressTextBox.Text.Trim();
+
+                db.SaveChanges();
 
                 MessageBox.Show("Customer updated successfully.", "Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ClearForm();
@@ -140,27 +134,18 @@ WHERE CustomerId = @CustomerId;";
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Warning);
 
-            if (result != DialogResult.Yes)
-            {
-                return;
-            }
+            if (result != DialogResult.Yes) return;
 
             try
             {
-                using SqlConnection connection = DatabaseHelper.OpenConnection();
-                using SqlTransaction transaction = connection.BeginTransaction();
+                using var db = new AppDbContext();
 
-                using SqlCommand activeCommand = new(
-                    "SELECT COUNT(*) FROM Rentals WHERE CustomerId = @CustomerId AND Status = @ActiveStatus;",
-                    connection,
-                    transaction);
-                activeCommand.AddInt("@CustomerId", selectedCustomerId.Value);
-                activeCommand.AddString("@ActiveStatus", AppConstants.ActiveRentalStatus, 20);
-                int activeRentals = Convert.ToInt32(activeCommand.ExecuteScalar());
+                bool hasActiveRentals = db.Rentals.Any(r =>
+                    r.CustomerId == selectedCustomerId.Value &&
+                    r.Status == AppConstants.ActiveRentalStatus);
 
-                if (activeRentals > 0)
+                if (hasActiveRentals)
                 {
-                    transaction.Rollback();
                     MessageBox.Show(
                         "This customer still has an active rental. Process the return before deleting the customer.",
                         "Active Rental Found",
@@ -169,15 +154,14 @@ WHERE CustomerId = @CustomerId;";
                     return;
                 }
 
-                using SqlCommand deleteRentalsCommand = new("DELETE FROM Rentals WHERE CustomerId = @CustomerId;", connection, transaction);
-                deleteRentalsCommand.AddInt("@CustomerId", selectedCustomerId.Value);
-                deleteRentalsCommand.ExecuteNonQuery();
+                var rentals = db.Rentals.Where(r => r.CustomerId == selectedCustomerId.Value).ToList();
+                db.Rentals.RemoveRange(rentals);
 
-                using SqlCommand deleteCustomerCommand = new("DELETE FROM Customers WHERE CustomerId = @CustomerId;", connection, transaction);
-                deleteCustomerCommand.AddInt("@CustomerId", selectedCustomerId.Value);
-                deleteCustomerCommand.ExecuteNonQuery();
+                var customer = db.Customers.Find(selectedCustomerId.Value);
+                if (customer != null)
+                    db.Customers.Remove(customer);
 
-                transaction.Commit();
+                db.SaveChanges();
 
                 MessageBox.Show("Customer deleted successfully.", "Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ClearForm();
@@ -201,17 +185,18 @@ WHERE CustomerId = @CustomerId;";
 
         private void CustomersGrid_SelectionChanged(object? sender, EventArgs e)
         {
-            if (customersGrid.CurrentRow?.DataBoundItem is not DataRowView row || !customersGrid.CurrentRow.Selected)
+            if (customersGrid.CurrentRow?.DataBoundItem == null || !customersGrid.CurrentRow.Selected)
             {
                 selectedCustomerId = null;
                 return;
             }
 
-            selectedCustomerId = Convert.ToInt32(row["CustomerId"]);
-            nameTextBox.Text = row["Full Name"].ToString();
-            contactTextBox.Text = row["Contact Number"].ToString();
-            licenseTextBox.Text = row["License Number"].ToString();
-            addressTextBox.Text = row["Address"].ToString();
+            dynamic row = customersGrid.CurrentRow.DataBoundItem;
+            selectedCustomerId = (int)row.CustomerId;
+            nameTextBox.Text = row.FullName;
+            contactTextBox.Text = row.ContactNumber;
+            licenseTextBox.Text = row.LicenseNumber;
+            addressTextBox.Text = row.Address;
         }
 
         private bool ValidateInputs()
@@ -226,14 +211,6 @@ WHERE CustomerId = @CustomerId;";
             }
 
             return true;
-        }
-
-        private void AddCustomerParameters(SqlCommand command)
-        {
-            command.AddString("@FullName", nameTextBox.Text.Trim(), 100);
-            command.AddString("@ContactNumber", contactTextBox.Text.Trim(), 30);
-            command.AddString("@LicenseNumber", licenseTextBox.Text.Trim(), 50);
-            command.AddString("@Address", addressTextBox.Text.Trim(), 200);
         }
 
         private void ClearForm()

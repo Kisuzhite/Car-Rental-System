@@ -1,5 +1,4 @@
-using System.Data;
-using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 namespace Car_Rental_System
 {
@@ -29,22 +28,18 @@ namespace Car_Rental_System
         {
             try
             {
-                using SqlConnection connection = DatabaseHelper.OpenConnection();
+                using var db = new AppDbContext();
 
-                totalCarsValueLabel.Text = DatabaseHelper.ExecuteScalar(connection, "SELECT COUNT(*) FROM Cars;").ToString();
-                availableCarsValueLabel.Text = DatabaseHelper.ExecuteScalar(
-                    connection,
-                    $"SELECT COUNT(*) FROM Cars WHERE Status = '{AppConstants.AvailableStatus}';").ToString();
-                activeRentalsValueLabel.Text = DatabaseHelper.ExecuteScalar(
-                    connection,
-                    $"SELECT COUNT(*) FROM Rentals WHERE Status = '{AppConstants.ActiveRentalStatus}';").ToString();
+                totalCarsValueLabel.Text = db.Cars.Count().ToString();
+                availableCarsValueLabel.Text = db.Cars.Count(c => c.Status == AppConstants.AvailableStatus).ToString();
+                activeRentalsValueLabel.Text = db.Rentals.Count(r => r.Status == AppConstants.ActiveRentalStatus).ToString();
 
-                object income = DatabaseHelper.ExecuteScalar(
-                    connection,
-                    $"SELECT ISNULL(SUM(TotalAmount), 0) FROM Rentals WHERE Status = '{AppConstants.ReturnedRentalStatus}';");
-                incomeValueLabel.Text = RentalCalculator.FormatCurrency(Convert.ToDecimal(income));
+                decimal income = db.Rentals
+                    .Where(r => r.Status == AppConstants.ReturnedRentalStatus)
+                    .Sum(r => (decimal?)r.TotalAmount) ?? 0;
+                incomeValueLabel.Text = RentalCalculator.FormatCurrency(income);
 
-                LoadRentalHistory(connection, search);
+                LoadRentalHistory(db, search);
             }
             catch (Exception ex)
             {
@@ -52,41 +47,42 @@ namespace Car_Rental_System
             }
         }
 
-        private void LoadRentalHistory(SqlConnection connection, string search)
+        private void LoadRentalHistory(AppDbContext db, string search)
         {
-            string query = @"
-SELECT
-    r.RentalId AS [Rental ID],
-    c.FullName AS Customer,
-    ca.PlateNumber + ' - ' + ca.Brand + ' ' + ca.Model AS Car,
-    r.RentalDate AS [Rental Date],
-    r.ExpectedReturnDate AS [Expected Return],
-    r.ActualReturnDate AS [Actual Return],
-    r.TotalAmount AS [Total Amount],
-    r.Status
-FROM Rentals r
-INNER JOIN Customers c ON c.CustomerId = r.CustomerId
-INNER JOIN Cars ca ON ca.CarId = r.CarId
-WHERE
-    @Search = ''
-    OR c.FullName LIKE @SearchText
-    OR ca.PlateNumber LIKE @SearchText
-    OR ca.Brand LIKE @SearchText
-    OR ca.Model LIKE @SearchText
-    OR r.Status LIKE @SearchText
-ORDER BY r.RentalId DESC;";
+            var query = db.Rentals
+                .Include(r => r.Customer)
+                .Include(r => r.Car)
+                .AsQueryable();
 
-            using SqlCommand command = new(query, connection);
-            command.AddSearchParameters(search);
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(r =>
+                    r.Customer.FullName.Contains(search) ||
+                    r.Car.PlateNumber.Contains(search) ||
+                    r.Car.Brand.Contains(search) ||
+                    r.Car.Model.Contains(search) ||
+                    r.Status.Contains(search));
+            }
 
-            DataTable table = new();
-            using SqlDataAdapter adapter = new(command);
-            adapter.Fill(table);
+            var history = query
+                .OrderByDescending(r => r.RentalId)
+                .Select(r => new
+                {
+                    RentalId = r.RentalId,
+                    Customer = r.Customer.FullName,
+                    Car = r.Car.PlateNumber + " - " + r.Car.Brand + " " + r.Car.Model,
+                    RentalDate = r.RentalDate,
+                    ExpectedReturn = r.ExpectedReturnDate,
+                    ActualReturn = r.ActualReturnDate,
+                    TotalAmount = r.TotalAmount,
+                    r.Status
+                })
+                .ToList();
 
             reportGrid.Columns.Clear();
-            reportGrid.DataSource = table;
+            reportGrid.DataSource = history;
 
-            DataGridViewHelper.HideColumn(reportGrid, "Rental ID");
+            DataGridViewHelper.HideColumn(reportGrid, "RentalId");
             DataGridViewHelper.ClearSelectionWhenReady(reportGrid);
         }
     }

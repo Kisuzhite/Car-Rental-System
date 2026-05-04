@@ -21,7 +21,6 @@ namespace Car_Rental_System
         private void PrepareForm()
         {
             UpdateStatusOptions();
-
             LoadCarImage("");
         }
 
@@ -29,43 +28,25 @@ namespace Car_Rental_System
         {
             try
             {
-                using SqlConnection connection = DatabaseHelper.OpenConnection();
+                using AppDbContext db = new();
 
-                string query = @"
-SELECT
-    CarId,
-    PlateNumber AS [Plate Number],
-    Brand,
-    Model,
-    [Year],
-    Color,
-    DailyRate AS [Daily Rate],
-    Status,
-    ImagePath AS [Image Path]
-FROM Cars
-WHERE
-Status <> @RentedStatus
-AND (
-    @Search = ''
-    OR PlateNumber LIKE @SearchText
-    OR Brand LIKE @SearchText
-    OR Model LIKE @SearchText
-)
-ORDER BY CarId DESC;";
+                string trimmed = search.Trim();
 
-                using SqlCommand command = new(query, connection);
-                command.AddString("@RentedStatus", AppConstants.RentedStatus, 20);
-                command.AddSearchParameters(search);
-
-                DataTable table = new();
-                using SqlDataAdapter adapter = new(command);
-                adapter.Fill(table);
+                List<Car> cars = db.Cars
+                    .Where(c => c.Status != AppConstants.RentedStatus &&
+                                (trimmed == "" ||
+                                 c.PlateNumber.Contains(trimmed) ||
+                                 c.Brand.Contains(trimmed) ||
+                                 c.Model.Contains(trimmed)))
+                    .OrderByDescending(c => c.CarId)
+                    .ToList();
 
                 carsGrid.Columns.Clear();
-                carsGrid.DataSource = table;
+                carsGrid.DataSource = cars;
 
                 DataGridViewHelper.HideColumn(carsGrid, "CarId");
-                DataGridViewHelper.HideColumn(carsGrid, "Image Path");
+                DataGridViewHelper.HideColumn(carsGrid, "ImagePath");
+                DataGridViewHelper.HideColumn(carsGrid, "Rentals");
 
                 BeginInvoke(new Action(ClearForm));
             }
@@ -77,23 +58,23 @@ ORDER BY CarId DESC;";
 
         private void CarsGrid_SelectionChanged(object? sender, EventArgs e)
         {
-            if (carsGrid.CurrentRow?.DataBoundItem is not DataRowView row || !carsGrid.CurrentRow.Selected)
+            if (carsGrid.CurrentRow?.DataBoundItem is not Car car || !carsGrid.CurrentRow.Selected)
             {
                 selectedCarId = null;
                 return;
             }
 
-            selectedCarId = Convert.ToInt32(row["CarId"]);
-            plateTextBox.Text = row["Plate Number"].ToString();
-            brandTextBox.Text = row["Brand"].ToString();
-            modelTextBox.Text = row["Model"].ToString();
-            yearTextBox.Text = row["Year"].ToString();
-            colorTextBox.Text = row["Color"].ToString();
-            dailyRateTextBox.Text = Convert.ToDecimal(row["Daily Rate"]).ToString("0.##");
-            statusComboBox.Text = row["Status"].ToString();
+            selectedCarId = car.CarId;
+            plateTextBox.Text = car.PlateNumber;
+            brandTextBox.Text = car.Brand;
+            modelTextBox.Text = car.Model;
+            yearTextBox.Text = car.Year.ToString();
+            colorTextBox.Text = car.Color;
+            dailyRateTextBox.Text = car.DailyRate.ToString("0.##");
+            statusComboBox.Text = car.Status;
             UpdateStatusOptions();
-            imagePathTextBox.Text = row["Image Path"]?.ToString();
-            LoadCarImage(imagePathTextBox.Text);
+            imagePathTextBox.Text = car.ImagePath;
+            LoadCarImage(car.ImagePath);
         }
 
         private void AddButton_Click(object? sender, EventArgs e)
@@ -105,15 +86,21 @@ ORDER BY CarId DESC;";
 
             try
             {
-                using SqlConnection connection = DatabaseHelper.OpenConnection();
+                using AppDbContext db = new();
 
-                string query = @"
-INSERT INTO Cars (PlateNumber, Brand, Model, [Year], Color, DailyRate, Status, ImagePath)
-VALUES (@PlateNumber, @Brand, @Model, @Year, @Color, @DailyRate, @Status, @ImagePath);";
+                db.Cars.Add(new Car
+                {
+                    PlateNumber = plateTextBox.Text.Trim(),
+                    Brand = brandTextBox.Text.Trim(),
+                    Model = modelTextBox.Text.Trim(),
+                    Year = year,
+                    Color = colorTextBox.Text.Trim(),
+                    DailyRate = dailyRate,
+                    Status = statusComboBox.Text.Trim(),
+                    ImagePath = string.IsNullOrWhiteSpace(imagePathTextBox.Text) ? null : imagePathTextBox.Text.Trim()
+                });
 
-                using SqlCommand command = new(query, connection);
-                AddCarParameters(command, year, dailyRate);
-                command.ExecuteNonQuery();
+                db.SaveChanges();
 
                 MessageBox.Show("Car added successfully.", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ClearForm();
@@ -140,24 +127,26 @@ VALUES (@PlateNumber, @Brand, @Model, @Year, @Color, @DailyRate, @Status, @Image
 
             try
             {
-                using SqlConnection connection = DatabaseHelper.OpenConnection();
+                using AppDbContext db = new();
 
-                string query = @"
-UPDATE Cars
-SET PlateNumber = @PlateNumber,
-    Brand = @Brand,
-    Model = @Model,
-    [Year] = @Year,
-    Color = @Color,
-    DailyRate = @DailyRate,
-    Status = @Status,
-    ImagePath = @ImagePath
-WHERE CarId = @CarId;";
+                Car? car = db.Cars.Find(selectedCarId.Value);
 
-                using SqlCommand command = new(query, connection);
-                AddCarParameters(command, year, dailyRate);
-                command.AddInt("@CarId", selectedCarId.Value);
-                command.ExecuteNonQuery();
+                if (car == null)
+                {
+                    MessageBox.Show("Car not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                car.PlateNumber = plateTextBox.Text.Trim();
+                car.Brand = brandTextBox.Text.Trim();
+                car.Model = modelTextBox.Text.Trim();
+                car.Year = year;
+                car.Color = colorTextBox.Text.Trim();
+                car.DailyRate = dailyRate;
+                car.Status = statusComboBox.Text.Trim();
+                car.ImagePath = string.IsNullOrWhiteSpace(imagePathTextBox.Text) ? null : imagePathTextBox.Text.Trim();
+
+                db.SaveChanges();
 
                 MessageBox.Show("Car updated successfully.", "Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ClearForm();
@@ -195,11 +184,15 @@ WHERE CarId = @CarId;";
 
             try
             {
-                using SqlConnection connection = DatabaseHelper.OpenConnection();
+                using AppDbContext db = new();
 
-                using SqlCommand command = new("DELETE FROM Cars WHERE CarId = @CarId;", connection);
-                command.AddInt("@CarId", selectedCarId.Value);
-                command.ExecuteNonQuery();
+                Car? car = db.Cars.Find(selectedCarId.Value);
+
+                if (car != null)
+                {
+                    db.Cars.Remove(car);
+                    db.SaveChanges();
+                }
 
                 MessageBox.Show("Car deleted successfully.", "Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ClearForm();
@@ -224,16 +217,13 @@ WHERE CarId = @CarId;";
 
             try
             {
-                using SqlConnection connection = DatabaseHelper.OpenConnection();
+                using AppDbContext db = new();
 
-                using SqlCommand activeCommand = new(
-                    "SELECT COUNT(*) FROM Rentals WHERE CarId = @CarId AND Status = @ActiveStatus;",
-                    connection);
-                activeCommand.AddInt("@CarId", selectedCarId.Value);
-                activeCommand.AddString("@ActiveStatus", AppConstants.ActiveRentalStatus, 20);
-                int activeRentals = Convert.ToInt32(activeCommand.ExecuteScalar());
+                bool hasActiveRental = db.Rentals.Any(r =>
+                    r.CarId == selectedCarId.Value &&
+                    r.Status == AppConstants.ActiveRentalStatus);
 
-                if (activeRentals > 0)
+                if (hasActiveRental)
                 {
                     MessageBox.Show(
                         "This car has an active rental. Process the return before deleting it.",
@@ -243,11 +233,9 @@ WHERE CarId = @CarId;";
                     return false;
                 }
 
-                using SqlCommand historyCommand = new("SELECT COUNT(*) FROM Rentals WHERE CarId = @CarId;", connection);
-                historyCommand.AddInt("@CarId", selectedCarId.Value);
-                int rentalHistory = Convert.ToInt32(historyCommand.ExecuteScalar());
+                bool hasRentalHistory = db.Rentals.Any(r => r.CarId == selectedCarId.Value);
 
-                if (rentalHistory > 0)
+                if (hasRentalHistory)
                 {
                     MessageBox.Show(
                         "This car has rental history, so it cannot be deleted without breaking reports. Change its status to Maintenance instead.",
@@ -341,18 +329,6 @@ WHERE CarId = @CarId;";
             }
 
             return true;
-        }
-
-        private void AddCarParameters(SqlCommand command, int year, decimal dailyRate)
-        {
-            command.AddString("@PlateNumber", plateTextBox.Text.Trim(), 20);
-            command.AddString("@Brand", brandTextBox.Text.Trim(), 50);
-            command.AddString("@Model", modelTextBox.Text.Trim(), 50);
-            command.AddInt("@Year", year);
-            command.AddString("@Color", colorTextBox.Text.Trim(), 30);
-            command.AddMoney("@DailyRate", dailyRate);
-            command.AddString("@Status", statusComboBox.Text.Trim(), 20);
-            command.AddNullableString("@ImagePath", imagePathTextBox.Text, 500);
         }
 
         private void ClearForm()

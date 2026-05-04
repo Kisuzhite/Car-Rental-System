@@ -1,5 +1,5 @@
-using System.Data;
-using Microsoft.Data.SqlClient;
+using Car_Rental_System.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Car_Rental_System
 {
@@ -29,10 +29,9 @@ namespace Car_Rental_System
         {
             try
             {
-                using SqlConnection connection = DatabaseHelper.OpenConnection();
-
-                LoadCustomers(connection);
-                LoadAvailableCars(connection);
+                using var db = new AppDbContext();
+                LoadCustomers(db);
+                LoadAvailableCars(db);
             }
             catch (Exception ex)
             {
@@ -40,40 +39,36 @@ namespace Car_Rental_System
             }
         }
 
-        private void LoadCustomers(SqlConnection connection)
+        private void LoadCustomers(AppDbContext db)
         {
-            using SqlCommand command = new("SELECT CustomerId, FullName FROM Customers ORDER BY FullName;", connection);
-            DataTable table = new();
-            using SqlDataAdapter adapter = new(command);
-            adapter.Fill(table);
+            var customers = db.Customers
+                .OrderBy(c => c.FullName)
+                .Select(c => new { c.CustomerId, c.FullName })
+                .ToList();
 
-            customerComboBox.DataSource = table;
+            customerComboBox.DataSource = customers;
             customerComboBox.DisplayMember = "FullName";
             customerComboBox.ValueMember = "CustomerId";
         }
 
-        private void LoadAvailableCars(SqlConnection connection)
+        private void LoadAvailableCars(AppDbContext db)
         {
-            string query = @"
-SELECT
-    CarId,
-    PlateNumber + ' - ' + Brand + ' ' + Model AS CarName,
-    DailyRate
-FROM Cars
-WHERE Status = @AvailableStatus
-ORDER BY Brand, Model;";
+            var cars = db.Cars
+                .Where(c => c.Status == AppConstants.AvailableStatus)
+                .OrderBy(c => c.Brand).ThenBy(c => c.Model)
+                .Select(c => new
+                {
+                    c.CarId,
+                    CarName = c.PlateNumber + " - " + c.Brand + " " + c.Model,
+                    c.DailyRate
+                })
+                .ToList();
 
-            using SqlCommand command = new(query, connection);
-            command.AddString("@AvailableStatus", AppConstants.AvailableStatus, 20);
-            DataTable table = new();
-            using SqlDataAdapter adapter = new(command);
-            adapter.Fill(table);
-
-            carComboBox.DataSource = table;
+            carComboBox.DataSource = cars;
             carComboBox.DisplayMember = "CarName";
             carComboBox.ValueMember = "CarId";
 
-            if (table.Rows.Count == 0)
+            if (cars.Count == 0)
             {
                 rateTextBox.Clear();
                 totalTextBox.Text = RentalCalculator.FormatCurrency(0);
@@ -86,41 +81,39 @@ ORDER BY Brand, Model;";
         {
             try
             {
-                using SqlConnection connection = DatabaseHelper.OpenConnection();
+                using var db = new AppDbContext();
 
-                string query = @"
-SELECT
-    r.RentalId,
-    c.FullName AS Customer,
-    ca.PlateNumber + ' - ' + ca.Brand + ' ' + ca.Model AS Car,
-    r.RentalDate AS [Rental Date],
-    r.ExpectedReturnDate AS [Return Date],
-    r.TotalAmount AS [Total Amount],
-    r.Status
-FROM Rentals r
-INNER JOIN Customers c ON c.CustomerId = r.CustomerId
-INNER JOIN Cars ca ON ca.CarId = r.CarId
-WHERE
-    r.Status = @ActiveStatus
-    AND (
-        @Search = ''
-        OR c.FullName LIKE @SearchText
-        OR ca.PlateNumber LIKE @SearchText
-        OR ca.Brand LIKE @SearchText
-        OR ca.Model LIKE @SearchText
-    )
-ORDER BY r.RentalId DESC;";
+                var query = db.Rentals
+                    .Where(r => r.Status == AppConstants.ActiveRentalStatus)
+                    .Include(r => r.Customer)
+                    .Include(r => r.Car)
+                    .AsQueryable();
 
-                using SqlCommand command = new(query, connection);
-                command.AddString("@ActiveStatus", AppConstants.ActiveRentalStatus, 20);
-                command.AddSearchParameters(search);
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    query = query.Where(r =>
+                        r.Customer.FullName.Contains(search) ||
+                        r.Car.PlateNumber.Contains(search) ||
+                        r.Car.Brand.Contains(search) ||
+                        r.Car.Model.Contains(search));
+                }
 
-                DataTable table = new();
-                using SqlDataAdapter adapter = new(command);
-                adapter.Fill(table);
+                var rentals = query
+                    .OrderByDescending(r => r.RentalId)
+                    .Select(r => new
+                    {
+                        r.RentalId,
+                        Customer = r.Customer.FullName,
+                        Car = r.Car.PlateNumber + " - " + r.Car.Brand + " " + r.Car.Model,
+                        RentalDate = r.RentalDate,
+                        ReturnDate = r.ExpectedReturnDate,
+                        TotalAmount = r.TotalAmount,
+                        r.Status
+                    })
+                    .ToList();
 
                 rentalsGrid.Columns.Clear();
-                rentalsGrid.DataSource = table;
+                rentalsGrid.DataSource = rentals;
 
                 DataGridViewHelper.HideColumn(rentalsGrid, "RentalId");
                 DataGridViewHelper.ClearSelectionWhenReady(rentalsGrid);
@@ -134,22 +127,17 @@ ORDER BY r.RentalId DESC;";
         private void CreateButton_Click(object? sender, EventArgs e)
         {
             if (!ValidateInputs(out int customerId, out int carId, out decimal dailyRate, out decimal totalAmount))
-            {
                 return;
-            }
 
             try
             {
-                using SqlConnection connection = DatabaseHelper.OpenConnection();
+                using var db = new AppDbContext();
 
-                using SqlCommand activeCheckCommand = new(
-                    "SELECT COUNT(*) FROM Rentals WHERE CustomerId = @CustomerId AND Status = @ActiveStatus;",
-                    connection);
-                activeCheckCommand.AddInt("@CustomerId", customerId);
-                activeCheckCommand.AddString("@ActiveStatus", AppConstants.ActiveRentalStatus, 20);
-                int activeRentals = Convert.ToInt32(activeCheckCommand.ExecuteScalar());
+                bool hasActiveRental = db.Rentals.Any(r =>
+                    r.CustomerId == customerId &&
+                    r.Status == AppConstants.ActiveRentalStatus);
 
-                if (activeRentals > 0)
+                if (hasActiveRental)
                 {
                     MessageBox.Show(
                         "This customer already has an active rental.\nProcess the return first before renting another car.",
@@ -159,19 +147,12 @@ ORDER BY r.RentalId DESC;";
                     return;
                 }
 
-                using SqlTransaction transaction = connection.BeginTransaction();
+                var car = db.Cars.FirstOrDefault(c =>
+                    c.CarId == carId &&
+                    c.Status == AppConstants.AvailableStatus);
 
-                using SqlCommand carCommand = new(
-                    "UPDATE Cars SET Status = @RentedStatus WHERE CarId = @CarId AND Status = @AvailableStatus;",
-                    connection,
-                    transaction);
-                carCommand.AddString("@RentedStatus", AppConstants.RentedStatus, 20);
-                carCommand.AddInt("@CarId", carId);
-                carCommand.AddString("@AvailableStatus", AppConstants.AvailableStatus, 20);
-
-                if (carCommand.ExecuteNonQuery() == 0)
+                if (car == null)
                 {
-                    transaction.Rollback();
                     MessageBox.Show(
                         "The selected car is no longer available. Please choose another car.",
                         "Car Not Available",
@@ -182,21 +163,20 @@ ORDER BY r.RentalId DESC;";
                     return;
                 }
 
-                string insertRental = @"
-INSERT INTO Rentals (CustomerId, CarId, RentalDate, ExpectedReturnDate, DailyRate, TotalAmount, Status)
-VALUES (@CustomerId, @CarId, @RentalDate, @ExpectedReturnDate, @DailyRate, @TotalAmount, @ActiveStatus);";
+                car.Status = AppConstants.RentedStatus;
 
-                using SqlCommand rentalCommand = new(insertRental, connection, transaction);
-                rentalCommand.AddInt("@CustomerId", customerId);
-                rentalCommand.AddInt("@CarId", carId);
-                rentalCommand.AddDate("@RentalDate", rentalDatePicker.Value);
-                rentalCommand.AddDate("@ExpectedReturnDate", returnDatePicker.Value);
-                rentalCommand.AddMoney("@DailyRate", dailyRate);
-                rentalCommand.AddMoney("@TotalAmount", totalAmount);
-                rentalCommand.AddString("@ActiveStatus", AppConstants.ActiveRentalStatus, 20);
-                rentalCommand.ExecuteNonQuery();
+                db.Rentals.Add(new Rental
+                {
+                    CustomerId = customerId,
+                    CarId = carId,
+                    RentalDate = RentalCalculator.ToDateOnly(rentalDatePicker.Value),
+                    ExpectedReturnDate = RentalCalculator.ToDateOnly(returnDatePicker.Value),
+                    DailyRate = dailyRate,
+                    TotalAmount = totalAmount,
+                    Status = AppConstants.ActiveRentalStatus
+                });
 
-                transaction.Commit();
+                db.SaveChanges();
 
                 MessageBox.Show("Rental transaction created successfully.", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ClearForm();
@@ -219,44 +199,16 @@ VALUES (@CustomerId, @CarId, @RentalDate, @ExpectedReturnDate, @DailyRate, @Tota
 
             try
             {
-                using SqlConnection connection = DatabaseHelper.OpenConnection();
-                using SqlTransaction transaction = connection.BeginTransaction();
+                using var db = new AppDbContext();
 
-                using SqlCommand getRentalCommand = new(
-                    "SELECT CarId, ExpectedReturnDate, DailyRate, TotalAmount FROM Rentals WHERE RentalId = @RentalId AND Status = @ActiveStatus;",
-                    connection,
-                    transaction);
-                getRentalCommand.AddInt("@RentalId", selectedRentalId.Value);
-                getRentalCommand.AddString("@ActiveStatus", AppConstants.ActiveRentalStatus, 20);
+                var rental = db.Rentals
+                    .Include(r => r.Car)
+                    .FirstOrDefault(r =>
+                        r.RentalId == selectedRentalId.Value &&
+                        r.Status == AppConstants.ActiveRentalStatus);
 
-                int carId;
-                DateTime expectedReturnDate;
-                decimal dailyRate;
-                decimal baseAmount;
-                bool rentalFound = false;
-
-                using (SqlDataReader reader = getRentalCommand.ExecuteReader())
+                if (rental == null)
                 {
-                    if (reader.Read())
-                    {
-                        rentalFound = true;
-                        carId = Convert.ToInt32(reader["CarId"]);
-                        expectedReturnDate = Convert.ToDateTime(reader["ExpectedReturnDate"]);
-                        dailyRate = Convert.ToDecimal(reader["DailyRate"]);
-                        baseAmount = Convert.ToDecimal(reader["TotalAmount"]);
-                    }
-                    else
-                    {
-                        carId = 0;
-                        expectedReturnDate = DateTime.Today;
-                        dailyRate = 0;
-                        baseAmount = 0;
-                    }
-                }
-
-                if (!rentalFound)
-                {
-                    transaction.Rollback();
                     MessageBox.Show(
                         "This rental is no longer active.",
                         "Rental Already Closed",
@@ -266,41 +218,19 @@ VALUES (@CustomerId, @CarId, @RentalDate, @ExpectedReturnDate, @DailyRate, @Tota
                     return;
                 }
 
-                DateTime actualReturnDate = DateTime.Today;
+                DateOnly actualReturnDate = RentalCalculator.ToDateOnly(DateTime.Today);
                 decimal finalAmount = RentalCalculator.CalculateFinalAmount(
-                    expectedReturnDate,
+                    rental.ExpectedReturnDate,
                     actualReturnDate,
-                    dailyRate,
-                    baseAmount);
+                    rental.DailyRate,
+                    rental.TotalAmount);
 
-                using SqlCommand rentalCommand = new(
-                    "UPDATE Rentals SET ActualReturnDate = @ActualReturnDate, TotalAmount = @TotalAmount, Status = @ReturnedStatus WHERE RentalId = @RentalId AND Status = @ActiveStatus;",
-                    connection,
-                    transaction);
-                rentalCommand.AddDate("@ActualReturnDate", actualReturnDate);
-                rentalCommand.AddMoney("@TotalAmount", finalAmount);
-                rentalCommand.AddString("@ReturnedStatus", AppConstants.ReturnedRentalStatus, 20);
-                rentalCommand.AddInt("@RentalId", selectedRentalId.Value);
-                rentalCommand.AddString("@ActiveStatus", AppConstants.ActiveRentalStatus, 20);
+                rental.ActualReturnDate = actualReturnDate;
+                rental.TotalAmount = finalAmount;
+                rental.Status = AppConstants.ReturnedRentalStatus;
+                rental.Car.Status = AppConstants.AvailableStatus;
 
-                if (rentalCommand.ExecuteNonQuery() == 0)
-                {
-                    transaction.Rollback();
-                    MessageBox.Show(
-                        "This rental is no longer active.",
-                        "Rental Already Closed",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
-                    LoadRentals(searchTextBox.Text);
-                    return;
-                }
-
-                using SqlCommand carCommand = new("UPDATE Cars SET Status = @AvailableStatus WHERE CarId = @CarId;", connection, transaction);
-                carCommand.AddString("@AvailableStatus", AppConstants.AvailableStatus, 20);
-                carCommand.AddInt("@CarId", carId);
-                carCommand.ExecuteNonQuery();
-
-                transaction.Commit();
+                db.SaveChanges();
 
                 MessageBox.Show("Rental marked as returned.", "Returned", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ClearForm();
@@ -325,20 +255,22 @@ VALUES (@CustomerId, @CarId, @RentalDate, @ExpectedReturnDate, @DailyRate, @Tota
 
         private void RentalsGrid_SelectionChanged(object? sender, EventArgs e)
         {
-            if (rentalsGrid.CurrentRow?.DataBoundItem is not DataRowView row || !rentalsGrid.CurrentRow.Selected)
+            if (rentalsGrid.CurrentRow?.DataBoundItem == null || !rentalsGrid.CurrentRow.Selected)
             {
                 selectedRentalId = null;
                 return;
             }
 
-            selectedRentalId = Convert.ToInt32(row["RentalId"]);
+            dynamic row = rentalsGrid.CurrentRow.DataBoundItem;
+            selectedRentalId = (int)row.RentalId;
         }
 
         private void CarComboBox_SelectedIndexChanged(object? sender, EventArgs e)
         {
-            if (carComboBox.SelectedItem is DataRowView row && row.Row.Table.Columns.Contains("DailyRate"))
+            if (carComboBox.SelectedItem != null)
             {
-                rateTextBox.Text = row["DailyRate"].ToString();
+                dynamic selected = carComboBox.SelectedItem;
+                rateTextBox.Text = selected.DailyRate.ToString();
             }
 
             CalculateTotal();
@@ -388,7 +320,6 @@ VALUES (@CustomerId, @CarId, @RentalDate, @ExpectedReturnDate, @DailyRate, @Tota
         private static bool TryGetSelectedValue(ComboBox comboBox, out int value)
         {
             value = 0;
-
             return comboBox.SelectedValue != null &&
                 int.TryParse(comboBox.SelectedValue.ToString(), out value);
         }
@@ -413,15 +344,8 @@ VALUES (@CustomerId, @CarId, @RentalDate, @ExpectedReturnDate, @DailyRate, @Tota
         private void ClearForm()
         {
             selectedRentalId = null;
-            if (customerComboBox.Items.Count > 0)
-            {
-                customerComboBox.SelectedIndex = 0;
-            }
-
-            if (carComboBox.Items.Count > 0)
-            {
-                carComboBox.SelectedIndex = 0;
-            }
+            if (customerComboBox.Items.Count > 0) customerComboBox.SelectedIndex = 0;
+            if (carComboBox.Items.Count > 0) carComboBox.SelectedIndex = 0;
 
             rentalDatePicker.Value = DateTime.Today;
             returnDatePicker.Value = DateTime.Today.AddDays(1);
