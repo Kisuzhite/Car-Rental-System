@@ -1,5 +1,5 @@
-using System.Data;
-using Microsoft.Data.SqlClient;
+using Car_Rental_System.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Car_Rental_System
 {
