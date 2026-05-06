@@ -6,7 +6,13 @@ namespace Car_Rental_System
         static void Main()
         {
             ApplicationConfiguration.Initialize();
-            Application.Run(new MainForm());
+            using var loginForm = new LoginForm();
+
+            if (loginForm.ShowDialog() == DialogResult.OK &&
+                loginForm.AuthenticatedUser != null)
+            {
+                Application.Run(new MainForm(loginForm.AuthenticatedUser));
+            }
         }
     }
 }

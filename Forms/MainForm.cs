@@ -1,6 +1,7 @@
 ﻿using Car_Rental_System.Data;
 using Car_Rental_System.Helpers;
 using Car_Rental_System.Models;
+using Car_Rental_System.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Car_Rental_System
@@ -8,17 +9,24 @@ namespace Car_Rental_System
     public partial class MainForm : Form
     {
         private readonly Padding dashboardPadding;
+        private readonly AppUser currentUser;
         private Form? activeModuleForm;
 
-        public MainForm()
+        public MainForm() : this(new AppUser { UserName = "owner", Role = AppConstants.OwnerRole })
+        {
+        }
+
+        internal MainForm(AppUser currentUser)
         {
             InitializeComponent();
+            this.currentUser = currentUser;
             dashboardPadding = contentPanel.Padding;
         }
 
         private void MainForm_Load(object? sender, EventArgs e)
         {
             dateLabel.Text = DateTime.Now.ToString("MMMM d, yyyy");
+            staffBadgeLabel.Text = $"{currentUser.Role} Account";
             SetActiveNavigationButton(dashboardButton);
             PrepareDashboardForm();
 
@@ -68,9 +76,13 @@ namespace Car_Rental_System
 
         private void LoadDashboardStats(AppDbContext db)
         {
+            DateOnly today = RentalCalculator.ToDateOnly(DateTime.Today);
+
             totalCarsValueLabel.Text = db.Cars.Count().ToString();
             availableCarsValueLabel.Text = db.Cars.Count(c => c.Status == AppConstants.AvailableStatus).ToString();
-            rentedCarsValueLabel.Text = db.Cars.Count(c => c.Status == AppConstants.RentedStatus).ToString();
+            rentedCarsValueLabel.Text = db.Rentals.Count(r =>
+                r.Status == AppConstants.ActiveRentalStatus &&
+                r.ExpectedReturnDate < today).ToString();
 
             DateOnly firstOfMonth = new(DateTime.Today.Year, DateTime.Today.Month, 1);
             DateOnly firstOfNextMonth = firstOfMonth.AddMonths(1);
@@ -121,11 +133,14 @@ namespace Car_Rental_System
 
         private void LoadRecentRentals(AppDbContext db)
         {
+            DateOnly today = RentalCalculator.ToDateOnly(DateTime.Today);
+
             var rentals = db.Rentals
                 .Include(r => r.Customer)
-                .Include(r => r.Car)
+                .Include(r => r.Car).ThenInclude(c => c.CarType)
                 .OrderByDescending(r => r.RentalId)
                 .Take(10)
+                .ToList()
                 .Select(r => new
                 {
                     RentalID = r.RentalId,
@@ -134,7 +149,7 @@ namespace Car_Rental_System
                         (r.Car.CarType != null ? " (" + r.Car.CarType.TypeName + ")" : ""),
                     ReturnDate = r.ExpectedReturnDate,
                     Amount = r.TotalAmount,
-                    r.Status
+                    Status = RentalStatusHelper.GetDisplayStatus(r, today)
                 })
                 .ToList();
 
@@ -278,62 +293,27 @@ namespace Car_Rental_System
 
             try
             {
-                using var db = new AppDbContext();
-
-                int customerId = GetOrCreateCustomer(db, ValidationHelper.CollapseSpaces(customerNameTextBox.Text));
-
-                bool hasActiveRental = db.Rentals.Any(r =>
-                    r.CustomerId == customerId &&
-                    r.Status == AppConstants.ActiveRentalStatus);
-
-                if (hasActiveRental)
-                {
-                    MessageBox.Show(
-                        "This customer already has an active rental.\nProcess the return first before renting another car.",
-                        "Customer Has Active Rental",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
-                    return;
-                }
-
-                var car = db.Cars
-                    .Include(c => c.CarType)
-                    .FirstOrDefault(c =>
-                    c.CarId == carId &&
-                    c.Status == AppConstants.AvailableStatus);
-
-                if (car == null)
-                {
-                    MessageBox.Show(
-                        "The selected car is no longer available. Please choose another car.",
-                        "Car Not Available",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
-                    LoadDashboardData(searchTextBox.Text);
-                    return;
-                }
-
-                car.Status = AppConstants.RentedStatus;
-                dailyRate = car.CarType?.DailyRate ?? car.DailyRate;
-                totalAmount = RentalCalculator.CalculateBaseAmount(
+                var rentalService = new RentalService();
+                RentalOperationResult result = rentalService.CreateQuickRental(
+                    customerNameTextBox.Text,
+                    carId,
                     rentalDatePicker.Value,
-                    returnDatePicker.Value,
-                    dailyRate);
+                    returnDatePicker.Value);
 
-                db.Rentals.Add(new Rental
+                if (!result.Success)
                 {
-                    CustomerId = customerId,
-                    CarId = carId,
-                    RentalDate = RentalCalculator.ToDateOnly(rentalDatePicker.Value),
-                    ExpectedReturnDate = RentalCalculator.ToDateOnly(returnDatePicker.Value),
-                    DailyRate = dailyRate,
-                    TotalAmount = totalAmount,
-                    Status = AppConstants.ActiveRentalStatus
-                });
+                    MessageBox.Show(
+                        result.Message,
+                        result.Title,
+                        MessageBoxButtons.OK,
+                        GetRentalFailureIcon(result));
 
-                db.SaveChanges();
+                    if (result.Title == "Car Not Available")
+                        LoadDashboardData(searchTextBox.Text);
+                    return;
+                }
 
-                MessageBox.Show("Rental transaction created successfully.", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(result.Message, result.Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ClearQuickRentalForm();
                 LoadDashboardData(searchTextBox.Text);
             }
@@ -341,31 +321,6 @@ namespace Car_Rental_System
             {
                 AppMessageBox.ShowDatabaseError("Unable to create rental.", ex);
             }
-        }
-
-        private int GetOrCreateCustomer(AppDbContext db, string customerName)
-        {
-            customerName = ValidationHelper.CollapseSpaces(customerName);
-
-            var existing = db.Customers
-                .Where(c => !c.IsArchived && c.FullName == customerName)
-                .OrderByDescending(c => c.CustomerId)
-                .FirstOrDefault();
-
-            if (existing != null)
-                return existing.CustomerId;
-
-            var newCustomer = new Customer
-            {
-                FullName = customerName,
-                ContactNumber = AppConstants.NotProvided,
-                LicenseNumber = AppConstants.NotProvided,
-                Address = AppConstants.NotProvided
-            };
-
-            db.Customers.Add(newCustomer);
-            db.SaveChanges();
-            return newCustomer.CustomerId;
         }
 
         private bool ValidateQuickRental(out int carId, out decimal dailyRate, out decimal totalAmount)
@@ -416,6 +371,13 @@ namespace Car_Rental_System
 
             totalAmount = CalculateQuickRentalTotal();
             return true;
+        }
+
+        private static MessageBoxIcon GetRentalFailureIcon(RentalOperationResult result)
+        {
+            return result.Title == "Car Not Available"
+                ? MessageBoxIcon.Information
+                : MessageBoxIcon.Warning;
         }
 
         private bool TryGetSelectedCarId(out int carId)

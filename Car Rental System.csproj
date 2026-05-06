@@ -13,6 +13,15 @@
     <Content Include="Assets\Cars\*.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Assets\Icons\*.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Brand\*.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -45,6 +54,8 @@
 
   <ItemGroup>
     <Folder Include="Assets\Cars\" />
+    <Folder Include="Assets\Brand\" />
+    <Folder Include="Assets\Icons\" />
     <Folder Include="Resources\" />
   </ItemGroup>
 

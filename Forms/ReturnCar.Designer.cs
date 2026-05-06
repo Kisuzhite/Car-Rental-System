@@ -18,6 +18,7 @@ namespace Car_Rental_System
 
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ReturnCar));
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
@@ -153,12 +154,15 @@ namespace Car_Rental_System
             refreshButton.FlatStyle = FlatStyle.Flat;
             refreshButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             refreshButton.ForeColor = Color.FromArgb(31, 41, 55);
-            refreshButton.Location = new Point(206, 603);
+            refreshButton.Image = (Image)resources.GetObject("refreshButton.Image");
+            refreshButton.Location = new Point(25, 628);
             refreshButton.Margin = new Padding(3, 4, 3, 4);
             refreshButton.Name = "refreshButton";
-            refreshButton.Size = new Size(162, 45);
+            refreshButton.Size = new Size(343, 45);
             refreshButton.TabIndex = 20;
             refreshButton.Text = "Refresh";
+            refreshButton.TextAlign = ContentAlignment.MiddleRight;
+            refreshButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             refreshButton.UseVisualStyleBackColor = false;
             refreshButton.Click += RefreshButton_Click;
             // 
@@ -170,12 +174,15 @@ namespace Car_Rental_System
             processReturnButton.FlatStyle = FlatStyle.Flat;
             processReturnButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             processReturnButton.ForeColor = Color.White;
-            processReturnButton.Location = new Point(25, 603);
+            processReturnButton.Image = (Image)resources.GetObject("processReturnButton.Image");
+            processReturnButton.Location = new Point(25, 575);
             processReturnButton.Margin = new Padding(3, 4, 3, 4);
             processReturnButton.Name = "processReturnButton";
-            processReturnButton.Size = new Size(162, 45);
+            processReturnButton.Size = new Size(343, 45);
             processReturnButton.TabIndex = 19;
             processReturnButton.Text = "Process Return";
+            processReturnButton.TextAlign = ContentAlignment.MiddleRight;
+            processReturnButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             processReturnButton.UseVisualStyleBackColor = false;
             processReturnButton.Click += ProcessReturnButton_Click;
             // 
@@ -408,7 +415,6 @@ namespace Car_Rental_System
             activeRentalsGrid.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
             activeRentalsGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             activeRentalsGrid.BackgroundColor = Color.White;
-            activeRentalsGrid.BorderStyle = BorderStyle.FixedSingle;
             activeRentalsGrid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
             activeRentalsGrid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
             dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;

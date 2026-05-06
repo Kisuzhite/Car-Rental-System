@@ -6,6 +6,7 @@ namespace Car_Rental_System.Helpers
         public const string RentedStatus = "Rented";
         public const string MaintenanceStatus = "Maintenance";
         public const string ActiveRentalStatus = "Active";
+        public const string OverdueRentalStatus = "Overdue";
         public const string ReturnedRentalStatus = "Returned";
 
         public const int MinimumCarYear = 1900;
@@ -17,6 +18,7 @@ namespace Car_Rental_System.Helpers
 
         public const string CurrencyPrefix = "P ";
         public const string NotProvided = "Not provided";
+        public const string OwnerRole = "Owner";
 
         public static readonly string DefaultCarImagePath =
             Path.Combine("Assets", "Cars", "default-car.png");

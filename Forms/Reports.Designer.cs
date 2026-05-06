@@ -18,6 +18,7 @@ namespace Car_Rental_System
 
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Reports));
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
@@ -78,12 +79,15 @@ namespace Car_Rental_System
             refreshButton.FlatStyle = FlatStyle.Flat;
             refreshButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             refreshButton.ForeColor = Color.White;
+            refreshButton.Image = (Image)resources.GetObject("refreshButton.Image");
             refreshButton.Location = new Point(1051, 47);
             refreshButton.Margin = new Padding(3, 4, 3, 4);
             refreshButton.Name = "refreshButton";
             refreshButton.Size = new Size(137, 45);
             refreshButton.TabIndex = 2;
             refreshButton.Text = "Refresh";
+            refreshButton.TextAlign = ContentAlignment.MiddleRight;
+            refreshButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             refreshButton.UseVisualStyleBackColor = false;
             refreshButton.Click += RefreshButton_Click;
             // 
@@ -142,7 +146,6 @@ namespace Car_Rental_System
             reportGrid.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
             reportGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             reportGrid.BackgroundColor = Color.White;
-            reportGrid.BorderStyle = BorderStyle.FixedSingle;
             reportGrid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
             reportGrid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
             dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
@@ -333,9 +336,9 @@ namespace Car_Rental_System
             activeRentalsTextLabel.ForeColor = Color.FromArgb(31, 41, 55);
             activeRentalsTextLabel.Location = new Point(23, 27);
             activeRentalsTextLabel.Name = "activeRentalsTextLabel";
-            activeRentalsTextLabel.Size = new Size(127, 24);
+            activeRentalsTextLabel.Size = new Size(147, 24);
             activeRentalsTextLabel.TabIndex = 0;
-            activeRentalsTextLabel.Text = "Active Rentals";
+            activeRentalsTextLabel.Text = "Active / Overdue";
             // 
             // incomeCard
             // 

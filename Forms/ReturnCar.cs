@@ -1,6 +1,7 @@
 using System.Globalization;
 using Car_Rental_System.Data;
 using Car_Rental_System.Helpers;
+using Car_Rental_System.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Car_Rental_System
@@ -32,11 +33,12 @@ namespace Car_Rental_System
             try
             {
                 using var db = new AppDbContext();
+                DateOnly today = RentalCalculator.ToDateOnly(DateTime.Today);
 
                 var query = db.Rentals
                     .Where(r => r.Status == AppConstants.ActiveRentalStatus)
                     .Include(r => r.Customer)
-                    .Include(r => r.Car)
+                    .Include(r => r.Car).ThenInclude(c => c.CarType)
                     .AsQueryable();
 
                 if (!string.IsNullOrWhiteSpace(search))
@@ -51,6 +53,7 @@ namespace Car_Rental_System
 
                 var rentals = query
                     .OrderBy(r => r.ExpectedReturnDate)
+                    .ToList()
                     .Select(r => new
                     {
                         r.RentalId,
@@ -62,7 +65,9 @@ namespace Car_Rental_System
                         ExpectedReturn = r.ExpectedReturnDate,
                         DailyRate = r.DailyRate,
                         BaseAmount = r.TotalAmount,
-                        r.Status
+                        LateDays = RentalStatusHelper.GetLateDays(r, today),
+                        Penalty = RentalStatusHelper.GetLatePenalty(r, today),
+                        Status = RentalStatusHelper.GetDisplayStatus(r, today)
                     })
                     .ToList();
 
@@ -149,41 +154,27 @@ namespace Car_Rental_System
                 return;
             }
 
-            if (!decimal.TryParse(finalAmountTextBox.Text, NumberStyles.Number, CultureInfo.CurrentCulture, out decimal finalAmount))
-            {
-                MessageBox.Show("Final amount could not be calculated. Please select the rental again.", "Invalid Amount", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
             try
             {
-                using var db = new AppDbContext();
+                var rentalService = new RentalService();
+                RentalOperationResult result = rentalService.ProcessReturn(
+                    selectedRentalId.Value,
+                    actualReturnDatePicker.Value);
 
-                var rental = db.Rentals
-                    .Include(r => r.Car)
-                    .FirstOrDefault(r =>
-                        r.RentalId == selectedRentalId.Value &&
-                        r.Status == AppConstants.ActiveRentalStatus);
-
-                if (rental == null)
+                if (!result.Success)
                 {
                     MessageBox.Show(
-                        "This rental is no longer active.",
-                        "Rental Already Closed",
+                        result.Message,
+                        result.Title,
                         MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
-                    LoadActiveRentals(searchTextBox.Text);
+                        result.Title == "Rental Already Closed" ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
+
+                    if (result.Title == "Rental Already Closed")
+                        LoadActiveRentals(searchTextBox.Text);
                     return;
                 }
 
-                rental.ActualReturnDate = actualReturnDate;
-                rental.TotalAmount = finalAmount;
-                rental.Status = AppConstants.ReturnedRentalStatus;
-                rental.Car.Status = AppConstants.AvailableStatus;
-
-                db.SaveChanges();
-
-                MessageBox.Show("Car returned successfully.", "Return Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(result.Message, result.Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LoadActiveRentals(searchTextBox.Text);
             }
             catch (Exception ex)

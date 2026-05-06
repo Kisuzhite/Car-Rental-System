@@ -13,8 +13,7 @@ namespace Car_Rental_System.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            options.UseSqlServer(
-                @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=CarRentalDB;Integrated Security=True;TrustServerCertificate=True");
+            options.UseSqlServer(AppConfiguration.GetConnectionString());
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -18,6 +18,7 @@ namespace Car_Rental_System
 
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
@@ -33,6 +34,7 @@ namespace Car_Rental_System
             ratesButton = new Button();
             carsButton = new Button();
             dashboardButton = new Button();
+            sidebarLogoPictureBox = new PictureBox();
             appTitleLabel = new Label();
             topPanel = new Panel();
             staffBadgeLabel = new Label();
@@ -78,6 +80,7 @@ namespace Car_Rental_System
             incomeValueLabel = new Label();
             incomeTextLabel = new Label();
             sidebarPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)sidebarLogoPictureBox).BeginInit();
             topPanel.SuspendLayout();
             contentPanel.SuspendLayout();
             recentPanel.SuspendLayout();
@@ -105,6 +108,7 @@ namespace Car_Rental_System
             sidebarPanel.Controls.Add(ratesButton);
             sidebarPanel.Controls.Add(carsButton);
             sidebarPanel.Controls.Add(dashboardButton);
+            sidebarPanel.Controls.Add(sidebarLogoPictureBox);
             sidebarPanel.Controls.Add(appTitleLabel);
             sidebarPanel.Dock = DockStyle.Left;
             sidebarPanel.Location = new Point(0, 0);
@@ -121,15 +125,19 @@ namespace Car_Rental_System
             logoutButton.FlatAppearance.BorderSize = 0;
             logoutButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(245, 158, 11);
             logoutButton.FlatStyle = FlatStyle.Flat;
-            logoutButton.Font = new Font("Segoe UI", 10F);
+            logoutButton.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             logoutButton.ForeColor = Color.FromArgb(31, 41, 55);
+            logoutButton.Image = (Image)resources.GetObject("logoutButton.Image");
+            logoutButton.ImageAlign = ContentAlignment.MiddleLeft;
             logoutButton.Location = new Point(23, 872);
             logoutButton.Margin = new Padding(3, 4, 3, 4);
             logoutButton.Name = "logoutButton";
-            logoutButton.Padding = new Padding(18, 0, 0, 0);
+            logoutButton.Padding = new Padding(16, 0, 0, 0);
             logoutButton.Size = new Size(229, 56);
             logoutButton.TabIndex = 8;
             logoutButton.Text = "Logout";
+            logoutButton.TextAlign = ContentAlignment.MiddleLeft;
+            logoutButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             logoutButton.UseVisualStyleBackColor = false;
             logoutButton.Click += LogoutButton_Click;
             // 
@@ -142,14 +150,17 @@ namespace Car_Rental_System
             reportsButton.FlatStyle = FlatStyle.Flat;
             reportsButton.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             reportsButton.ForeColor = Color.White;
+            reportsButton.Image = (Image)resources.GetObject("reportsButton.Image");
+            reportsButton.ImageAlign = ContentAlignment.MiddleLeft;
             reportsButton.Location = new Point(23, 559);
             reportsButton.Margin = new Padding(3, 4, 3, 4);
             reportsButton.Name = "reportsButton";
-            reportsButton.Padding = new Padding(18, 0, 0, 0);
+            reportsButton.Padding = new Padding(16, 0, 0, 0);
             reportsButton.Size = new Size(229, 56);
             reportsButton.TabIndex = 8;
             reportsButton.Text = "Reports";
             reportsButton.TextAlign = ContentAlignment.MiddleLeft;
+            reportsButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             reportsButton.UseVisualStyleBackColor = false;
             reportsButton.Click += NavigationButton_Click;
             // 
@@ -162,14 +173,17 @@ namespace Car_Rental_System
             returnsButton.FlatStyle = FlatStyle.Flat;
             returnsButton.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             returnsButton.ForeColor = Color.White;
+            returnsButton.Image = (Image)resources.GetObject("returnsButton.Image");
+            returnsButton.ImageAlign = ContentAlignment.MiddleLeft;
             returnsButton.Location = new Point(23, 493);
             returnsButton.Margin = new Padding(3, 4, 3, 4);
             returnsButton.Name = "returnsButton";
-            returnsButton.Padding = new Padding(18, 0, 0, 0);
+            returnsButton.Padding = new Padding(16, 0, 0, 0);
             returnsButton.Size = new Size(229, 56);
             returnsButton.TabIndex = 7;
             returnsButton.Text = "Return Car";
             returnsButton.TextAlign = ContentAlignment.MiddleLeft;
+            returnsButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             returnsButton.UseVisualStyleBackColor = false;
             returnsButton.Click += NavigationButton_Click;
             // 
@@ -182,14 +196,17 @@ namespace Car_Rental_System
             rentalsButton.FlatStyle = FlatStyle.Flat;
             rentalsButton.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             rentalsButton.ForeColor = Color.White;
+            rentalsButton.Image = (Image)resources.GetObject("rentalsButton.Image");
+            rentalsButton.ImageAlign = ContentAlignment.MiddleLeft;
             rentalsButton.Location = new Point(23, 427);
             rentalsButton.Margin = new Padding(3, 4, 3, 4);
             rentalsButton.Name = "rentalsButton";
-            rentalsButton.Padding = new Padding(18, 0, 0, 0);
+            rentalsButton.Padding = new Padding(16, 0, 0, 0);
             rentalsButton.Size = new Size(229, 56);
             rentalsButton.TabIndex = 6;
             rentalsButton.Text = "Rentals";
             rentalsButton.TextAlign = ContentAlignment.MiddleLeft;
+            rentalsButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             rentalsButton.UseVisualStyleBackColor = false;
             rentalsButton.Click += NavigationButton_Click;
             // 
@@ -202,14 +219,17 @@ namespace Car_Rental_System
             customersButton.FlatStyle = FlatStyle.Flat;
             customersButton.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             customersButton.ForeColor = Color.White;
+            customersButton.Image = (Image)resources.GetObject("customersButton.Image");
+            customersButton.ImageAlign = ContentAlignment.MiddleLeft;
             customersButton.Location = new Point(23, 360);
             customersButton.Margin = new Padding(3, 4, 3, 4);
             customersButton.Name = "customersButton";
-            customersButton.Padding = new Padding(18, 0, 0, 0);
+            customersButton.Padding = new Padding(16, 0, 0, 0);
             customersButton.Size = new Size(229, 56);
             customersButton.TabIndex = 5;
             customersButton.Text = "Customers";
             customersButton.TextAlign = ContentAlignment.MiddleLeft;
+            customersButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             customersButton.UseVisualStyleBackColor = false;
             customersButton.Click += NavigationButton_Click;
             // 
@@ -222,14 +242,17 @@ namespace Car_Rental_System
             ratesButton.FlatStyle = FlatStyle.Flat;
             ratesButton.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             ratesButton.ForeColor = Color.White;
+            ratesButton.Image = (Image)resources.GetObject("ratesButton.Image");
+            ratesButton.ImageAlign = ContentAlignment.MiddleLeft;
             ratesButton.Location = new Point(23, 293);
             ratesButton.Margin = new Padding(3, 4, 3, 4);
             ratesButton.Name = "ratesButton";
-            ratesButton.Padding = new Padding(18, 0, 0, 0);
+            ratesButton.Padding = new Padding(16, 0, 0, 0);
             ratesButton.Size = new Size(229, 56);
             ratesButton.TabIndex = 4;
             ratesButton.Text = "Car Rates";
             ratesButton.TextAlign = ContentAlignment.MiddleLeft;
+            ratesButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             ratesButton.UseVisualStyleBackColor = false;
             ratesButton.Click += NavigationButton_Click;
             // 
@@ -242,14 +265,17 @@ namespace Car_Rental_System
             carsButton.FlatStyle = FlatStyle.Flat;
             carsButton.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             carsButton.ForeColor = Color.White;
+            carsButton.Image = (Image)resources.GetObject("carsButton.Image");
+            carsButton.ImageAlign = ContentAlignment.MiddleLeft;
             carsButton.Location = new Point(23, 227);
             carsButton.Margin = new Padding(3, 4, 3, 4);
             carsButton.Name = "carsButton";
-            carsButton.Padding = new Padding(18, 0, 0, 0);
+            carsButton.Padding = new Padding(16, 0, 0, 0);
             carsButton.Size = new Size(229, 56);
             carsButton.TabIndex = 3;
             carsButton.Text = "Cars";
             carsButton.TextAlign = ContentAlignment.MiddleLeft;
+            carsButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             carsButton.UseVisualStyleBackColor = false;
             carsButton.Click += NavigationButton_Click;
             // 
@@ -262,27 +288,40 @@ namespace Car_Rental_System
             dashboardButton.FlatStyle = FlatStyle.Flat;
             dashboardButton.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             dashboardButton.ForeColor = Color.White;
+            dashboardButton.Image = (Image)resources.GetObject("dashboardButton.Image");
             dashboardButton.ImageAlign = ContentAlignment.MiddleLeft;
             dashboardButton.Location = new Point(23, 160);
             dashboardButton.Margin = new Padding(3, 4, 3, 4);
             dashboardButton.Name = "dashboardButton";
-            dashboardButton.Padding = new Padding(18, 0, 0, 0);
+            dashboardButton.Padding = new Padding(16, 0, 0, 0);
             dashboardButton.Size = new Size(229, 56);
             dashboardButton.TabIndex = 2;
             dashboardButton.Text = "Dashboard";
             dashboardButton.TextAlign = ContentAlignment.MiddleLeft;
+            dashboardButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             dashboardButton.UseVisualStyleBackColor = false;
             dashboardButton.Click += NavigationButton_Click;
             // 
+            // sidebarLogoPictureBox
+            // 
+            sidebarLogoPictureBox.Image = (Image)resources.GetObject("sidebarLogoPictureBox.Image");
+            sidebarLogoPictureBox.Location = new Point(23, 20);
+            sidebarLogoPictureBox.Name = "sidebarLogoPictureBox";
+            sidebarLogoPictureBox.Size = new Size(229, 96);
+            sidebarLogoPictureBox.SizeMode = PictureBoxSizeMode.Zoom;
+            sidebarLogoPictureBox.TabIndex = 9;
+            sidebarLogoPictureBox.TabStop = false;
+            // 
             // appTitleLabel
             // 
-            appTitleLabel.Font = new Font("Inter", 16.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            appTitleLabel.ForeColor = Color.White;
-            appTitleLabel.Location = new Point(23, 27);
+            appTitleLabel.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            appTitleLabel.ForeColor = Color.FromArgb(245, 158, 11);
+            appTitleLabel.Location = new Point(23, 122);
             appTitleLabel.Name = "appTitleLabel";
-            appTitleLabel.Size = new Size(195, 92);
+            appTitleLabel.Size = new Size(229, 28);
             appTitleLabel.TabIndex = 0;
-            appTitleLabel.Text = "Auto Avenue Car Rental";
+            appTitleLabel.Text = "Owner Portal";
+            appTitleLabel.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // topPanel
             // 
@@ -464,12 +503,15 @@ namespace Car_Rental_System
             clearButton.FlatStyle = FlatStyle.Flat;
             clearButton.Font = new Font("Inter Medium", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             clearButton.ForeColor = Color.FromArgb(31, 41, 55);
+            clearButton.Image = (Image)resources.GetObject("clearButton.Image");
             clearButton.Location = new Point(224, 344);
             clearButton.Margin = new Padding(3, 4, 3, 4);
             clearButton.Name = "clearButton";
             clearButton.Size = new Size(96, 37);
             clearButton.TabIndex = 14;
             clearButton.Text = "Clear";
+            clearButton.TextAlign = ContentAlignment.MiddleRight;
+            clearButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             clearButton.UseVisualStyleBackColor = false;
             clearButton.Click += ClearButton_Click;
             // 
@@ -481,12 +523,15 @@ namespace Car_Rental_System
             createRentalButton.FlatStyle = FlatStyle.Flat;
             createRentalButton.Font = new Font("Inter Medium", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             createRentalButton.ForeColor = Color.White;
+            createRentalButton.Image = (Image)resources.GetObject("createRentalButton.Image");
             createRentalButton.Location = new Point(23, 344);
             createRentalButton.Margin = new Padding(3, 4, 3, 4);
             createRentalButton.Name = "createRentalButton";
             createRentalButton.Size = new Size(192, 37);
             createRentalButton.TabIndex = 13;
             createRentalButton.Text = "Create Rental";
+            createRentalButton.TextAlign = ContentAlignment.MiddleRight;
+            createRentalButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             createRentalButton.UseVisualStyleBackColor = false;
             createRentalButton.Click += CreateRentalButton_Click;
             // 
@@ -835,7 +880,7 @@ namespace Car_Rental_System
             // 
             rentedCarsValueLabel.AutoSize = true;
             rentedCarsValueLabel.Font = new Font("Inter SemiBold", 22.2F, FontStyle.Bold);
-            rentedCarsValueLabel.ForeColor = Color.FromArgb(245, 158, 11);
+            rentedCarsValueLabel.ForeColor = Color.FromArgb(220, 38, 38);
             rentedCarsValueLabel.Location = new Point(18, 56);
             rentedCarsValueLabel.Name = "rentedCarsValueLabel";
             rentedCarsValueLabel.Size = new Size(47, 53);
@@ -849,9 +894,9 @@ namespace Car_Rental_System
             rentedCarsTextLabel.ForeColor = Color.FromArgb(31, 41, 55);
             rentedCarsTextLabel.Location = new Point(21, 24);
             rentedCarsTextLabel.Name = "rentedCarsTextLabel";
-            rentedCarsTextLabel.Size = new Size(109, 24);
+            rentedCarsTextLabel.Size = new Size(144, 24);
             rentedCarsTextLabel.TabIndex = 0;
-            rentedCarsTextLabel.Text = "Rented Cars";
+            rentedCarsTextLabel.Text = "Overdue Rentals";
             // 
             // incomeCard
             // 
@@ -905,6 +950,7 @@ namespace Car_Rental_System
             Text = "Auto Avenue Car Rental";
             Load += MainForm_Load;
             sidebarPanel.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)sidebarLogoPictureBox).EndInit();
             topPanel.ResumeLayout(false);
             topPanel.PerformLayout();
             contentPanel.ResumeLayout(false);
@@ -941,6 +987,7 @@ namespace Car_Rental_System
         private Button ratesButton;
         private Button carsButton;
         private Button dashboardButton;
+        private PictureBox sidebarLogoPictureBox;
         private Label appTitleLabel;
         private Panel topPanel;
         private Label staffBadgeLabel;

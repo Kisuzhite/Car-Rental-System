@@ -18,6 +18,7 @@ namespace Car_Rental_System
 
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Rentals));
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
@@ -140,12 +141,15 @@ namespace Car_Rental_System
             clearButton.FlatStyle = FlatStyle.Flat;
             clearButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             clearButton.ForeColor = Color.FromArgb(31, 41, 55);
+            clearButton.Image = (Image)resources.GetObject("clearButton.Image");
             clearButton.Location = new Point(25, 457);
             clearButton.Margin = new Padding(3, 4, 3, 4);
             clearButton.Name = "clearButton";
             clearButton.Size = new Size(343, 45);
             clearButton.TabIndex = 17;
             clearButton.Text = "Clear";
+            clearButton.TextAlign = ContentAlignment.MiddleRight;
+            clearButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             clearButton.UseVisualStyleBackColor = false;
             clearButton.Click += ClearButton_Click;
             // 
@@ -157,12 +161,15 @@ namespace Car_Rental_System
             createButton.FlatStyle = FlatStyle.Flat;
             createButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             createButton.ForeColor = Color.White;
+            createButton.Image = (Image)resources.GetObject("createButton.Image");
             createButton.Location = new Point(23, 392);
             createButton.Margin = new Padding(3, 4, 3, 4);
             createButton.Name = "createButton";
             createButton.Size = new Size(342, 45);
             createButton.TabIndex = 15;
             createButton.Text = "Create Rental";
+            createButton.TextAlign = ContentAlignment.MiddleRight;
+            createButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             createButton.UseVisualStyleBackColor = false;
             createButton.Click += CreateButton_Click;
             // 
@@ -333,7 +340,6 @@ namespace Car_Rental_System
             rentalsGrid.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
             rentalsGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             rentalsGrid.BackgroundColor = Color.White;
-            rentalsGrid.BorderStyle = BorderStyle.FixedSingle;
             rentalsGrid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
             rentalsGrid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
             dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;

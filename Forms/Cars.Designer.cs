@@ -18,6 +18,7 @@ namespace Car_Rental_System
 
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Cars));
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
@@ -162,12 +163,15 @@ namespace Car_Rental_System
             clearButton.FlatStyle = FlatStyle.Flat;
             clearButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             clearButton.ForeColor = Color.FromArgb(31, 41, 55);
+            clearButton.Image = (Image)resources.GetObject("clearButton.Image");
             clearButton.Location = new Point(213, 672);
             clearButton.Margin = new Padding(3, 4, 3, 4);
             clearButton.Name = "clearButton";
             clearButton.Size = new Size(158, 48);
             clearButton.TabIndex = 22;
             clearButton.Text = "Clear";
+            clearButton.TextAlign = ContentAlignment.MiddleRight;
+            clearButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             clearButton.UseVisualStyleBackColor = false;
             clearButton.Click += ClearButton_Click;
             // 
@@ -179,12 +183,15 @@ namespace Car_Rental_System
             deleteButton.FlatStyle = FlatStyle.Flat;
             deleteButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             deleteButton.ForeColor = Color.White;
+            deleteButton.Image = (Image)resources.GetObject("deleteButton.Image");
             deleteButton.Location = new Point(27, 672);
             deleteButton.Margin = new Padding(3, 4, 3, 4);
             deleteButton.Name = "deleteButton";
             deleteButton.Size = new Size(158, 48);
             deleteButton.TabIndex = 21;
             deleteButton.Text = "Delete";
+            deleteButton.TextAlign = ContentAlignment.MiddleRight;
+            deleteButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             deleteButton.UseVisualStyleBackColor = false;
             deleteButton.Click += DeleteButton_Click;
             // 
@@ -196,12 +203,15 @@ namespace Car_Rental_System
             updateButton.FlatStyle = FlatStyle.Flat;
             updateButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             updateButton.ForeColor = Color.White;
+            updateButton.Image = (Image)resources.GetObject("updateButton.Image");
             updateButton.Location = new Point(213, 608);
             updateButton.Margin = new Padding(3, 4, 3, 4);
             updateButton.Name = "updateButton";
             updateButton.Size = new Size(158, 48);
             updateButton.TabIndex = 20;
             updateButton.Text = "Update";
+            updateButton.TextAlign = ContentAlignment.MiddleRight;
+            updateButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             updateButton.UseVisualStyleBackColor = false;
             updateButton.Click += UpdateButton_Click;
             // 
@@ -213,12 +223,15 @@ namespace Car_Rental_System
             addButton.FlatStyle = FlatStyle.Flat;
             addButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             addButton.ForeColor = Color.White;
+            addButton.Image = (Image)resources.GetObject("addButton.Image");
             addButton.Location = new Point(27, 608);
             addButton.Margin = new Padding(3, 4, 3, 4);
             addButton.Name = "addButton";
             addButton.Size = new Size(158, 48);
             addButton.TabIndex = 19;
             addButton.Text = "Add Car";
+            addButton.TextAlign = ContentAlignment.MiddleRight;
+            addButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             addButton.UseVisualStyleBackColor = false;
             addButton.Click += AddButton_Click;
             // 
@@ -230,12 +243,15 @@ namespace Car_Rental_System
             browseImageButton.FlatStyle = FlatStyle.Flat;
             browseImageButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             browseImageButton.ForeColor = Color.White;
+            browseImageButton.Image = (Image)resources.GetObject("browseImageButton.Image");
             browseImageButton.Location = new Point(27, 556);
             browseImageButton.Margin = new Padding(3, 4, 3, 4);
             browseImageButton.Name = "browseImageButton";
             browseImageButton.Size = new Size(343, 45);
             browseImageButton.TabIndex = 18;
             browseImageButton.Text = "Browse Photo";
+            browseImageButton.TextAlign = ContentAlignment.MiddleRight;
+            browseImageButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             browseImageButton.UseVisualStyleBackColor = false;
             browseImageButton.Click += BrowseImageButton_Click;
             // 
@@ -338,7 +354,7 @@ namespace Car_Rental_System
             carTypeLabel.ForeColor = Color.FromArgb(31, 41, 55);
             carTypeLabel.Location = new Point(27, 232);
             carTypeLabel.Name = "carTypeLabel";
-            carTypeLabel.Size = new Size(71, 22);
+            carTypeLabel.Size = new Size(70, 22);
             carTypeLabel.TabIndex = 24;
             carTypeLabel.Text = "Car type";
             // 
@@ -483,7 +499,6 @@ namespace Car_Rental_System
             carsGrid.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
             carsGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             carsGrid.BackgroundColor = Color.White;
-            carsGrid.BorderStyle = BorderStyle.FixedSingle;
             carsGrid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
             carsGrid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
             dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;

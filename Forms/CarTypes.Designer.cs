@@ -18,6 +18,7 @@ namespace Car_Rental_System
 
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CarTypes));
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
@@ -70,7 +71,7 @@ namespace Car_Rental_System
             helperLabel.ForeColor = Color.FromArgb(31, 41, 55);
             helperLabel.Location = new Point(35, 85);
             helperLabel.Name = "helperLabel";
-            helperLabel.Size = new Size(471, 24);
+            helperLabel.Size = new Size(445, 24);
             helperLabel.TabIndex = 1;
             helperLabel.Text = "Manage vehicle categories and adjustable daily rates.";
             // 
@@ -136,7 +137,7 @@ namespace Car_Rental_System
             isActiveCheckBox.Location = new Point(25, 389);
             isActiveCheckBox.Margin = new Padding(3, 4, 3, 4);
             isActiveCheckBox.Name = "isActiveCheckBox";
-            isActiveCheckBox.Size = new Size(145, 28);
+            isActiveCheckBox.Size = new Size(171, 28);
             isActiveCheckBox.TabIndex = 8;
             isActiveCheckBox.Text = "Active for rentals";
             isActiveCheckBox.UseVisualStyleBackColor = true;
@@ -149,12 +150,15 @@ namespace Car_Rental_System
             clearButton.FlatStyle = FlatStyle.Flat;
             clearButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             clearButton.ForeColor = Color.FromArgb(31, 41, 55);
+            clearButton.Image = (Image)resources.GetObject("clearButton.Image");
             clearButton.Location = new Point(194, 544);
             clearButton.Margin = new Padding(3, 4, 3, 4);
             clearButton.Name = "clearButton";
             clearButton.Size = new Size(151, 45);
             clearButton.TabIndex = 12;
             clearButton.Text = "Clear";
+            clearButton.TextAlign = ContentAlignment.MiddleRight;
+            clearButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             clearButton.UseVisualStyleBackColor = false;
             clearButton.Click += ClearButton_Click;
             // 
@@ -166,12 +170,15 @@ namespace Car_Rental_System
             deleteButton.FlatStyle = FlatStyle.Flat;
             deleteButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             deleteButton.ForeColor = Color.White;
+            deleteButton.Image = (Image)resources.GetObject("deleteButton.Image");
             deleteButton.Location = new Point(25, 544);
             deleteButton.Margin = new Padding(3, 4, 3, 4);
             deleteButton.Name = "deleteButton";
             deleteButton.Size = new Size(151, 45);
             deleteButton.TabIndex = 11;
             deleteButton.Text = "Delete";
+            deleteButton.TextAlign = ContentAlignment.MiddleRight;
+            deleteButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             deleteButton.UseVisualStyleBackColor = false;
             deleteButton.Click += DeleteButton_Click;
             // 
@@ -183,12 +190,15 @@ namespace Car_Rental_System
             updateButton.FlatStyle = FlatStyle.Flat;
             updateButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             updateButton.ForeColor = Color.White;
+            updateButton.Image = (Image)resources.GetObject("updateButton.Image");
             updateButton.Location = new Point(194, 483);
             updateButton.Margin = new Padding(3, 4, 3, 4);
             updateButton.Name = "updateButton";
             updateButton.Size = new Size(151, 45);
             updateButton.TabIndex = 10;
             updateButton.Text = "Update";
+            updateButton.TextAlign = ContentAlignment.MiddleRight;
+            updateButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             updateButton.UseVisualStyleBackColor = false;
             updateButton.Click += UpdateButton_Click;
             // 
@@ -200,12 +210,15 @@ namespace Car_Rental_System
             addButton.FlatStyle = FlatStyle.Flat;
             addButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             addButton.ForeColor = Color.White;
+            addButton.Image = (Image)resources.GetObject("addButton.Image");
             addButton.Location = new Point(25, 483);
             addButton.Margin = new Padding(3, 4, 3, 4);
             addButton.Name = "addButton";
             addButton.Size = new Size(151, 45);
             addButton.TabIndex = 9;
             addButton.Text = "Add Type";
+            addButton.TextAlign = ContentAlignment.MiddleRight;
+            addButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             addButton.UseVisualStyleBackColor = false;
             addButton.Click += AddButton_Click;
             // 
@@ -272,7 +285,7 @@ namespace Car_Rental_System
             typeNameLabel.ForeColor = Color.FromArgb(31, 41, 55);
             typeNameLabel.Location = new Point(25, 83);
             typeNameLabel.Name = "typeNameLabel";
-            typeNameLabel.Size = new Size(89, 22);
+            typeNameLabel.Size = new Size(90, 22);
             typeNameLabel.TabIndex = 1;
             typeNameLabel.Text = "Type Name";
             // 
@@ -283,7 +296,7 @@ namespace Car_Rental_System
             sectionLabel.ForeColor = Color.FromArgb(31, 41, 55);
             sectionLabel.Location = new Point(23, 24);
             sectionLabel.Name = "sectionLabel";
-            sectionLabel.Size = new Size(143, 32);
+            sectionLabel.Size = new Size(147, 32);
             sectionLabel.TabIndex = 0;
             sectionLabel.Text = "Rate Details";
             // 
@@ -307,7 +320,6 @@ namespace Car_Rental_System
             carTypesGrid.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
             carTypesGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             carTypesGrid.BackgroundColor = Color.White;
-            carTypesGrid.BorderStyle = BorderStyle.FixedSingle;
             carTypesGrid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
             carTypesGrid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
             dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
@@ -374,7 +386,7 @@ namespace Car_Rental_System
             recordsLabel.ForeColor = Color.FromArgb(31, 41, 55);
             recordsLabel.Location = new Point(0, 21);
             recordsLabel.Name = "recordsLabel";
-            recordsLabel.Size = new Size(169, 32);
+            recordsLabel.Size = new Size(162, 32);
             recordsLabel.TabIndex = 0;
             recordsLabel.Text = "Rate Records";
             // 

@@ -117,4 +117,11 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="refreshButton.Image" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Icons\action-refresh-flaticon-dark.png;System.Drawing.Bitmap, System.Drawing.Common</value>
+  </data>
+  <data name="processReturnButton.Image" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Assets\Icons\action-process-return-flaticon-white.png;System.Drawing.Bitmap, System.Drawing.Common</value>
+  </data>
 </root>
