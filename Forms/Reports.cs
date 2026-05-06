@@ -1,3 +1,5 @@
+using Car_Rental_System.Data;
+using Car_Rental_System.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Car_Rental_System

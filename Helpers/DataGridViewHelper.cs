@@ -1,4 +1,4 @@
-namespace Car_Rental_System
+namespace Car_Rental_System.Helpers
 {
     internal static class DataGridViewHelper
     {

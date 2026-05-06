@@ -59,35 +59,5 @@ namespace Car_Rental_System.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap _497469315_1279703600822755_330310290224678067_n {
-            get {
-                object obj = ResourceManager.GetObject("497469315_1279703600822755_330310290224678067_n", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap _497469315_1279703600822755_330310290224678067_n1 {
-            get {
-                object obj = ResourceManager.GetObject("497469315_1279703600822755_330310290224678067_n1", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap dashboard {
-            get {
-                object obj = ResourceManager.GetObject("dashboard", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
     }
 }

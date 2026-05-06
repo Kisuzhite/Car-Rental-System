@@ -1,4 +1,6 @@
-﻿using Car_Rental_System.Models;
+﻿using Car_Rental_System.Data;
+using Car_Rental_System.Helpers;
+using Car_Rental_System.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Car_Rental_System
@@ -123,7 +125,7 @@ namespace Car_Rental_System
                 .Take(10)
                 .Select(r => new
                 {
-                    RentalId = r.RentalId,
+                    RentalID = r.RentalId,
                     Customer = r.Customer.FullName,
                     Car = r.Car.PlateNumber + " - " + r.Car.Brand + " " + r.Car.Model,
                     ReturnDate = r.ExpectedReturnDate,
@@ -492,11 +494,6 @@ namespace Car_Rental_System
             if (result != DialogResult.Yes) return;
 
             Close();
-        }
-
-        private void pictureBox1_Click(object sender, EventArgs e)
-        {
-
         }
     }
 

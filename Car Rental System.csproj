@@ -43,4 +43,9 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Assets\Cars\" />
+    <Folder Include="Resources\" />
+  </ItemGroup>
+
 </Project>
