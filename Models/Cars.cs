@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Car_Rental_System.Models
 {
@@ -13,8 +11,14 @@ namespace Car_Rental_System.Models
         public int Year { get; set; }
         public string Color { get; set; } = "";
         public decimal DailyRate { get; set; }
+        public int? CarTypeId { get; set; }
         public string Status { get; set; } = "";
         public string? ImagePath { get; set; }
+
+        public CarType? CarType { get; set; }
+
+        [NotMapped]
+        public string CarTypeName => CarType?.TypeName ?? "";
 
         public ICollection<Rental> Rentals { get; set; } = [];
     }

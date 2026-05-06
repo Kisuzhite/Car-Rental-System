@@ -45,7 +45,8 @@ namespace Car_Rental_System
                         r.Customer.FullName.Contains(search) ||
                         r.Car.PlateNumber.Contains(search) ||
                         r.Car.Brand.Contains(search) ||
-                        r.Car.Model.Contains(search));
+                        r.Car.Model.Contains(search) ||
+                        (r.Car.CarType != null && r.Car.CarType.TypeName.Contains(search)));
                 }
 
                 var rentals = query
@@ -55,7 +56,8 @@ namespace Car_Rental_System
                         r.RentalId,
                         r.CarId,
                         Customer = r.Customer.FullName,
-                        Car = r.Car.PlateNumber + " - " + r.Car.Brand + " " + r.Car.Model,
+                        Car = r.Car.PlateNumber + " - " + r.Car.Brand + " " + r.Car.Model +
+                            (r.Car.CarType != null ? " (" + r.Car.CarType.TypeName + ")" : ""),
                         RentalDate = r.RentalDate,
                         ExpectedReturn = r.ExpectedReturnDate,
                         DailyRate = r.DailyRate,
@@ -67,6 +69,7 @@ namespace Car_Rental_System
                 activeRentalsGrid.Columns.Clear();
                 activeRentalsGrid.DataSource = rentals;
 
+                DataGridViewHelper.ApplyFriendlyHeaders(activeRentalsGrid);
                 DataGridViewHelper.HideColumn(activeRentalsGrid, "RentalId");
                 DataGridViewHelper.HideColumn(activeRentalsGrid, "CarId");
                 DataGridViewHelper.ApplyStatusFormatting(activeRentalsGrid);

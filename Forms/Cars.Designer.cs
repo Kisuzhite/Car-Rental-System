@@ -38,6 +38,8 @@ namespace Car_Rental_System
             statusLabel = new Label();
             dailyRateTextBox = new TextBox();
             dailyRateLabel = new Label();
+            carTypeComboBox = new ComboBox();
+            carTypeLabel = new Label();
             colorTextBox = new TextBox();
             colorLabel = new Label();
             yearTextBox = new TextBox();
@@ -132,6 +134,8 @@ namespace Car_Rental_System
             detailsPanel.Controls.Add(statusLabel);
             detailsPanel.Controls.Add(dailyRateTextBox);
             detailsPanel.Controls.Add(dailyRateLabel);
+            detailsPanel.Controls.Add(carTypeComboBox);
+            detailsPanel.Controls.Add(carTypeLabel);
             detailsPanel.Controls.Add(colorTextBox);
             detailsPanel.Controls.Add(colorLabel);
             detailsPanel.Controls.Add(yearTextBox);
@@ -226,7 +230,7 @@ namespace Car_Rental_System
             browseImageButton.FlatStyle = FlatStyle.Flat;
             browseImageButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             browseImageButton.ForeColor = Color.White;
-            browseImageButton.Location = new Point(27, 539);
+            browseImageButton.Location = new Point(27, 556);
             browseImageButton.Margin = new Padding(3, 4, 3, 4);
             browseImageButton.Name = "browseImageButton";
             browseImageButton.Size = new Size(343, 45);
@@ -239,7 +243,7 @@ namespace Car_Rental_System
             // 
             imagePathTextBox.BorderStyle = BorderStyle.FixedSingle;
             imagePathTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            imagePathTextBox.Location = new Point(27, 499);
+            imagePathTextBox.Location = new Point(27, 516);
             imagePathTextBox.Margin = new Padding(3, 4, 3, 4);
             imagePathTextBox.Name = "imagePathTextBox";
             imagePathTextBox.ReadOnly = true;
@@ -251,7 +255,7 @@ namespace Car_Rental_System
             imagePathLabel.AutoSize = true;
             imagePathLabel.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
             imagePathLabel.ForeColor = Color.FromArgb(31, 41, 55);
-            imagePathLabel.Location = new Point(27, 472);
+            imagePathLabel.Location = new Point(27, 489);
             imagePathLabel.Name = "imagePathLabel";
             imagePathLabel.Size = new Size(88, 22);
             imagePathLabel.TabIndex = 16;
@@ -261,10 +265,10 @@ namespace Car_Rental_System
             // 
             carImagePictureBox.BackColor = Color.White;
             carImagePictureBox.BorderStyle = BorderStyle.FixedSingle;
-            carImagePictureBox.Location = new Point(27, 312);
+            carImagePictureBox.Location = new Point(27, 386);
             carImagePictureBox.Margin = new Padding(3, 4, 3, 4);
             carImagePictureBox.Name = "carImagePictureBox";
-            carImagePictureBox.Size = new Size(343, 143);
+            carImagePictureBox.Size = new Size(343, 87);
             carImagePictureBox.SizeMode = PictureBoxSizeMode.Zoom;
             carImagePictureBox.TabIndex = 15;
             carImagePictureBox.TabStop = false;
@@ -275,10 +279,10 @@ namespace Car_Rental_System
             statusComboBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
             statusComboBox.FormattingEnabled = true;
             statusComboBox.Items.AddRange(new object[] { "Available", "Rented", "Maintenance" });
-            statusComboBox.Location = new Point(213, 259);
+            statusComboBox.Location = new Point(27, 333);
             statusComboBox.Margin = new Padding(3, 4, 3, 4);
             statusComboBox.Name = "statusComboBox";
-            statusComboBox.Size = new Size(157, 32);
+            statusComboBox.Size = new Size(343, 32);
             statusComboBox.TabIndex = 14;
             // 
             // statusLabel
@@ -286,7 +290,7 @@ namespace Car_Rental_System
             statusLabel.AutoSize = true;
             statusLabel.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
             statusLabel.ForeColor = Color.FromArgb(31, 41, 55);
-            statusLabel.Location = new Point(213, 232);
+            statusLabel.Location = new Point(27, 306);
             statusLabel.Name = "statusLabel";
             statusLabel.Size = new Size(55, 22);
             statusLabel.TabIndex = 13;
@@ -296,10 +300,11 @@ namespace Car_Rental_System
             // 
             dailyRateTextBox.BorderStyle = BorderStyle.FixedSingle;
             dailyRateTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            dailyRateTextBox.Location = new Point(27, 259);
+            dailyRateTextBox.Location = new Point(213, 259);
             dailyRateTextBox.Margin = new Padding(3, 4, 3, 4);
             dailyRateTextBox.Name = "dailyRateTextBox";
             dailyRateTextBox.PlaceholderText = "2500";
+            dailyRateTextBox.ReadOnly = true;
             dailyRateTextBox.Size = new Size(157, 28);
             dailyRateTextBox.TabIndex = 12;
             // 
@@ -308,11 +313,34 @@ namespace Car_Rental_System
             dailyRateLabel.AutoSize = true;
             dailyRateLabel.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
             dailyRateLabel.ForeColor = Color.FromArgb(31, 41, 55);
-            dailyRateLabel.Location = new Point(27, 232);
+            dailyRateLabel.Location = new Point(213, 232);
             dailyRateLabel.Name = "dailyRateLabel";
             dailyRateLabel.Size = new Size(77, 22);
             dailyRateLabel.TabIndex = 11;
             dailyRateLabel.Text = "Daily rate";
+            // 
+            // carTypeComboBox
+            // 
+            carTypeComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            carTypeComboBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            carTypeComboBox.FormattingEnabled = true;
+            carTypeComboBox.Location = new Point(27, 259);
+            carTypeComboBox.Margin = new Padding(3, 4, 3, 4);
+            carTypeComboBox.Name = "carTypeComboBox";
+            carTypeComboBox.Size = new Size(157, 32);
+            carTypeComboBox.TabIndex = 23;
+            carTypeComboBox.SelectedIndexChanged += CarTypeComboBox_SelectedIndexChanged;
+            // 
+            // carTypeLabel
+            // 
+            carTypeLabel.AutoSize = true;
+            carTypeLabel.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            carTypeLabel.ForeColor = Color.FromArgb(31, 41, 55);
+            carTypeLabel.Location = new Point(27, 232);
+            carTypeLabel.Name = "carTypeLabel";
+            carTypeLabel.Size = new Size(71, 22);
+            carTypeLabel.TabIndex = 24;
+            carTypeLabel.Text = "Car type";
             // 
             // colorTextBox
             // 
@@ -574,6 +602,8 @@ namespace Car_Rental_System
         private Label statusLabel;
         private TextBox dailyRateTextBox;
         private Label dailyRateLabel;
+        private ComboBox carTypeComboBox;
+        private Label carTypeLabel;
         private TextBox colorTextBox;
         private Label colorLabel;
         private TextBox yearTextBox;

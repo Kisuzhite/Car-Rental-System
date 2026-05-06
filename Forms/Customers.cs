@@ -25,7 +25,9 @@ namespace Car_Rental_System
             {
                 using var db = new AppDbContext();
 
-                var query = db.Customers.AsQueryable();
+                var query = db.Customers
+                    .Where(c => !c.IsArchived)
+                    .AsQueryable();
 
                 if (!string.IsNullOrWhiteSpace(search))
                 {
@@ -50,6 +52,7 @@ namespace Car_Rental_System
                 customersGrid.Columns.Clear();
                 customersGrid.DataSource = customers;
 
+                DataGridViewHelper.ApplyFriendlyHeaders(customersGrid);
                 DataGridViewHelper.HideColumn(customersGrid, "CustomerId");
                 BeginInvoke(new Action(ClearForm));
             }
@@ -67,12 +70,20 @@ namespace Car_Rental_System
             {
                 using var db = new AppDbContext();
 
+                string licenseNumber = ValidationHelper.NormalizeLicenseNumber(licenseTextBox.Text);
+
+                if (IsDuplicateLicenseNumber(db, licenseNumber))
+                {
+                    ShowDuplicateLicenseMessage(licenseNumber);
+                    return;
+                }
+
                 var customer = new Customer
                 {
-                    FullName = nameTextBox.Text.Trim(),
-                    ContactNumber = contactTextBox.Text.Trim(),
-                    LicenseNumber = licenseTextBox.Text.Trim(),
-                    Address = addressTextBox.Text.Trim()
+                    FullName = ValidationHelper.CollapseSpaces(nameTextBox.Text),
+                    ContactNumber = ValidationHelper.CollapseSpaces(contactTextBox.Text),
+                    LicenseNumber = licenseNumber,
+                    Address = ValidationHelper.CollapseSpaces(addressTextBox.Text)
                 };
 
                 db.Customers.Add(customer);
@@ -105,10 +116,18 @@ namespace Car_Rental_System
                 var customer = db.Customers.Find(selectedCustomerId.Value);
                 if (customer == null) return;
 
-                customer.FullName = nameTextBox.Text.Trim();
-                customer.ContactNumber = contactTextBox.Text.Trim();
-                customer.LicenseNumber = licenseTextBox.Text.Trim();
-                customer.Address = addressTextBox.Text.Trim();
+                string licenseNumber = ValidationHelper.NormalizeLicenseNumber(licenseTextBox.Text);
+
+                if (IsDuplicateLicenseNumber(db, licenseNumber, selectedCustomerId.Value))
+                {
+                    ShowDuplicateLicenseMessage(licenseNumber);
+                    return;
+                }
+
+                customer.FullName = ValidationHelper.CollapseSpaces(nameTextBox.Text);
+                customer.ContactNumber = ValidationHelper.CollapseSpaces(contactTextBox.Text);
+                customer.LicenseNumber = licenseNumber;
+                customer.Address = ValidationHelper.CollapseSpaces(addressTextBox.Text);
 
                 db.SaveChanges();
 
@@ -130,20 +149,22 @@ namespace Car_Rental_System
                 return;
             }
 
-            DialogResult result = MessageBox.Show(
-                "Are you sure you want to permanently delete this customer and their returned rental history?",
-                "Confirm Delete",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Warning);
-
-            if (result != DialogResult.Yes) return;
-
             try
             {
                 using var db = new AppDbContext();
 
-                bool hasActiveRentals = db.Rentals.Any(r =>
-                    r.CustomerId == selectedCustomerId.Value &&
+                var customer = db.Customers
+                    .Include(c => c.Rentals)
+                    .FirstOrDefault(c => c.CustomerId == selectedCustomerId.Value);
+
+                if (customer == null)
+                {
+                    MessageBox.Show("Customer not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    LoadCustomers(searchTextBox.Text);
+                    return;
+                }
+
+                bool hasActiveRentals = customer.Rentals.Any(r =>
                     r.Status == AppConstants.ActiveRentalStatus);
 
                 if (hasActiveRentals)
@@ -156,16 +177,38 @@ namespace Car_Rental_System
                     return;
                 }
 
-                var rentals = db.Rentals.Where(r => r.CustomerId == selectedCustomerId.Value).ToList();
-                db.Rentals.RemoveRange(rentals);
+                bool hasRentalHistory = customer.Rentals.Any();
 
-                var customer = db.Customers.Find(selectedCustomerId.Value);
-                if (customer != null)
+                string confirmMessage = hasRentalHistory
+                    ? "This customer has rental history. Archive the customer instead of deleting their records?"
+                    : "Are you sure you want to delete this customer?";
+
+                DialogResult result = MessageBox.Show(
+                    confirmMessage,
+                    hasRentalHistory ? "Confirm Archive" : "Confirm Delete",
+                    MessageBoxButtons.YesNo,
+                    hasRentalHistory ? MessageBoxIcon.Information : MessageBoxIcon.Question);
+
+                if (result != DialogResult.Yes) return;
+
+                if (hasRentalHistory)
+                {
+                    customer.IsArchived = true;
+                }
+                else
+                {
                     db.Customers.Remove(customer);
+                }
 
                 db.SaveChanges();
 
-                MessageBox.Show("Customer deleted successfully.", "Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(
+                    hasRentalHistory
+                        ? "Customer archived successfully. Rental history was preserved."
+                        : "Customer deleted successfully.",
+                    hasRentalHistory ? "Archived" : "Deleted",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
                 ClearForm();
                 LoadCustomers(searchTextBox.Text);
             }
@@ -203,16 +246,68 @@ namespace Car_Rental_System
 
         private bool ValidateInputs()
         {
-            if (string.IsNullOrWhiteSpace(nameTextBox.Text) ||
-                string.IsNullOrWhiteSpace(contactTextBox.Text) ||
-                string.IsNullOrWhiteSpace(licenseTextBox.Text) ||
-                string.IsNullOrWhiteSpace(addressTextBox.Text))
+            string fullName = ValidationHelper.CollapseSpaces(nameTextBox.Text);
+            string contactNumber = ValidationHelper.CollapseSpaces(contactTextBox.Text);
+            string licenseNumber = ValidationHelper.NormalizeLicenseNumber(licenseTextBox.Text);
+            string address = ValidationHelper.CollapseSpaces(addressTextBox.Text);
+
+            if (string.IsNullOrWhiteSpace(fullName) ||
+                string.IsNullOrWhiteSpace(contactNumber) ||
+                string.IsNullOrWhiteSpace(licenseNumber) ||
+                string.IsNullOrWhiteSpace(address))
             {
                 MessageBox.Show("Please complete all customer details.", "Missing Details", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
 
+            if (!ValidationHelper.IsValidPersonName(fullName))
+            {
+                MessageBox.Show("Customer name must be 2-100 characters and contain only letters, spaces, apostrophes, periods, or hyphens.", "Invalid Name", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (!ValidationHelper.IsValidContactNumber(contactNumber))
+            {
+                MessageBox.Show("Contact number must contain 7-15 digits and may only include spaces, +, -, parentheses, or periods.", "Invalid Contact Number", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (!ValidationHelper.IsValidLicenseNumber(licenseNumber))
+            {
+                MessageBox.Show("License number must be 3-50 letters/numbers and may only include spaces or hyphens.", "Invalid License Number", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (address.Length < 5 || address.Length > 200)
+            {
+                MessageBox.Show("Address must be between 5 and 200 characters.", "Invalid Address", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
             return true;
+        }
+
+        private static bool IsDuplicateLicenseNumber(AppDbContext db, string licenseNumber, int? excludedCustomerId = null)
+        {
+            licenseNumber = ValidationHelper.NormalizeLicenseNumber(licenseNumber);
+
+            if (string.Equals(licenseNumber, AppConstants.NotProvided, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            return db.Customers.Any(c =>
+                c.LicenseNumber == licenseNumber &&
+                (!excludedCustomerId.HasValue || c.CustomerId != excludedCustomerId.Value));
+        }
+
+        private static void ShowDuplicateLicenseMessage(string licenseNumber)
+        {
+            MessageBox.Show(
+                $"A customer with license number '{licenseNumber}' already exists.",
+                "Duplicate License Number",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
         }
 
         private void ClearForm()

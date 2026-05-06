@@ -12,52 +12,15 @@ namespace Car_Rental_System.Helpers
             return Math.Max(1, (expectedReturnDate.Date - rentalDate.Date).Days);
         }
 
-        public static int GetBillableDays(DateOnly rentalDate, DateOnly expectedReturnDate)
-        {
-            return Math.Max(1, expectedReturnDate.DayNumber - rentalDate.DayNumber);
-        }
-
         public static decimal CalculateBaseAmount(DateTime rentalDate, DateTime expectedReturnDate, decimal dailyRate)
         {
             return GetBillableDays(rentalDate, expectedReturnDate) * dailyRate;
         }
 
-        public static decimal CalculateBaseAmount(DateOnly rentalDate, DateOnly expectedReturnDate, decimal dailyRate)
-        {
-            return GetBillableDays(rentalDate, expectedReturnDate) * dailyRate;
-        }
-
-        public static int GetLateDays(DateTime expectedReturnDate, DateTime actualReturnDate)
-        {
-            return Math.Max(0, (actualReturnDate.Date - expectedReturnDate.Date).Days);
-        }
-
-        public static int GetLateDays(DateOnly expectedReturnDate, DateOnly actualReturnDate)
-        {
-            return Math.Max(0, actualReturnDate.DayNumber - expectedReturnDate.DayNumber);
-        }
-
         public static int GetLateDays(DateOnly expectedReturnDate, DateTime actualReturnDate)
         {
-            return GetLateDays(expectedReturnDate, ToDateOnly(actualReturnDate));
-        }
-
-        public static decimal CalculateFinalAmount(
-            DateTime expectedReturnDate,
-            DateTime actualReturnDate,
-            decimal dailyRate,
-            decimal baseAmount)
-        {
-            return baseAmount + GetLateDays(expectedReturnDate, actualReturnDate) * dailyRate;
-        }
-
-        public static decimal CalculateFinalAmount(
-            DateOnly expectedReturnDate,
-            DateOnly actualReturnDate,
-            decimal dailyRate,
-            decimal baseAmount)
-        {
-            return baseAmount + GetLateDays(expectedReturnDate, actualReturnDate) * dailyRate;
+            DateOnly actualDate = ToDateOnly(actualReturnDate);
+            return Math.Max(0, actualDate.DayNumber - expectedReturnDate.DayNumber);
         }
 
         public static decimal CalculateFinalAmount(
@@ -66,7 +29,7 @@ namespace Car_Rental_System.Helpers
             decimal dailyRate,
             decimal baseAmount)
         {
-            return CalculateFinalAmount(expectedReturnDate, ToDateOnly(actualReturnDate), dailyRate, baseAmount);
+            return baseAmount + GetLateDays(expectedReturnDate, actualReturnDate) * dailyRate;
         }
 
         public static string FormatCurrency(decimal amount)

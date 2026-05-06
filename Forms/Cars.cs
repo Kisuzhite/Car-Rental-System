@@ -23,7 +23,35 @@ namespace Car_Rental_System
         private void PrepareForm()
         {
             UpdateStatusOptions();
+            LoadCarTypes();
             LoadCarImage("");
+        }
+
+        private void LoadCarTypes(int? includeCarTypeId = null)
+        {
+            try
+            {
+                using AppDbContext db = new();
+
+                var carTypes = db.CarTypes
+                    .Where(ct => ct.IsActive || (includeCarTypeId.HasValue && ct.CarTypeId == includeCarTypeId.Value))
+                    .OrderBy(ct => ct.TypeName)
+                    .Select(ct => new CarTypeLookupItem
+                    {
+                        CarTypeId = ct.CarTypeId,
+                        TypeName = ct.TypeName,
+                        DailyRate = ct.DailyRate
+                    })
+                    .ToList();
+
+                carTypeComboBox.DisplayMember = "DisplayName";
+                carTypeComboBox.ValueMember = "CarTypeId";
+                carTypeComboBox.DataSource = carTypes;
+            }
+            catch (Exception ex)
+            {
+                AppMessageBox.ShowLocalDbWarning(ex);
+            }
         }
 
         private void LoadCars(string search = "")
@@ -35,20 +63,26 @@ namespace Car_Rental_System
                 string trimmed = search.Trim();
 
                 List<Car> cars = db.Cars
+                    .Include(c => c.CarType)
                     .Where(c => c.Status != AppConstants.RentedStatus &&
                                 (trimmed == "" ||
                                  c.PlateNumber.Contains(trimmed) ||
                                  c.Brand.Contains(trimmed) ||
-                                 c.Model.Contains(trimmed)))
+                                 c.Model.Contains(trimmed) ||
+                                 (c.CarType != null && c.CarType.TypeName.Contains(trimmed))))
                     .OrderByDescending(c => c.CarId)
                     .ToList();
 
                 carsGrid.Columns.Clear();
                 carsGrid.DataSource = cars;
 
+                DataGridViewHelper.ApplyFriendlyHeaders(carsGrid);
                 DataGridViewHelper.HideColumn(carsGrid, "CarId");
+                DataGridViewHelper.HideColumn(carsGrid, "CarTypeId");
+                DataGridViewHelper.HideColumn(carsGrid, "CarType");
                 DataGridViewHelper.HideColumn(carsGrid, "ImagePath");
                 DataGridViewHelper.HideColumn(carsGrid, "Rentals");
+                DataGridViewHelper.MoveColumnToEnd(carsGrid, "Status");
                 DataGridViewHelper.ApplyStatusFormatting(carsGrid);
 
                 BeginInvoke(new Action(ClearForm));
@@ -74,6 +108,12 @@ namespace Car_Rental_System
             yearTextBox.Text = car.Year.ToString();
             colorTextBox.Text = car.Color;
             dailyRateTextBox.Text = car.DailyRate.ToString("0.##");
+            LoadCarTypes(car.CarTypeId);
+            carTypeComboBox.SelectedValue = car.CarTypeId ?? -1;
+            if (car.CarTypeId == null)
+            {
+                dailyRateTextBox.Text = car.DailyRate.ToString("0.##");
+            }
             statusComboBox.Text = car.Status;
             UpdateStatusOptions();
             imagePathTextBox.Text = car.ImagePath;
@@ -82,7 +122,7 @@ namespace Car_Rental_System
 
         private void AddButton_Click(object? sender, EventArgs e)
         {
-            if (!ValidateCarInputs(out int year, out decimal dailyRate))
+            if (!ValidateCarInputs(out int year, out int carTypeId, out decimal dailyRate))
             {
                 return;
             }
@@ -91,14 +131,23 @@ namespace Car_Rental_System
             {
                 using AppDbContext db = new();
 
+                string plateNumber = ValidationHelper.NormalizePlateNumber(plateTextBox.Text);
+
+                if (IsDuplicatePlateNumber(db, plateNumber))
+                {
+                    ShowDuplicatePlateMessage(plateNumber);
+                    return;
+                }
+
                 db.Cars.Add(new Car
                 {
-                    PlateNumber = plateTextBox.Text.Trim(),
-                    Brand = brandTextBox.Text.Trim(),
-                    Model = modelTextBox.Text.Trim(),
+                    PlateNumber = plateNumber,
+                    Brand = ValidationHelper.CollapseSpaces(brandTextBox.Text),
+                    Model = ValidationHelper.CollapseSpaces(modelTextBox.Text),
                     Year = year,
-                    Color = colorTextBox.Text.Trim(),
+                    Color = ValidationHelper.CollapseSpaces(colorTextBox.Text),
                     DailyRate = dailyRate,
+                    CarTypeId = carTypeId,
                     Status = statusComboBox.Text.Trim(),
                     ImagePath = string.IsNullOrWhiteSpace(imagePathTextBox.Text) ? null : imagePathTextBox.Text.Trim()
                 });
@@ -123,7 +172,7 @@ namespace Car_Rental_System
                 return;
             }
 
-            if (!ValidateCarInputs(out int year, out decimal dailyRate))
+            if (!ValidateCarInputs(out int year, out int carTypeId, out decimal dailyRate))
             {
                 return;
             }
@@ -140,12 +189,21 @@ namespace Car_Rental_System
                     return;
                 }
 
-                car.PlateNumber = plateTextBox.Text.Trim();
-                car.Brand = brandTextBox.Text.Trim();
-                car.Model = modelTextBox.Text.Trim();
+                string plateNumber = ValidationHelper.NormalizePlateNumber(plateTextBox.Text);
+
+                if (IsDuplicatePlateNumber(db, plateNumber, selectedCarId.Value))
+                {
+                    ShowDuplicatePlateMessage(plateNumber);
+                    return;
+                }
+
+                car.PlateNumber = plateNumber;
+                car.Brand = ValidationHelper.CollapseSpaces(brandTextBox.Text);
+                car.Model = ValidationHelper.CollapseSpaces(modelTextBox.Text);
                 car.Year = year;
-                car.Color = colorTextBox.Text.Trim();
+                car.Color = ValidationHelper.CollapseSpaces(colorTextBox.Text);
                 car.DailyRate = dailyRate;
+                car.CarTypeId = carTypeId;
                 car.Status = statusComboBox.Text.Trim();
                 car.ImagePath = string.IsNullOrWhiteSpace(imagePathTextBox.Text) ? null : imagePathTextBox.Text.Trim();
 
@@ -267,6 +325,17 @@ namespace Car_Rental_System
             LoadCars(searchTextBox.Text);
         }
 
+        private void CarTypeComboBox_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            if (carTypeComboBox.SelectedItem is CarTypeLookupItem item)
+            {
+                dailyRateTextBox.Text = item.DailyRate.ToString("0.##");
+                return;
+            }
+
+            dailyRateTextBox.Clear();
+        }
+
         private void BrowseImageButton_Click(object? sender, EventArgs e)
         {
             using OpenFileDialog dialog = new()
@@ -292,18 +361,50 @@ namespace Car_Rental_System
             LoadCarImage(imagePathTextBox.Text);
         }
 
-        private bool ValidateCarInputs(out int year, out decimal dailyRate)
+        private bool ValidateCarInputs(out int year, out int carTypeId, out decimal dailyRate)
         {
             year = 0;
+            carTypeId = 0;
             dailyRate = 0;
 
-            if (string.IsNullOrWhiteSpace(plateTextBox.Text) ||
-                string.IsNullOrWhiteSpace(brandTextBox.Text) ||
-                string.IsNullOrWhiteSpace(modelTextBox.Text) ||
-                string.IsNullOrWhiteSpace(colorTextBox.Text) ||
-                string.IsNullOrWhiteSpace(statusComboBox.Text))
+            string plateNumber = ValidationHelper.NormalizePlateNumber(plateTextBox.Text);
+            string brand = ValidationHelper.CollapseSpaces(brandTextBox.Text);
+            string model = ValidationHelper.CollapseSpaces(modelTextBox.Text);
+            string color = ValidationHelper.CollapseSpaces(colorTextBox.Text);
+            string status = statusComboBox.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(plateNumber) ||
+                string.IsNullOrWhiteSpace(brand) ||
+                string.IsNullOrWhiteSpace(model) ||
+                string.IsNullOrWhiteSpace(color) ||
+                string.IsNullOrWhiteSpace(status))
             {
                 MessageBox.Show("Please complete all car details.", "Missing Details", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (!ValidationHelper.IsValidPlateNumber(plateNumber))
+            {
+                MessageBox.Show("Plate number must be 3-20 letters/numbers and may only include spaces or hyphens.", "Invalid Plate Number", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (brand.Length > 50 || model.Length > 50 || color.Length > 30)
+            {
+                MessageBox.Show("Brand, model, or color is too long.", "Invalid Car Details", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            string[] allowedStatuses =
+            {
+                AppConstants.AvailableStatus,
+                AppConstants.MaintenanceStatus,
+                AppConstants.RentedStatus
+            };
+
+            if (!allowedStatuses.Contains(status))
+            {
+                MessageBox.Show("Please select a valid car status.", "Invalid Status", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
 
@@ -313,9 +414,19 @@ namespace Car_Rental_System
                 return false;
             }
 
-            if (!decimal.TryParse(dailyRateTextBox.Text, out dailyRate))
+            if (!TryGetSelectedCarType(out carTypeId, out dailyRate))
             {
-                MessageBox.Show("Daily rate must be a valid amount.", "Invalid Rate", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Please select an active car type/rate first.", "Missing Car Type", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (!ValidationHelper.IsValidDailyRate(dailyRate))
+            {
+                MessageBox.Show(
+                    $"Daily rate must be between {RentalCalculator.FormatCurrency(AppConstants.MinimumDailyRate)} and {RentalCalculator.FormatCurrency(AppConstants.MaximumDailyRate)}.",
+                    "Invalid Rate",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
                 return false;
             }
 
@@ -325,13 +436,40 @@ namespace Car_Rental_System
                 return false;
             }
 
-            if (dailyRate <= 0)
+            return true;
+        }
+
+        private bool TryGetSelectedCarType(out int carTypeId, out decimal dailyRate)
+        {
+            carTypeId = 0;
+            dailyRate = 0;
+
+            if (carTypeComboBox.SelectedItem is not CarTypeLookupItem item)
             {
-                MessageBox.Show("Daily rate must be greater than zero.", "Invalid Rate", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
 
+            carTypeId = item.CarTypeId;
+            dailyRate = item.DailyRate;
             return true;
+        }
+
+        private static bool IsDuplicatePlateNumber(AppDbContext db, string plateNumber, int? excludedCarId = null)
+        {
+            plateNumber = ValidationHelper.NormalizePlateNumber(plateNumber);
+
+            return db.Cars.Any(c =>
+                c.PlateNumber == plateNumber &&
+                (!excludedCarId.HasValue || c.CarId != excludedCarId.Value));
+        }
+
+        private static void ShowDuplicatePlateMessage(string plateNumber)
+        {
+            MessageBox.Show(
+                $"A car with plate number '{plateNumber}' already exists.",
+                "Duplicate Plate Number",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
         }
 
         private void ClearForm()
@@ -346,6 +484,7 @@ namespace Car_Rental_System
             imagePathTextBox.Clear();
 
             UpdateStatusOptions();
+            LoadCarTypes();
 
             LoadCarImage("");
             carsGrid.ClearSelection();
@@ -408,5 +547,13 @@ namespace Car_Rental_System
 
             statusComboBox.SelectedIndex = 0;
         }
+    }
+
+    public class CarTypeLookupItem
+    {
+        public int CarTypeId { get; set; }
+        public string TypeName { get; set; } = "";
+        public decimal DailyRate { get; set; }
+        public string DisplayName => TypeName;
     }
 }

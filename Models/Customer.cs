@@ -11,6 +11,7 @@ namespace Car_Rental_System.Models
         public string ContactNumber { get; set; } = "";
         public string LicenseNumber { get; set; } = "";
         public string Address { get; set; } = "";
+        public bool IsArchived { get; set; }
 
         public ICollection<Rental> Rentals { get; set; } = [];
     }

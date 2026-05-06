@@ -63,6 +63,7 @@ namespace Car_Rental_System
                     r.Car.PlateNumber.Contains(search) ||
                     r.Car.Brand.Contains(search) ||
                     r.Car.Model.Contains(search) ||
+                    (r.Car.CarType != null && r.Car.CarType.TypeName.Contains(search)) ||
                     r.Status.Contains(search));
             }
 
@@ -72,7 +73,8 @@ namespace Car_Rental_System
                 {
                     RentalId = r.RentalId,
                     Customer = r.Customer.FullName,
-                    Car = r.Car.PlateNumber + " - " + r.Car.Brand + " " + r.Car.Model,
+                    Car = r.Car.PlateNumber + " - " + r.Car.Brand + " " + r.Car.Model +
+                        (r.Car.CarType != null ? " (" + r.Car.CarType.TypeName + ")" : ""),
                     RentalDate = r.RentalDate,
                     ExpectedReturn = r.ExpectedReturnDate,
                     ActualReturn = r.ActualReturnDate,
@@ -84,6 +86,7 @@ namespace Car_Rental_System
             reportGrid.Columns.Clear();
             reportGrid.DataSource = history;
 
+            DataGridViewHelper.ApplyFriendlyHeaders(reportGrid);
             DataGridViewHelper.HideColumn(reportGrid, "RentalId");
             DataGridViewHelper.ApplyStatusFormatting(reportGrid);
             DataGridViewHelper.ClearSelectionWhenReady(reportGrid);

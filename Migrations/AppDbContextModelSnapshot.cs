@@ -35,6 +35,9 @@ namespace Car_Rental_System.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int?>("CarTypeId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Color")
                         .IsRequired()
                         .HasMaxLength(30)
@@ -67,7 +70,86 @@ namespace Car_Rental_System.Migrations
 
                     b.HasKey("CarId");
 
+                    b.HasIndex("CarTypeId");
+
+                    b.HasIndex("PlateNumber")
+                        .IsUnique();
+
                     b.ToTable("Cars");
+                });
+
+            modelBuilder.Entity("Car_Rental_System.Models.CarType", b =>
+                {
+                    b.Property<int>("CarTypeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CarTypeId"));
+
+                    b.Property<decimal>("DailyRate")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("TypeName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("CarTypeId");
+
+                    b.HasIndex("TypeName")
+                        .IsUnique();
+
+                    b.ToTable("CarTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            CarTypeId = 1,
+                            DailyRate = 1500m,
+                            Description = "Small fuel-efficient cars for budget rentals.",
+                            IsActive = true,
+                            TypeName = "Economy"
+                        },
+                        new
+                        {
+                            CarTypeId = 2,
+                            DailyRate = 2000m,
+                            Description = "Comfortable standard cars for daily use.",
+                            IsActive = true,
+                            TypeName = "Sedan"
+                        },
+                        new
+                        {
+                            CarTypeId = 3,
+                            DailyRate = 3500m,
+                            Description = "Higher-capacity vehicles for family or group trips.",
+                            IsActive = true,
+                            TypeName = "SUV"
+                        },
+                        new
+                        {
+                            CarTypeId = 4,
+                            DailyRate = 4000m,
+                            Description = "Large passenger vehicles for groups and luggage.",
+                            IsActive = true,
+                            TypeName = "Van"
+                        },
+                        new
+                        {
+                            CarTypeId = 5,
+                            DailyRate = 6000m,
+                            Description = "Premium vehicles with higher comfort and style.",
+                            IsActive = true,
+                            TypeName = "Luxury"
+                        });
                 });
 
             modelBuilder.Entity("Car_Rental_System.Models.Customer", b =>
@@ -93,12 +175,19 @@ namespace Car_Rental_System.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LicenseNumber")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
                     b.HasKey("CustomerId");
+
+                    b.HasIndex("LicenseNumber")
+                        .IsUnique()
+                        .HasFilter("[LicenseNumber] <> N'Not provided'");
 
                     b.ToTable("Customers");
                 });
@@ -146,18 +235,28 @@ namespace Car_Rental_System.Migrations
                     b.ToTable("Rentals");
                 });
 
+            modelBuilder.Entity("Car_Rental_System.Models.Car", b =>
+                {
+                    b.HasOne("Car_Rental_System.Models.CarType", "CarType")
+                        .WithMany("Cars")
+                        .HasForeignKey("CarTypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CarType");
+                });
+
             modelBuilder.Entity("Car_Rental_System.Models.Rental", b =>
                 {
                     b.HasOne("Car_Rental_System.Models.Car", "Car")
                         .WithMany("Rentals")
                         .HasForeignKey("CarId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Car_Rental_System.Models.Customer", "Customer")
                         .WithMany("Rentals")
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Car");
@@ -168,6 +267,11 @@ namespace Car_Rental_System.Migrations
             modelBuilder.Entity("Car_Rental_System.Models.Car", b =>
                 {
                     b.Navigation("Rentals");
+                });
+
+            modelBuilder.Entity("Car_Rental_System.Models.CarType", b =>
+                {
+                    b.Navigation("Cars");
                 });
 
             modelBuilder.Entity("Car_Rental_System.Models.Customer", b =>

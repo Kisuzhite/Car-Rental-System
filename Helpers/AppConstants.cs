@@ -9,8 +9,11 @@ namespace Car_Rental_System.Helpers
         public const string ReturnedRentalStatus = "Returned";
 
         public const int MinimumCarYear = 1900;
+        public const int MaximumRentalDays = 365;
         public const int MoneyPrecision = 10;
         public const int MoneyScale = 2;
+        public const decimal MinimumDailyRate = 100;
+        public const decimal MaximumDailyRate = 100000;
 
         public const string CurrencyPrefix = "P ";
         public const string NotProvided = "Not provided";

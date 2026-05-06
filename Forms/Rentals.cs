@@ -7,8 +7,6 @@ namespace Car_Rental_System
 {
     public partial class Rentals : Form
     {
-        private int? selectedRentalId;
-
         public Rentals()
         {
             InitializeComponent();
@@ -44,6 +42,7 @@ namespace Car_Rental_System
         private void LoadCustomers(AppDbContext db)
         {
             var customers = db.Customers
+                .Where(c => !c.IsArchived)
                 .OrderBy(c => c.FullName)
                 .Select(c => new { c.CustomerId, c.FullName })
                 .ToList();
@@ -61,8 +60,9 @@ namespace Car_Rental_System
                 .Select(c => new
                 {
                     c.CarId,
-                    CarName = c.PlateNumber + " - " + c.Brand + " " + c.Model,
-                    c.DailyRate
+                    CarName = c.PlateNumber + " - " + c.Brand + " " + c.Model +
+                        (c.CarType != null ? " (" + c.CarType.TypeName + ")" : ""),
+                    DailyRate = c.CarType != null ? c.CarType.DailyRate : c.DailyRate
                 })
                 .ToList();
 
@@ -97,7 +97,8 @@ namespace Car_Rental_System
                         r.Customer.FullName.Contains(search) ||
                         r.Car.PlateNumber.Contains(search) ||
                         r.Car.Brand.Contains(search) ||
-                        r.Car.Model.Contains(search));
+                        r.Car.Model.Contains(search) ||
+                        (r.Car.CarType != null && r.Car.CarType.TypeName.Contains(search)));
                 }
 
                 var rentals = query
@@ -106,7 +107,8 @@ namespace Car_Rental_System
                     {
                         r.RentalId,
                         Customer = r.Customer.FullName,
-                        Car = r.Car.PlateNumber + " - " + r.Car.Brand + " " + r.Car.Model,
+                        Car = r.Car.PlateNumber + " - " + r.Car.Brand + " " + r.Car.Model +
+                            (r.Car.CarType != null ? " (" + r.Car.CarType.TypeName + ")" : ""),
                         RentalDate = r.RentalDate,
                         ReturnDate = r.ExpectedReturnDate,
                         TotalAmount = r.TotalAmount,
@@ -117,6 +119,7 @@ namespace Car_Rental_System
                 rentalsGrid.Columns.Clear();
                 rentalsGrid.DataSource = rentals;
 
+                DataGridViewHelper.ApplyFriendlyHeaders(rentalsGrid);
                 DataGridViewHelper.HideColumn(rentalsGrid, "RentalId");
                 DataGridViewHelper.ApplyStatusFormatting(rentalsGrid);
                 DataGridViewHelper.ClearSelectionWhenReady(rentalsGrid);
@@ -150,7 +153,9 @@ namespace Car_Rental_System
                     return;
                 }
 
-                var car = db.Cars.FirstOrDefault(c =>
+                var car = db.Cars
+                    .Include(c => c.CarType)
+                    .FirstOrDefault(c =>
                     c.CarId == carId &&
                     c.Status == AppConstants.AvailableStatus);
 
@@ -167,6 +172,11 @@ namespace Car_Rental_System
                 }
 
                 car.Status = AppConstants.RentedStatus;
+                dailyRate = car.CarType?.DailyRate ?? car.DailyRate;
+                totalAmount = RentalCalculator.CalculateBaseAmount(
+                    rentalDatePicker.Value,
+                    returnDatePicker.Value,
+                    dailyRate);
 
                 db.Rentals.Add(new Rental
                 {
@@ -192,60 +202,6 @@ namespace Car_Rental_System
             }
         }
 
-        private void ReturnedButton_Click(object? sender, EventArgs e)
-        {
-            if (selectedRentalId == null)
-            {
-                MessageBox.Show("Please select a rental transaction first.", "No Rental Selected", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            try
-            {
-                using var db = new AppDbContext();
-
-                var rental = db.Rentals
-                    .Include(r => r.Car)
-                    .FirstOrDefault(r =>
-                        r.RentalId == selectedRentalId.Value &&
-                        r.Status == AppConstants.ActiveRentalStatus);
-
-                if (rental == null)
-                {
-                    MessageBox.Show(
-                        "This rental is no longer active.",
-                        "Rental Already Closed",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
-                    LoadRentals(searchTextBox.Text);
-                    return;
-                }
-
-                DateOnly actualReturnDate = RentalCalculator.ToDateOnly(DateTime.Today);
-                decimal finalAmount = RentalCalculator.CalculateFinalAmount(
-                    rental.ExpectedReturnDate,
-                    actualReturnDate,
-                    rental.DailyRate,
-                    rental.TotalAmount);
-
-                rental.ActualReturnDate = actualReturnDate;
-                rental.TotalAmount = finalAmount;
-                rental.Status = AppConstants.ReturnedRentalStatus;
-                rental.Car.Status = AppConstants.AvailableStatus;
-
-                db.SaveChanges();
-
-                MessageBox.Show("Rental marked as returned.", "Returned", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                ClearForm();
-                LoadLookups();
-                LoadRentals(searchTextBox.Text);
-            }
-            catch (Exception ex)
-            {
-                AppMessageBox.ShowDatabaseError("Unable to mark rental as returned.", ex);
-            }
-        }
-
         private void ClearButton_Click(object? sender, EventArgs e)
         {
             ClearForm();
@@ -254,18 +210,6 @@ namespace Car_Rental_System
         private void SearchTextBox_TextChanged(object? sender, EventArgs e)
         {
             LoadRentals(searchTextBox.Text);
-        }
-
-        private void RentalsGrid_SelectionChanged(object? sender, EventArgs e)
-        {
-            if (rentalsGrid.CurrentRow?.DataBoundItem == null || !rentalsGrid.CurrentRow.Selected)
-            {
-                selectedRentalId = null;
-                return;
-            }
-
-            dynamic row = rentalsGrid.CurrentRow.DataBoundItem;
-            selectedRentalId = (int)row.RentalId;
         }
 
         private void CarComboBox_SelectedIndexChanged(object? sender, EventArgs e)
@@ -298,9 +242,9 @@ namespace Car_Rental_System
                 return false;
             }
 
-            if (returnDatePicker.Value.Date < rentalDatePicker.Value.Date)
+            if (!ValidationHelper.TryValidateRentalDates(rentalDatePicker.Value, returnDatePicker.Value, out string dateError))
             {
-                MessageBox.Show("Return date cannot be earlier than rental date.", "Invalid Dates", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(dateError, "Invalid Dates", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
 
@@ -310,9 +254,13 @@ namespace Car_Rental_System
                 return false;
             }
 
-            if (dailyRate <= 0)
+            if (!ValidationHelper.IsValidDailyRate(dailyRate))
             {
-                MessageBox.Show("Daily rate must be greater than zero.", "Invalid Rate", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(
+                    $"Daily rate must be between {RentalCalculator.FormatCurrency(AppConstants.MinimumDailyRate)} and {RentalCalculator.FormatCurrency(AppConstants.MaximumDailyRate)}.",
+                    "Invalid Rate",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
                 return false;
             }
 
@@ -346,7 +294,6 @@ namespace Car_Rental_System
 
         private void ClearForm()
         {
-            selectedRentalId = null;
             if (customerComboBox.Items.Count > 0) customerComboBox.SelectedIndex = 0;
             if (carComboBox.Items.Count > 0) carComboBox.SelectedIndex = 0;
 

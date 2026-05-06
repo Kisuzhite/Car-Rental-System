@@ -197,6 +197,7 @@ namespace Car_Rental_System
             rateTextBox.Margin = new Padding(3, 4, 3, 4);
             rateTextBox.Name = "rateTextBox";
             rateTextBox.PlaceholderText = "2500";
+            rateTextBox.ReadOnly = true;
             rateTextBox.Size = new Size(160, 28);
             rateTextBox.TabIndex = 10;
             rateTextBox.TextChanged += DateOrRate_Changed;
@@ -365,7 +366,6 @@ namespace Car_Rental_System
             rentalsGrid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             rentalsGrid.Size = new Size(759, 617);
             rentalsGrid.TabIndex = 1;
-            rentalsGrid.SelectionChanged += RentalsGrid_SelectionChanged;
             // 
             // listHeaderPanel
             // 

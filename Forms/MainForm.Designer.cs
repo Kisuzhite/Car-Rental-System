@@ -30,6 +30,7 @@ namespace Car_Rental_System
             returnsButton = new Button();
             rentalsButton = new Button();
             customersButton = new Button();
+            ratesButton = new Button();
             carsButton = new Button();
             dashboardButton = new Button();
             appTitleLabel = new Label();
@@ -101,6 +102,7 @@ namespace Car_Rental_System
             sidebarPanel.Controls.Add(returnsButton);
             sidebarPanel.Controls.Add(rentalsButton);
             sidebarPanel.Controls.Add(customersButton);
+            sidebarPanel.Controls.Add(ratesButton);
             sidebarPanel.Controls.Add(carsButton);
             sidebarPanel.Controls.Add(dashboardButton);
             sidebarPanel.Controls.Add(appTitleLabel);
@@ -140,12 +142,12 @@ namespace Car_Rental_System
             reportsButton.FlatStyle = FlatStyle.Flat;
             reportsButton.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             reportsButton.ForeColor = Color.White;
-            reportsButton.Location = new Point(23, 493);
+            reportsButton.Location = new Point(23, 559);
             reportsButton.Margin = new Padding(3, 4, 3, 4);
             reportsButton.Name = "reportsButton";
             reportsButton.Padding = new Padding(18, 0, 0, 0);
             reportsButton.Size = new Size(229, 56);
-            reportsButton.TabIndex = 7;
+            reportsButton.TabIndex = 8;
             reportsButton.Text = "Reports";
             reportsButton.TextAlign = ContentAlignment.MiddleLeft;
             reportsButton.UseVisualStyleBackColor = false;
@@ -160,12 +162,12 @@ namespace Car_Rental_System
             returnsButton.FlatStyle = FlatStyle.Flat;
             returnsButton.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             returnsButton.ForeColor = Color.White;
-            returnsButton.Location = new Point(23, 427);
+            returnsButton.Location = new Point(23, 493);
             returnsButton.Margin = new Padding(3, 4, 3, 4);
             returnsButton.Name = "returnsButton";
             returnsButton.Padding = new Padding(18, 0, 0, 0);
             returnsButton.Size = new Size(229, 56);
-            returnsButton.TabIndex = 6;
+            returnsButton.TabIndex = 7;
             returnsButton.Text = "Return Car";
             returnsButton.TextAlign = ContentAlignment.MiddleLeft;
             returnsButton.UseVisualStyleBackColor = false;
@@ -180,12 +182,12 @@ namespace Car_Rental_System
             rentalsButton.FlatStyle = FlatStyle.Flat;
             rentalsButton.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             rentalsButton.ForeColor = Color.White;
-            rentalsButton.Location = new Point(23, 360);
+            rentalsButton.Location = new Point(23, 427);
             rentalsButton.Margin = new Padding(3, 4, 3, 4);
             rentalsButton.Name = "rentalsButton";
             rentalsButton.Padding = new Padding(18, 0, 0, 0);
             rentalsButton.Size = new Size(229, 56);
-            rentalsButton.TabIndex = 5;
+            rentalsButton.TabIndex = 6;
             rentalsButton.Text = "Rentals";
             rentalsButton.TextAlign = ContentAlignment.MiddleLeft;
             rentalsButton.UseVisualStyleBackColor = false;
@@ -200,16 +202,36 @@ namespace Car_Rental_System
             customersButton.FlatStyle = FlatStyle.Flat;
             customersButton.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             customersButton.ForeColor = Color.White;
-            customersButton.Location = new Point(23, 293);
+            customersButton.Location = new Point(23, 360);
             customersButton.Margin = new Padding(3, 4, 3, 4);
             customersButton.Name = "customersButton";
             customersButton.Padding = new Padding(18, 0, 0, 0);
             customersButton.Size = new Size(229, 56);
-            customersButton.TabIndex = 4;
+            customersButton.TabIndex = 5;
             customersButton.Text = "Customers";
             customersButton.TextAlign = ContentAlignment.MiddleLeft;
             customersButton.UseVisualStyleBackColor = false;
             customersButton.Click += NavigationButton_Click;
+            // 
+            // ratesButton
+            // 
+            ratesButton.BackColor = Color.FromArgb(31, 41, 55);
+            ratesButton.FlatAppearance.BorderSize = 0;
+            ratesButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(29, 78, 216);
+            ratesButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(37, 99, 235);
+            ratesButton.FlatStyle = FlatStyle.Flat;
+            ratesButton.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            ratesButton.ForeColor = Color.White;
+            ratesButton.Location = new Point(23, 293);
+            ratesButton.Margin = new Padding(3, 4, 3, 4);
+            ratesButton.Name = "ratesButton";
+            ratesButton.Padding = new Padding(18, 0, 0, 0);
+            ratesButton.Size = new Size(229, 56);
+            ratesButton.TabIndex = 4;
+            ratesButton.Text = "Car Rates";
+            ratesButton.TextAlign = ContentAlignment.MiddleLeft;
+            ratesButton.UseVisualStyleBackColor = false;
+            ratesButton.Click += NavigationButton_Click;
             // 
             // carsButton
             // 
@@ -498,6 +520,7 @@ namespace Car_Rental_System
             dailyRateTextBox.Location = new Point(23, 296);
             dailyRateTextBox.Margin = new Padding(3, 4, 3, 4);
             dailyRateTextBox.Name = "dailyRateTextBox";
+            dailyRateTextBox.ReadOnly = true;
             dailyRateTextBox.Size = new Size(137, 28);
             dailyRateTextBox.TabIndex = 10;
             dailyRateTextBox.Text = "2500";
@@ -915,6 +938,7 @@ namespace Car_Rental_System
         private Button returnsButton;
         private Button rentalsButton;
         private Button customersButton;
+        private Button ratesButton;
         private Button carsButton;
         private Button dashboardButton;
         private Label appTitleLabel;
