@@ -1,6 +1,7 @@
 using System.Globalization;
 using Car_Rental_System.Data;
 using Car_Rental_System.Helpers;
+using Car_Rental_System.Models;
 using Car_Rental_System.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -36,7 +37,7 @@ namespace Car_Rental_System
                 DateOnly today = RentalCalculator.ToDateOnly(DateTime.Today);
 
                 var query = db.Rentals
-                    .Where(r => r.Status == AppConstants.ActiveRentalStatus)
+                    .Where(r => r.Status == RentalStatus.Active)
                     .Include(r => r.Customer)
                     .Include(r => r.Car).ThenInclude(c => c.CarType)
                     .AsQueryable();
@@ -167,9 +168,9 @@ namespace Car_Rental_System
                         result.Message,
                         result.Title,
                         MessageBoxButtons.OK,
-                        result.Title == "Rental Already Closed" ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
+                        result.RentalWasAlreadyClosed ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
 
-                    if (result.Title == "Rental Already Closed")
+                    if (result.RentalWasAlreadyClosed)
                         LoadActiveRentals(searchTextBox.Text);
                     return;
                 }

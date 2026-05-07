@@ -28,7 +28,10 @@ namespace Car_Rental_System.Data
                 e.Property(c => c.Model).HasMaxLength(50).IsRequired();
                 e.Property(c => c.Color).HasMaxLength(30).IsRequired();
                 e.Property(c => c.DailyRate).HasColumnType(moneyColumnType);
-                e.Property(c => c.Status).HasMaxLength(20).IsRequired();
+                e.Property(c => c.Status)
+                    .HasConversion<string>()
+                    .HasMaxLength(20)
+                    .IsRequired();
                 e.Property(c => c.ImagePath).HasMaxLength(500);
                 e.HasOne(c => c.CarType)
                     .WithMany(ct => ct.Cars)
@@ -65,7 +68,10 @@ namespace Car_Rental_System.Data
             {
                 e.Property(r => r.DailyRate).HasColumnType(moneyColumnType);
                 e.Property(r => r.TotalAmount).HasColumnType(moneyColumnType);
-                e.Property(r => r.Status).HasMaxLength(20).IsRequired();
+                e.Property(r => r.Status)
+                    .HasConversion<string>()
+                    .HasMaxLength(20)
+                    .IsRequired();
                 e.HasOne(r => r.Customer)
                     .WithMany(c => c.Rentals)
                     .HasForeignKey(r => r.CustomerId)

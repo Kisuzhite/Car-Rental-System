@@ -6,6 +6,7 @@ namespace Car_Rental_System.Services
             bool success,
             string title,
             string message,
+            RentalOperationError error = RentalOperationError.None,
             int? rentalId = null,
             decimal dailyRate = 0,
             decimal totalAmount = 0,
@@ -14,6 +15,7 @@ namespace Car_Rental_System.Services
             Success = success;
             Title = title;
             Message = message;
+            Error = error;
             RentalId = rentalId;
             DailyRate = dailyRate;
             TotalAmount = totalAmount;
@@ -23,6 +25,9 @@ namespace Car_Rental_System.Services
         public bool Success { get; }
         public string Title { get; }
         public string Message { get; }
+        public RentalOperationError Error { get; }
+        public bool CarWasUnavailable => Error == RentalOperationError.CarNotAvailable;
+        public bool RentalWasAlreadyClosed => Error == RentalOperationError.RentalAlreadyClosed;
         public int? RentalId { get; }
         public decimal DailyRate { get; }
         public decimal TotalAmount { get; }
@@ -36,12 +41,22 @@ namespace Car_Rental_System.Services
             decimal totalAmount = 0,
             int lateDays = 0)
         {
-            return new RentalOperationResult(true, title, message, rentalId, dailyRate, totalAmount, lateDays);
+            return new RentalOperationResult(
+                true,
+                title,
+                message,
+                rentalId: rentalId,
+                dailyRate: dailyRate,
+                totalAmount: totalAmount,
+                lateDays: lateDays);
         }
 
-        public static RentalOperationResult Fail(string title, string message)
+        public static RentalOperationResult Fail(
+            RentalOperationError error,
+            string title,
+            string message)
         {
-            return new RentalOperationResult(false, title, message);
+            return new RentalOperationResult(false, title, message, error);
         }
     }
 }

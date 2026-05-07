@@ -64,7 +64,7 @@ namespace Car_Rental_System
 
                 List<Car> cars = db.Cars
                     .Include(c => c.CarType)
-                    .Where(c => c.Status != AppConstants.RentedStatus &&
+                    .Where(c => c.Status != CarStatus.Rented &&
                                 (trimmed == "" ||
                                  c.PlateNumber.Contains(trimmed) ||
                                  c.Brand.Contains(trimmed) ||
@@ -114,15 +114,14 @@ namespace Car_Rental_System
             {
                 dailyRateTextBox.Text = car.DailyRate.ToString("0.##");
             }
-            statusComboBox.Text = car.Status;
-            UpdateStatusOptions();
+            UpdateStatusOptions(car.Status);
             imagePathTextBox.Text = car.ImagePath;
             LoadCarImage(car.ImagePath);
         }
 
         private void AddButton_Click(object? sender, EventArgs e)
         {
-            if (!ValidateCarInputs(out int year, out int carTypeId, out decimal dailyRate))
+            if (!ValidateCarInputs(out int year, out int carTypeId, out decimal dailyRate, out CarStatus status))
             {
                 return;
             }
@@ -148,7 +147,7 @@ namespace Car_Rental_System
                     Color = ValidationHelper.CollapseSpaces(colorTextBox.Text),
                     DailyRate = dailyRate,
                     CarTypeId = carTypeId,
-                    Status = statusComboBox.Text.Trim(),
+                    Status = status,
                     ImagePath = string.IsNullOrWhiteSpace(imagePathTextBox.Text) ? null : imagePathTextBox.Text.Trim()
                 });
 
@@ -172,7 +171,7 @@ namespace Car_Rental_System
                 return;
             }
 
-            if (!ValidateCarInputs(out int year, out int carTypeId, out decimal dailyRate))
+            if (!ValidateCarInputs(out int year, out int carTypeId, out decimal dailyRate, out CarStatus status))
             {
                 return;
             }
@@ -204,7 +203,7 @@ namespace Car_Rental_System
                 car.Color = ValidationHelper.CollapseSpaces(colorTextBox.Text);
                 car.DailyRate = dailyRate;
                 car.CarTypeId = carTypeId;
-                car.Status = statusComboBox.Text.Trim();
+                car.Status = status;
                 car.ImagePath = string.IsNullOrWhiteSpace(imagePathTextBox.Text) ? null : imagePathTextBox.Text.Trim();
 
                 db.SaveChanges();
@@ -282,7 +281,7 @@ namespace Car_Rental_System
 
                 bool hasActiveRental = db.Rentals.Any(r =>
                     r.CarId == selectedCarId.Value &&
-                    r.Status == AppConstants.ActiveRentalStatus);
+                    r.Status == RentalStatus.Active);
 
                 if (hasActiveRental)
                 {
@@ -361,23 +360,22 @@ namespace Car_Rental_System
             LoadCarImage(imagePathTextBox.Text);
         }
 
-        private bool ValidateCarInputs(out int year, out int carTypeId, out decimal dailyRate)
+        private bool ValidateCarInputs(out int year, out int carTypeId, out decimal dailyRate, out CarStatus status)
         {
             year = 0;
             carTypeId = 0;
             dailyRate = 0;
+            status = CarStatus.Available;
 
             string plateNumber = ValidationHelper.NormalizePlateNumber(plateTextBox.Text);
             string brand = ValidationHelper.CollapseSpaces(brandTextBox.Text);
             string model = ValidationHelper.CollapseSpaces(modelTextBox.Text);
             string color = ValidationHelper.CollapseSpaces(colorTextBox.Text);
-            string status = statusComboBox.Text.Trim();
 
             if (string.IsNullOrWhiteSpace(plateNumber) ||
                 string.IsNullOrWhiteSpace(brand) ||
                 string.IsNullOrWhiteSpace(model) ||
-                string.IsNullOrWhiteSpace(color) ||
-                string.IsNullOrWhiteSpace(status))
+                string.IsNullOrWhiteSpace(color))
             {
                 MessageBox.Show("Please complete all car details.", "Missing Details", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
@@ -395,14 +393,7 @@ namespace Car_Rental_System
                 return false;
             }
 
-            string[] allowedStatuses =
-            {
-                AppConstants.AvailableStatus,
-                AppConstants.MaintenanceStatus,
-                AppConstants.RentedStatus
-            };
-
-            if (!allowedStatuses.Contains(status))
+            if (!TryGetSelectedStatus(out status))
             {
                 MessageBox.Show("Please select a valid car status.", "Invalid Status", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
@@ -530,22 +521,39 @@ namespace Car_Rental_System
                 : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, imagePath);
         }
 
-        private void UpdateStatusOptions()
+        private static bool TryGetCarStatus(string statusText, out CarStatus status)
         {
-            string? currentStatus = statusComboBox.Text;
+            return Enum.TryParse(statusText, ignoreCase: false, out status) &&
+                Enum.IsDefined(status);
+        }
 
-            statusComboBox.Items.Clear();
-            statusComboBox.Items.Add(AppConstants.AvailableStatus);
-            statusComboBox.Items.Add(AppConstants.MaintenanceStatus);
-
-            if (selectedCarId != null && currentStatus == AppConstants.RentedStatus)
+        private bool TryGetSelectedStatus(out CarStatus status)
+        {
+            if (statusComboBox.SelectedItem is CarStatus selectedStatus)
             {
-                statusComboBox.Items.Add(AppConstants.RentedStatus);
-                statusComboBox.Text = AppConstants.RentedStatus;
+                status = selectedStatus;
+                return true;
+            }
+
+            return TryGetCarStatus(statusComboBox.Text, out status);
+        }
+
+        private void UpdateStatusOptions(CarStatus preferredStatus = CarStatus.Available)
+        {
+            statusComboBox.Items.Clear();
+            statusComboBox.Items.Add(CarStatus.Available);
+            statusComboBox.Items.Add(CarStatus.Maintenance);
+
+            if (selectedCarId != null && preferredStatus == CarStatus.Rented)
+            {
+                statusComboBox.Items.Add(CarStatus.Rented);
+                statusComboBox.SelectedItem = CarStatus.Rented;
                 return;
             }
 
-            statusComboBox.SelectedIndex = 0;
+            statusComboBox.SelectedItem = preferredStatus == CarStatus.Maintenance
+                ? CarStatus.Maintenance
+                : CarStatus.Available;
         }
     }
 

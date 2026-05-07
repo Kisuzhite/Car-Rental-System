@@ -37,11 +37,12 @@ namespace Car_Rental_System.Services
                 .Include(r => r.Car)
                 .FirstOrDefault(r =>
                     r.RentalId == rentalId &&
-                    r.Status == AppConstants.ActiveRentalStatus);
+                    r.Status == RentalStatus.Active);
 
             if (rental == null)
             {
                 return RentalOperationResult.Fail(
+                    RentalOperationError.RentalAlreadyClosed,
                     "Rental Already Closed",
                     "This rental is no longer active.");
             }
@@ -51,6 +52,7 @@ namespace Car_Rental_System.Services
             if (actualReturn < rental.RentalDate)
             {
                 return RentalOperationResult.Fail(
+                    RentalOperationError.InvalidReturnDate,
                     "Invalid Return Date",
                     "Actual return date cannot be earlier than the rental date.");
             }
@@ -64,8 +66,8 @@ namespace Car_Rental_System.Services
 
             rental.ActualReturnDate = actualReturn;
             rental.TotalAmount = finalAmount;
-            rental.Status = AppConstants.ReturnedRentalStatus;
-            rental.Car.Status = AppConstants.AvailableStatus;
+            rental.Status = RentalStatus.Returned;
+            rental.Car.Status = CarStatus.Available;
 
             db.SaveChanges();
 
@@ -87,11 +89,12 @@ namespace Car_Rental_System.Services
         {
             bool hasActiveRental = db.Rentals.Any(r =>
                 r.CustomerId == customerId &&
-                r.Status == AppConstants.ActiveRentalStatus);
+                r.Status == RentalStatus.Active);
 
             if (hasActiveRental)
             {
                 return RentalOperationResult.Fail(
+                    RentalOperationError.CustomerHasActiveRental,
                     "Customer Has Active Rental",
                     "This customer already has an active rental.\nProcess the return first before renting another car.");
             }
@@ -100,11 +103,12 @@ namespace Car_Rental_System.Services
                 .Include(c => c.CarType)
                 .FirstOrDefault(c =>
                     c.CarId == carId &&
-                    c.Status == AppConstants.AvailableStatus);
+                    c.Status == CarStatus.Available);
 
             if (car == null)
             {
                 return RentalOperationResult.Fail(
+                    RentalOperationError.CarNotAvailable,
                     "Car Not Available",
                     "The selected car is no longer available. Please choose another car.");
             }
@@ -115,7 +119,7 @@ namespace Car_Rental_System.Services
                 expectedReturnDate,
                 dailyRate);
 
-            car.Status = AppConstants.RentedStatus;
+            car.Status = CarStatus.Rented;
 
             var rental = new Rental
             {
@@ -125,7 +129,7 @@ namespace Car_Rental_System.Services
                 ExpectedReturnDate = RentalCalculator.ToDateOnly(expectedReturnDate),
                 DailyRate = dailyRate,
                 TotalAmount = totalAmount,
-                Status = AppConstants.ActiveRentalStatus
+                Status = RentalStatus.Active
             };
 
             db.Rentals.Add(rental);

@@ -12,7 +12,7 @@ namespace Car_Rental_System.Models
         public string Color { get; set; } = "";
         public decimal DailyRate { get; set; }
         public int? CarTypeId { get; set; }
-        public string Status { get; set; } = "";
+        public CarStatus Status { get; set; } = CarStatus.Available;
         public string? ImagePath { get; set; }
 
         public CarType? CarType { get; set; }

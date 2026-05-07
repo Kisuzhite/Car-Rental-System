@@ -6,13 +6,13 @@ namespace Car_Rental_System.Helpers
     {
         public static string GetDisplayStatus(Rental rental, DateOnly today)
         {
-            if (rental.Status == AppConstants.ActiveRentalStatus &&
+            if (rental.Status == RentalStatus.Active &&
                 rental.ExpectedReturnDate < today)
             {
                 return AppConstants.OverdueRentalStatus;
             }
 
-            return rental.Status;
+            return rental.Status.ToString();
         }
 
         public static int GetLateDays(Rental rental, DateOnly today)
@@ -20,8 +20,8 @@ namespace Car_Rental_System.Helpers
             DateOnly? actualReturnDate = rental.ActualReturnDate;
             DateOnly comparisonDate = actualReturnDate ?? today;
 
-            if (rental.Status == AppConstants.ActiveRentalStatus ||
-                rental.Status == AppConstants.ReturnedRentalStatus)
+            if (rental.Status == RentalStatus.Active ||
+                rental.Status == RentalStatus.Returned)
             {
                 return Math.Max(0, comparisonDate.DayNumber - rental.ExpectedReturnDate.DayNumber);
             }

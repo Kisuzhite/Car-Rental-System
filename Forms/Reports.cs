@@ -1,5 +1,6 @@
 using Car_Rental_System.Data;
 using Car_Rental_System.Helpers;
+using Car_Rental_System.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Car_Rental_System
@@ -34,16 +35,16 @@ namespace Car_Rental_System
                 DateOnly today = RentalCalculator.ToDateOnly(DateTime.Today);
 
                 totalCarsValueLabel.Text = db.Cars.Count().ToString();
-                availableCarsValueLabel.Text = db.Cars.Count(c => c.Status == AppConstants.AvailableStatus).ToString();
+                availableCarsValueLabel.Text = db.Cars.Count(c => c.Status == CarStatus.Available).ToString();
 
-                int activeRentals = db.Rentals.Count(r => r.Status == AppConstants.ActiveRentalStatus);
+                int activeRentals = db.Rentals.Count(r => r.Status == RentalStatus.Active);
                 int overdueRentals = db.Rentals.Count(r =>
-                    r.Status == AppConstants.ActiveRentalStatus &&
+                    r.Status == RentalStatus.Active &&
                     r.ExpectedReturnDate < today);
                 activeRentalsValueLabel.Text = $"{activeRentals} / {overdueRentals}";
 
                 decimal income = db.Rentals
-                    .Where(r => r.Status == AppConstants.ReturnedRentalStatus)
+                    .Where(r => r.Status == RentalStatus.Returned)
                     .Sum(r => (decimal?)r.TotalAmount) ?? 0;
                 incomeValueLabel.Text = RentalCalculator.FormatCurrency(income);
 
@@ -66,16 +67,23 @@ namespace Car_Rental_System
 
             if (!string.IsNullOrWhiteSpace(search))
             {
+                string trimmedSearch = search.Trim();
+                List<RentalStatus> matchingStatuses = Enum.GetValues<RentalStatus>()
+                    .Where(status => status.ToString().Contains(trimmedSearch, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+                bool matchesOverdueStatus = AppConstants.OverdueRentalStatus
+                    .Contains(trimmedSearch, StringComparison.OrdinalIgnoreCase);
+
                 query = query.Where(r =>
                     r.Customer.FullName.Contains(search) ||
                     r.Car.PlateNumber.Contains(search) ||
                     r.Car.Brand.Contains(search) ||
                     r.Car.Model.Contains(search) ||
                     (r.Car.CarType != null && r.Car.CarType.TypeName.Contains(search)) ||
-                    r.Status.Contains(search) ||
-                    (r.Status == AppConstants.ActiveRentalStatus &&
-                        r.ExpectedReturnDate < today &&
-                        AppConstants.OverdueRentalStatus.Contains(search)));
+                    matchingStatuses.Contains(r.Status) ||
+                    (matchesOverdueStatus &&
+                        r.Status == RentalStatus.Active &&
+                        r.ExpectedReturnDate < today));
             }
 
             var history = query

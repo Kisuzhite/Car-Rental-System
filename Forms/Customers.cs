@@ -165,7 +165,7 @@ namespace Car_Rental_System
                 }
 
                 bool hasActiveRentals = customer.Rentals.Any(r =>
-                    r.Status == AppConstants.ActiveRentalStatus);
+                    r.Status == RentalStatus.Active);
 
                 if (hasActiveRentals)
                 {

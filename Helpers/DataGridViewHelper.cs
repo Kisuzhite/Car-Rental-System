@@ -1,4 +1,5 @@
 using System.Drawing.Drawing2D;
+using Car_Rental_System.Models;
 
 namespace Car_Rental_System.Helpers
 {
@@ -249,34 +250,34 @@ namespace Car_Rental_System.Helpers
         {
             Color backColor = status switch
             {
-                AppConstants.AvailableStatus => Color.FromArgb(220, 252, 231),
-                AppConstants.RentedStatus => Color.FromArgb(254, 243, 199),
-                AppConstants.MaintenanceStatus => Color.FromArgb(243, 244, 246),
-                AppConstants.ActiveRentalStatus => Color.FromArgb(219, 234, 254),
+                nameof(CarStatus.Available) => Color.FromArgb(220, 252, 231),
+                nameof(CarStatus.Rented) => Color.FromArgb(254, 243, 199),
+                nameof(CarStatus.Maintenance) => Color.FromArgb(243, 244, 246),
+                nameof(RentalStatus.Active) => Color.FromArgb(219, 234, 254),
                 AppConstants.OverdueRentalStatus => Color.FromArgb(254, 226, 226),
-                AppConstants.ReturnedRentalStatus => Color.FromArgb(220, 252, 231),
+                nameof(RentalStatus.Returned) => Color.FromArgb(220, 252, 231),
                 _ => Color.White
             };
 
             Color borderColor = status switch
             {
-                AppConstants.AvailableStatus => Color.FromArgb(134, 239, 172),
-                AppConstants.RentedStatus => Color.FromArgb(252, 211, 77),
-                AppConstants.MaintenanceStatus => Color.FromArgb(209, 213, 219),
-                AppConstants.ActiveRentalStatus => Color.FromArgb(147, 197, 253),
+                nameof(CarStatus.Available) => Color.FromArgb(134, 239, 172),
+                nameof(CarStatus.Rented) => Color.FromArgb(252, 211, 77),
+                nameof(CarStatus.Maintenance) => Color.FromArgb(209, 213, 219),
+                nameof(RentalStatus.Active) => Color.FromArgb(147, 197, 253),
                 AppConstants.OverdueRentalStatus => Color.FromArgb(252, 165, 165),
-                AppConstants.ReturnedRentalStatus => Color.FromArgb(134, 239, 172),
+                nameof(RentalStatus.Returned) => Color.FromArgb(134, 239, 172),
                 _ => Color.FromArgb(229, 231, 235)
             };
 
             Color foreColor = status switch
             {
-                AppConstants.AvailableStatus => Color.FromArgb(22, 101, 52),
-                AppConstants.RentedStatus => Color.FromArgb(146, 64, 14),
-                AppConstants.MaintenanceStatus => Color.FromArgb(75, 85, 99),
-                AppConstants.ActiveRentalStatus => Color.FromArgb(30, 64, 175),
+                nameof(CarStatus.Available) => Color.FromArgb(22, 101, 52),
+                nameof(CarStatus.Rented) => Color.FromArgb(146, 64, 14),
+                nameof(CarStatus.Maintenance) => Color.FromArgb(75, 85, 99),
+                nameof(RentalStatus.Active) => Color.FromArgb(30, 64, 175),
                 AppConstants.OverdueRentalStatus => Color.FromArgb(153, 27, 27),
-                AppConstants.ReturnedRentalStatus => Color.FromArgb(22, 101, 52),
+                nameof(RentalStatus.Returned) => Color.FromArgb(22, 101, 52),
                 _ => Color.FromArgb(31, 41, 55)
             };
 

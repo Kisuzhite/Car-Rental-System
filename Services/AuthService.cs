@@ -9,13 +9,13 @@ namespace Car_Rental_System.Services
         {
             user = null;
 
-            (string ownerUserName, string ownerPassword) = AppConfiguration.GetOwnerAccount();
+            (string ownerUserName, string ownerPasswordHash) = AppConfiguration.GetOwnerAccount();
 
             bool isOwnerUserName = string.Equals(
                 userName.Trim(),
                 ownerUserName,
                 StringComparison.OrdinalIgnoreCase);
-            bool isOwnerPassword = string.Equals(password, ownerPassword, StringComparison.Ordinal);
+            bool isOwnerPassword = VerifyPassword(password, ownerPasswordHash);
 
             if (!isOwnerUserName || !isOwnerPassword)
                 return false;
@@ -27,6 +27,20 @@ namespace Car_Rental_System.Services
             };
 
             return true;
+        }
+
+        private static bool VerifyPassword(string password, string passwordHash)
+        {
+            try
+            {
+                return BCrypt.Net.BCrypt.Verify(password, passwordHash);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException(
+                    "Owner password hash is invalid. Generate a BCrypt hash and store it as OwnerAccount:PasswordHash.",
+                    ex);
+            }
         }
     }
 }

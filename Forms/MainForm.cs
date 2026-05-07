@@ -79,16 +79,16 @@ namespace Car_Rental_System
             DateOnly today = RentalCalculator.ToDateOnly(DateTime.Today);
 
             totalCarsValueLabel.Text = db.Cars.Count().ToString();
-            availableCarsValueLabel.Text = db.Cars.Count(c => c.Status == AppConstants.AvailableStatus).ToString();
+            availableCarsValueLabel.Text = db.Cars.Count(c => c.Status == CarStatus.Available).ToString();
             rentedCarsValueLabel.Text = db.Rentals.Count(r =>
-                r.Status == AppConstants.ActiveRentalStatus &&
+                r.Status == RentalStatus.Active &&
                 r.ExpectedReturnDate < today).ToString();
 
             DateOnly firstOfMonth = new(DateTime.Today.Year, DateTime.Today.Month, 1);
             DateOnly firstOfNextMonth = firstOfMonth.AddMonths(1);
 
             decimal income = db.Rentals
-                .Where(r => r.Status == AppConstants.ReturnedRentalStatus
+                .Where(r => r.Status == RentalStatus.Returned
                     && r.ActualReturnDate >= firstOfMonth
                     && r.ActualReturnDate < firstOfNextMonth)
                 .Sum(r => (decimal?)r.TotalAmount) ?? 0;
@@ -99,7 +99,7 @@ namespace Car_Rental_System
         private void LoadAvailableCars(AppDbContext db, string search)
         {
             var query = db.Cars
-                .Where(c => c.Status == AppConstants.AvailableStatus)
+                .Where(c => c.Status == CarStatus.Available)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
@@ -163,7 +163,7 @@ namespace Car_Rental_System
         private void LoadAvailableCarLookup(AppDbContext db)
         {
             var cars = db.Cars
-                .Where(c => c.Status == AppConstants.AvailableStatus)
+                .Where(c => c.Status == CarStatus.Available)
                 .OrderBy(c => c.Brand).ThenBy(c => c.Model)
                 .Select(c => new CarLookupItem
                 {
@@ -308,7 +308,7 @@ namespace Car_Rental_System
                         MessageBoxButtons.OK,
                         GetRentalFailureIcon(result));
 
-                    if (result.Title == "Car Not Available")
+                    if (result.CarWasUnavailable)
                         LoadDashboardData(searchTextBox.Text);
                     return;
                 }
@@ -375,7 +375,7 @@ namespace Car_Rental_System
 
         private static MessageBoxIcon GetRentalFailureIcon(RentalOperationResult result)
         {
-            return result.Title == "Car Not Available"
+            return result.CarWasUnavailable
                 ? MessageBoxIcon.Information
                 : MessageBoxIcon.Warning;
         }

@@ -2,12 +2,7 @@ namespace Car_Rental_System.Helpers
 {
     internal static class AppConstants
     {
-        public const string AvailableStatus = "Available";
-        public const string RentedStatus = "Rented";
-        public const string MaintenanceStatus = "Maintenance";
-        public const string ActiveRentalStatus = "Active";
         public const string OverdueRentalStatus = "Overdue";
-        public const string ReturnedRentalStatus = "Returned";
 
         public const int MinimumCarYear = 1900;
         public const int MaximumRentalDays = 365;

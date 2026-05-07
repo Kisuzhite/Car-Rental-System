@@ -7,7 +7,7 @@ namespace Car_Rental_System.Helpers
         private const string AppSettingsFileName = "appsettings.json";
         private const string ConnectionStringEnvironmentVariable = "CAR_RENTAL_CONNECTION_STRING";
         private const string OwnerUserNameEnvironmentVariable = "CAR_RENTAL_OWNER_USERNAME";
-        private const string OwnerPasswordEnvironmentVariable = "CAR_RENTAL_OWNER_PASSWORD";
+        private const string OwnerPasswordHashEnvironmentVariable = "CAR_RENTAL_OWNER_PASSWORD_HASH";
 
         public static string GetConnectionString()
         {
@@ -25,25 +25,32 @@ namespace Car_Rental_System.Helpers
                 $"Database connection string is missing. Set {ConnectionStringEnvironmentVariable} or add ConnectionStrings:CarRentalDb to {AppSettingsFileName}.");
         }
 
-        public static (string UserName, string Password) GetOwnerAccount()
+        public static (string UserName, string PasswordHash) GetOwnerAccount()
         {
             string? configuredUserName = GetJsonValue("OwnerAccount", "UserName");
-            string? configuredPassword = GetJsonValue("OwnerAccount", "Password");
+            string? configuredPasswordHash = GetJsonValue("OwnerAccount", "PasswordHash");
+            string? legacyPlainTextPassword = GetJsonValue("OwnerAccount", "Password");
+
+            if (!string.IsNullOrWhiteSpace(legacyPlainTextPassword))
+            {
+                throw new InvalidOperationException(
+                    $"Plaintext OwnerAccount:Password is no longer supported. Replace it with OwnerAccount:PasswordHash in {AppSettingsFileName}.");
+            }
 
             string userName = Environment.GetEnvironmentVariable(OwnerUserNameEnvironmentVariable)
                 ?? configuredUserName
                 ?? "";
-            string password = Environment.GetEnvironmentVariable(OwnerPasswordEnvironmentVariable)
-                ?? configuredPassword
+            string passwordHash = Environment.GetEnvironmentVariable(OwnerPasswordHashEnvironmentVariable)
+                ?? configuredPasswordHash
                 ?? "";
 
-            if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
+            if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(passwordHash))
             {
                 throw new InvalidOperationException(
-                    $"Owner login is missing. Set {OwnerUserNameEnvironmentVariable} and {OwnerPasswordEnvironmentVariable}, or add OwnerAccount settings to {AppSettingsFileName}.");
+                    $"Owner login is missing. Set {OwnerUserNameEnvironmentVariable} and {OwnerPasswordHashEnvironmentVariable}, or add OwnerAccount:UserName and OwnerAccount:PasswordHash to {AppSettingsFileName}.");
             }
 
-            return (userName, password);
+            return (userName, passwordHash);
         }
 
         private static string? GetJsonValue(params string[] path)

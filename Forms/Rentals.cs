@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Car_Rental_System.Data;
 using Car_Rental_System.Helpers;
 using Car_Rental_System.Models;
@@ -56,11 +57,11 @@ namespace Car_Rental_System
         private void LoadAvailableCars(AppDbContext db)
         {
             var cars = db.Cars
-                .Where(c => c.Status == AppConstants.AvailableStatus)
+                .Where(c => c.Status == CarStatus.Available)
                 .OrderBy(c => c.Brand).ThenBy(c => c.Model)
-                .Select(c => new
+                .Select(c => new RentalCarLookupItem
                 {
-                    c.CarId,
+                    CarId = c.CarId,
                     CarName = c.PlateNumber + " - " + c.Brand + " " + c.Model +
                         (c.CarType != null ? " (" + c.CarType.TypeName + ")" : ""),
                     DailyRate = c.CarType != null ? c.CarType.DailyRate : c.DailyRate
@@ -88,7 +89,7 @@ namespace Car_Rental_System
                 DateOnly today = RentalCalculator.ToDateOnly(DateTime.Today);
 
                 var query = db.Rentals
-                    .Where(r => r.Status == AppConstants.ActiveRentalStatus)
+                    .Where(r => r.Status == RentalStatus.Active)
                     .Include(r => r.Customer)
                     .Include(r => r.Car).ThenInclude(c => c.CarType)
                     .AsQueryable();
@@ -128,9 +129,10 @@ namespace Car_Rental_System
                 DataGridViewHelper.ApplyStatusFormatting(rentalsGrid);
                 DataGridViewHelper.ClearSelectionWhenReady(rentalsGrid);
             }
-            catch
+            catch (Exception ex)
             {
-                // The lookup loader already shows the LocalDB setup message.
+                Debug.WriteLine(ex);
+                AppMessageBox.ShowDatabaseError("Unable to load active rentals.", ex);
             }
         }
 
@@ -156,7 +158,7 @@ namespace Car_Rental_System
                         MessageBoxButtons.OK,
                         GetRentalFailureIcon(result));
 
-                    if (result.Title == "Car Not Available")
+                    if (result.CarWasUnavailable)
                     {
                         LoadLookups();
                         LoadRentals(searchTextBox.Text);
@@ -187,10 +189,13 @@ namespace Car_Rental_System
 
         private void CarComboBox_SelectedIndexChanged(object? sender, EventArgs e)
         {
-            if (carComboBox.SelectedItem != null)
+            if (carComboBox.SelectedItem is RentalCarLookupItem selected)
             {
-                dynamic selected = carComboBox.SelectedItem;
-                rateTextBox.Text = selected.DailyRate.ToString();
+                rateTextBox.Text = selected.DailyRate.ToString("0.##");
+            }
+            else
+            {
+                rateTextBox.Clear();
             }
 
             CalculateTotal();
@@ -243,7 +248,7 @@ namespace Car_Rental_System
 
         private static MessageBoxIcon GetRentalFailureIcon(RentalOperationResult result)
         {
-            return result.Title == "Car Not Available"
+            return result.CarWasUnavailable
                 ? MessageBoxIcon.Information
                 : MessageBoxIcon.Warning;
         }
@@ -282,6 +287,13 @@ namespace Car_Rental_System
 
             rentalsGrid.ClearSelection();
             CalculateTotal();
+        }
+
+        private sealed class RentalCarLookupItem
+        {
+            public int CarId { get; set; }
+            public string CarName { get; set; } = "";
+            public decimal DailyRate { get; set; }
         }
     }
 }

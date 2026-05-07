@@ -14,7 +14,7 @@ namespace Car_Rental_System.Models
         public DateOnly? ActualReturnDate { get; set; }
         public decimal DailyRate { get; set; }
         public decimal TotalAmount { get; set; }
-        public string Status { get; set; } = "";
+        public RentalStatus Status { get; set; } = RentalStatus.Active;
 
         public Customer Customer { get; set; } = null!;
         public Car Car { get; set; } = null!;
