@@ -1,3 +1,4 @@
+using System.Data;
 using Car_Rental_System.Data;
 using Car_Rental_System.Helpers;
 using Car_Rental_System.Models;
@@ -14,9 +15,17 @@ namespace Car_Rental_System.Services
             DateTime expectedReturnDate)
         {
             using var db = new AppDbContext();
+            using var transaction = db.Database.BeginTransaction(IsolationLevel.Serializable);
 
             int customerId = GetOrCreateCustomerId(db, customerName);
-            return CreateRental(db, customerId, carId, rentalDate, expectedReturnDate);
+            RentalOperationResult result = CreateRental(db, customerId, carId, rentalDate, expectedReturnDate);
+
+            if (result.Success)
+            {
+                transaction.Commit();
+            }
+
+            return result;
         }
 
         public RentalOperationResult CreateRental(
@@ -26,12 +35,22 @@ namespace Car_Rental_System.Services
             DateTime expectedReturnDate)
         {
             using var db = new AppDbContext();
-            return CreateRental(db, customerId, carId, rentalDate, expectedReturnDate);
+            using var transaction = db.Database.BeginTransaction(IsolationLevel.Serializable);
+
+            RentalOperationResult result = CreateRental(db, customerId, carId, rentalDate, expectedReturnDate);
+
+            if (result.Success)
+            {
+                transaction.Commit();
+            }
+
+            return result;
         }
 
         public RentalOperationResult ProcessReturn(int rentalId, DateTime actualReturnDate)
         {
             using var db = new AppDbContext();
+            using var transaction = db.Database.BeginTransaction(IsolationLevel.Serializable);
 
             var rental = db.Rentals
                 .Include(r => r.Car)
@@ -70,6 +89,7 @@ namespace Car_Rental_System.Services
             rental.Car.Status = CarStatus.Available;
 
             db.SaveChanges();
+            transaction.Commit();
 
             return RentalOperationResult.Ok(
                 "Return Complete",

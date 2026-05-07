@@ -39,13 +39,13 @@ namespace Car_Rental_System
 
                 var customers = query
                     .OrderByDescending(c => c.CustomerId)
-                    .Select(c => new
+                    .Select(c => new CustomerGridRow
                     {
-                        c.CustomerId,
+                        CustomerId = c.CustomerId,
                         FullName = c.FullName,
                         ContactNumber = c.ContactNumber,
                         LicenseNumber = c.LicenseNumber,
-                        c.Address
+                        Address = c.Address
                     })
                     .ToList();
 
@@ -236,8 +236,13 @@ namespace Car_Rental_System
                 return;
             }
 
-            dynamic row = customersGrid.CurrentRow.DataBoundItem;
-            selectedCustomerId = (int)row.CustomerId;
+            if (customersGrid.CurrentRow.DataBoundItem is not CustomerGridRow row)
+            {
+                selectedCustomerId = null;
+                return;
+            }
+
+            selectedCustomerId = row.CustomerId;
             nameTextBox.Text = row.FullName;
             contactTextBox.Text = row.ContactNumber;
             licenseTextBox.Text = row.LicenseNumber;
@@ -318,6 +323,15 @@ namespace Car_Rental_System
             licenseTextBox.Clear();
             addressTextBox.Clear();
             customersGrid.ClearSelection();
+        }
+
+        private sealed class CustomerGridRow
+        {
+            public int CustomerId { get; set; }
+            public string FullName { get; set; } = "";
+            public string ContactNumber { get; set; } = "";
+            public string LicenseNumber { get; set; } = "";
+            public string Address { get; set; } = "";
         }
     }
 }

@@ -1,9 +1,13 @@
+using System.Diagnostics;
+
 namespace Car_Rental_System.Helpers
 {
     internal static class AppMessageBox
     {
         public static void ShowLocalDbWarning(Exception exception)
         {
+            Debug.WriteLine(exception);
+
             MessageBox.Show(
                 "The app could not connect to SQL Server LocalDB yet.\n\nInstall SQL Server Express LocalDB from Visual Studio Installer, then run the project again.\n\nDetails: " + exception.Message,
                 "LocalDB Not Ready",
@@ -13,8 +17,10 @@ namespace Car_Rental_System.Helpers
 
         public static void ShowDatabaseError(string action, Exception exception)
         {
+            Debug.WriteLine(exception);
+
             MessageBox.Show(
-                $"{action}\n\n{exception.Message}",
+                $"{action}\n\nThe database operation could not be completed. Please check your data and try again.\n\nTechnical details were written to the Visual Studio Output window.",
                 "Database Error",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);

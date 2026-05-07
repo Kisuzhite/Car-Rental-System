@@ -55,10 +55,10 @@ namespace Car_Rental_System
                 var rentals = query
                     .OrderBy(r => r.ExpectedReturnDate)
                     .ToList()
-                    .Select(r => new
+                    .Select(r => new ActiveRentalGridRow
                     {
-                        r.RentalId,
-                        r.CarId,
+                        RentalId = r.RentalId,
+                        CarId = r.CarId,
                         Customer = r.Customer.FullName,
                         Car = r.Car.PlateNumber + " - " + r.Car.Brand + " " + r.Car.Model +
                             (r.Car.CarType != null ? " (" + r.Car.CarType.TypeName + ")" : ""),
@@ -97,15 +97,19 @@ namespace Car_Rental_System
                 return;
             }
 
-            dynamic row = activeRentalsGrid.CurrentRow.DataBoundItem;
+            if (activeRentalsGrid.CurrentRow.DataBoundItem is not ActiveRentalGridRow row)
+            {
+                ClearDetails();
+                return;
+            }
 
-            selectedRentalId = (int)row.RentalId;
-            selectedCarId = (int)row.CarId;
+            selectedRentalId = row.RentalId;
+            selectedCarId = row.CarId;
 
-            _selectedRentalDate = (DateOnly)row.RentalDate;
-            _selectedExpectedReturn = (DateOnly)row.ExpectedReturn;
-            _selectedDailyRate = (decimal)row.DailyRate;
-            _selectedBaseAmount = (decimal)row.BaseAmount;
+            _selectedRentalDate = row.RentalDate;
+            _selectedExpectedReturn = row.ExpectedReturn;
+            _selectedDailyRate = row.DailyRate;
+            _selectedBaseAmount = row.BaseAmount;
 
             customerTextBox.Text = row.Customer;
             carTextBox.Text = row.Car;
@@ -210,6 +214,21 @@ namespace Car_Rental_System
             lateDaysTextBox.Clear();
             penaltyTextBox.Clear();
             finalAmountTextBox.Clear();
+        }
+
+        private sealed class ActiveRentalGridRow
+        {
+            public int RentalId { get; set; }
+            public int CarId { get; set; }
+            public string Customer { get; set; } = "";
+            public string Car { get; set; } = "";
+            public DateOnly RentalDate { get; set; }
+            public DateOnly ExpectedReturn { get; set; }
+            public decimal DailyRate { get; set; }
+            public decimal BaseAmount { get; set; }
+            public int LateDays { get; set; }
+            public decimal Penalty { get; set; }
+            public string Status { get; set; } = "";
         }
     }
 }

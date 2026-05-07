@@ -39,12 +39,12 @@ namespace Car_Rental_System
                 var carTypes = query
                     .OrderByDescending(ct => ct.IsActive)
                     .ThenBy(ct => ct.TypeName)
-                    .Select(ct => new
+                    .Select(ct => new CarTypeGridRow
                     {
-                        ct.CarTypeId,
+                        CarTypeId = ct.CarTypeId,
                         TypeName = ct.TypeName,
                         DailyRate = ct.DailyRate,
-                        ct.Description,
+                        Description = ct.Description,
                         Status = ct.IsActive ? "Active" : "Inactive"
                     })
                     .ToList();
@@ -235,10 +235,15 @@ namespace Car_Rental_System
                 return;
             }
 
-            dynamic row = carTypesGrid.CurrentRow.DataBoundItem;
-            selectedCarTypeId = (int)row.CarTypeId;
+            if (carTypesGrid.CurrentRow.DataBoundItem is not CarTypeGridRow row)
+            {
+                selectedCarTypeId = null;
+                return;
+            }
+
+            selectedCarTypeId = row.CarTypeId;
             typeNameTextBox.Text = row.TypeName;
-            dailyRateTextBox.Text = ((decimal)row.DailyRate).ToString("0.##");
+            dailyRateTextBox.Text = row.DailyRate.ToString("0.##");
             descriptionTextBox.Text = row.Description;
             isActiveCheckBox.Checked = row.Status == "Active";
         }
@@ -344,6 +349,15 @@ namespace Car_Rental_System
             descriptionTextBox.Clear();
             isActiveCheckBox.Checked = true;
             carTypesGrid.ClearSelection();
+        }
+
+        private sealed class CarTypeGridRow
+        {
+            public int CarTypeId { get; set; }
+            public string TypeName { get; set; } = "";
+            public decimal DailyRate { get; set; }
+            public string Description { get; set; } = "";
+            public string Status { get; set; } = "";
         }
     }
 }

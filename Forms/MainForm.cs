@@ -41,7 +41,24 @@ namespace Car_Rental_System
             try
             {
                 using var db = new AppDbContext();
-                db.Database.Migrate();
+
+                if (!db.Database.CanConnect())
+                {
+                    throw new InvalidOperationException("The database connection could not be opened.");
+                }
+
+                List<string> pendingMigrations = db.Database.GetPendingMigrations().ToList();
+
+                if (pendingMigrations.Count > 0)
+                {
+                    MessageBox.Show(
+                        "The database needs to be updated before the app can continue.\n\nRun this command from the project folder:\n\ndotnet ef database update",
+                        "Database Update Required",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return false;
+                }
+
                 return true;
             }
             catch (Exception ex)
