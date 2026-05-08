@@ -29,6 +29,12 @@ namespace Car_Rental_System
             detailsPanel = new Panel();
             clearButton = new Button();
             createButton = new Button();
+            paymentMethodComboBox = new ComboBox();
+            paymentMethodLabel = new Label();
+            balanceTextBox = new TextBox();
+            balanceLabel = new Label();
+            paymentAmountTextBox = new TextBox();
+            paymentAmountLabel = new Label();
             totalTextBox = new TextBox();
             totalLabel = new Label();
             rateTextBox = new TextBox();
@@ -113,6 +119,12 @@ namespace Car_Rental_System
             detailsPanel.BorderStyle = BorderStyle.FixedSingle;
             detailsPanel.Controls.Add(clearButton);
             detailsPanel.Controls.Add(createButton);
+            detailsPanel.Controls.Add(paymentMethodComboBox);
+            detailsPanel.Controls.Add(paymentMethodLabel);
+            detailsPanel.Controls.Add(balanceTextBox);
+            detailsPanel.Controls.Add(balanceLabel);
+            detailsPanel.Controls.Add(paymentAmountTextBox);
+            detailsPanel.Controls.Add(paymentAmountLabel);
             detailsPanel.Controls.Add(totalTextBox);
             detailsPanel.Controls.Add(totalLabel);
             detailsPanel.Controls.Add(rateTextBox);
@@ -142,11 +154,11 @@ namespace Car_Rental_System
             clearButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             clearButton.ForeColor = Color.FromArgb(31, 41, 55);
             clearButton.Image = (Image)resources.GetObject("clearButton.Image");
-            clearButton.Location = new Point(25, 457);
+            clearButton.Location = new Point(25, 600);
             clearButton.Margin = new Padding(3, 4, 3, 4);
             clearButton.Name = "clearButton";
             clearButton.Size = new Size(343, 45);
-            clearButton.TabIndex = 17;
+            clearButton.TabIndex = 23;
             clearButton.Text = "Clear";
             clearButton.TextAlign = ContentAlignment.MiddleRight;
             clearButton.TextImageRelation = TextImageRelation.ImageBeforeText;
@@ -162,16 +174,83 @@ namespace Car_Rental_System
             createButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             createButton.ForeColor = Color.White;
             createButton.Image = (Image)resources.GetObject("createButton.Image");
-            createButton.Location = new Point(23, 392);
+            createButton.Location = new Point(25, 545);
             createButton.Margin = new Padding(3, 4, 3, 4);
             createButton.Name = "createButton";
-            createButton.Size = new Size(342, 45);
-            createButton.TabIndex = 15;
+            createButton.Size = new Size(343, 45);
+            createButton.TabIndex = 22;
             createButton.Text = "Create Rental";
             createButton.TextAlign = ContentAlignment.MiddleRight;
             createButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             createButton.UseVisualStyleBackColor = false;
             createButton.Click += CreateButton_Click;
+            // 
+            // paymentMethodComboBox
+            // 
+            paymentMethodComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            paymentMethodComboBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            paymentMethodComboBox.FormattingEnabled = true;
+            paymentMethodComboBox.Location = new Point(25, 481);
+            paymentMethodComboBox.Margin = new Padding(3, 4, 3, 4);
+            paymentMethodComboBox.Name = "paymentMethodComboBox";
+            paymentMethodComboBox.Size = new Size(342, 32);
+            paymentMethodComboBox.TabIndex = 21;
+            // 
+            // paymentMethodLabel
+            // 
+            paymentMethodLabel.AutoSize = true;
+            paymentMethodLabel.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            paymentMethodLabel.ForeColor = Color.FromArgb(31, 41, 55);
+            paymentMethodLabel.Location = new Point(25, 455);
+            paymentMethodLabel.Name = "paymentMethodLabel";
+            paymentMethodLabel.Size = new Size(134, 22);
+            paymentMethodLabel.TabIndex = 20;
+            paymentMethodLabel.Text = "Payment Method";
+            // 
+            // balanceTextBox
+            // 
+            balanceTextBox.BorderStyle = BorderStyle.FixedSingle;
+            balanceTextBox.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            balanceTextBox.Location = new Point(208, 406);
+            balanceTextBox.Margin = new Padding(3, 4, 3, 4);
+            balanceTextBox.Name = "balanceTextBox";
+            balanceTextBox.ReadOnly = true;
+            balanceTextBox.Size = new Size(160, 28);
+            balanceTextBox.TabIndex = 19;
+            // 
+            // balanceLabel
+            // 
+            balanceLabel.AutoSize = true;
+            balanceLabel.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            balanceLabel.ForeColor = Color.FromArgb(31, 41, 55);
+            balanceLabel.Location = new Point(208, 380);
+            balanceLabel.Name = "balanceLabel";
+            balanceLabel.Size = new Size(65, 22);
+            balanceLabel.TabIndex = 18;
+            balanceLabel.Text = "Balance";
+            // 
+            // paymentAmountTextBox
+            // 
+            paymentAmountTextBox.BorderStyle = BorderStyle.FixedSingle;
+            paymentAmountTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            paymentAmountTextBox.Location = new Point(25, 406);
+            paymentAmountTextBox.Margin = new Padding(3, 4, 3, 4);
+            paymentAmountTextBox.Name = "paymentAmountTextBox";
+            paymentAmountTextBox.PlaceholderText = "0";
+            paymentAmountTextBox.Size = new Size(160, 28);
+            paymentAmountTextBox.TabIndex = 17;
+            paymentAmountTextBox.TextChanged += PaymentAmountTextBox_TextChanged;
+            // 
+            // paymentAmountLabel
+            // 
+            paymentAmountLabel.AutoSize = true;
+            paymentAmountLabel.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            paymentAmountLabel.ForeColor = Color.FromArgb(31, 41, 55);
+            paymentAmountLabel.Location = new Point(25, 380);
+            paymentAmountLabel.Name = "paymentAmountLabel";
+            paymentAmountLabel.Size = new Size(104, 22);
+            paymentAmountLabel.TabIndex = 16;
+            paymentAmountLabel.Text = "Amount Paid";
             // 
             // totalTextBox
             // 
@@ -445,6 +524,12 @@ namespace Car_Rental_System
         private Panel detailsPanel;
         private Button clearButton;
         private Button createButton;
+        private ComboBox paymentMethodComboBox;
+        private Label paymentMethodLabel;
+        private TextBox balanceTextBox;
+        private Label balanceLabel;
+        private TextBox paymentAmountTextBox;
+        private Label paymentAmountLabel;
         private TextBox totalTextBox;
         private Label totalLabel;
         private TextBox rateTextBox;

@@ -10,7 +10,9 @@ namespace Car_Rental_System
     {
         private readonly Padding dashboardPadding;
         private readonly AppUser currentUser;
+        private readonly List<CarLookupItem> availableCarLookupItems = [];
         private Form? activeModuleForm;
+        private CarLookupItem? selectedQuickRentalCar;
 
         public MainForm() : this(new AppUser { UserName = "owner", Role = AppConstants.OwnerRole })
         {
@@ -70,6 +72,9 @@ namespace Car_Rental_System
 
         private void PrepareDashboardForm()
         {
+            paymentMethodComboBox.Format += PaymentMethodComboBox_Format;
+            paymentMethodComboBox.DataSource = PaymentHelper.GetSelectablePaymentMethods();
+            paymentMethodComboBox.SelectedItem = PaymentMethod.Cash;
             rentalDatePicker.Value = DateTime.Today;
             returnDatePicker.Value = DateTime.Today.AddDays(1);
             CalculateQuickRentalTotal();
@@ -105,10 +110,9 @@ namespace Car_Rental_System
             DateOnly firstOfNextMonth = firstOfMonth.AddMonths(1);
 
             decimal income = db.Rentals
-                .Where(r => r.Status == RentalStatus.Returned
-                    && r.ActualReturnDate >= firstOfMonth
+                .Where(r => r.ActualReturnDate >= firstOfMonth
                     && r.ActualReturnDate < firstOfNextMonth)
-                .Sum(r => (decimal?)r.TotalAmount) ?? 0;
+                .Sum(r => (decimal?)r.AmountPaid) ?? 0;
 
             incomeValueLabel.Text = RentalCalculator.FormatCurrency(income);
         }
@@ -132,6 +136,7 @@ namespace Car_Rental_System
                 .OrderBy(c => c.Brand).ThenBy(c => c.Model)
                 .Select(c => new
                 {
+                    c.CarId,
                     PlateNo = c.PlateNumber,
                     Type = c.CarType != null ? c.CarType.TypeName : AppConstants.NotProvided,
                     c.Brand,
@@ -144,6 +149,7 @@ namespace Car_Rental_System
             carsGrid.Columns.Clear();
             carsGrid.DataSource = cars;
             DataGridViewHelper.ApplyFriendlyHeaders(carsGrid);
+            DataGridViewHelper.HideColumn(carsGrid, "CarId");
             DataGridViewHelper.ApplyStatusFormatting(carsGrid);
             carsGrid.ClearSelection();
         }
@@ -166,6 +172,9 @@ namespace Car_Rental_System
                         (r.Car.CarType != null ? " (" + r.Car.CarType.TypeName + ")" : ""),
                     ReturnDate = r.ExpectedReturnDate,
                     Amount = r.TotalAmount,
+                    r.AmountPaid,
+                    Balance = r.Balance,
+                    r.PaymentStatus,
                     Status = RentalStatusHelper.GetDisplayStatus(r, today)
                 })
                 .ToList();
@@ -191,22 +200,13 @@ namespace Car_Rental_System
                 })
                 .ToList();
 
-            // Prepend blank placeholder
-            cars.Insert(0, new CarLookupItem
-            {
-                CarId = null,
-                CarName = "-- Select a car --",
-                DailyRate = null
-            });
+            availableCarLookupItems.Clear();
+            availableCarLookupItems.AddRange(cars);
 
-            selectedCarComboBox.DisplayMember = "CarName";
-            selectedCarComboBox.ValueMember = "CarId";
-            selectedCarComboBox.DataSource = cars;
-
-            if (cars.Count <= 1)
+            if (selectedQuickRentalCar != null &&
+                !availableCarLookupItems.Any(c => c.CarId == selectedQuickRentalCar.CarId))
             {
-                dailyRateTextBox.Clear();
-                totalAmountTextBox.Text = RentalCalculator.FormatCurrency(0);
+                ClearSelectedQuickRentalCar();
             }
         }
 
@@ -305,7 +305,12 @@ namespace Car_Rental_System
 
         private void CreateRentalButton_Click(object? sender, EventArgs e)
         {
-            if (!ValidateQuickRental(out int carId, out decimal dailyRate, out decimal totalAmount))
+            if (!ValidateQuickRental(
+                out int carId,
+                out decimal dailyRate,
+                out decimal totalAmount,
+                out decimal amountPaid,
+                out PaymentMethod paymentMethod))
                 return;
 
             try
@@ -315,7 +320,9 @@ namespace Car_Rental_System
                     customerNameTextBox.Text,
                     carId,
                     rentalDatePicker.Value,
-                    returnDatePicker.Value);
+                    returnDatePicker.Value,
+                    amountPaid,
+                    paymentMethod);
 
                 if (!result.Success)
                 {
@@ -340,11 +347,18 @@ namespace Car_Rental_System
             }
         }
 
-        private bool ValidateQuickRental(out int carId, out decimal dailyRate, out decimal totalAmount)
+        private bool ValidateQuickRental(
+            out int carId,
+            out decimal dailyRate,
+            out decimal totalAmount,
+            out decimal amountPaid,
+            out PaymentMethod paymentMethod)
         {
             carId = 0;
             dailyRate = 0;
             totalAmount = 0;
+            amountPaid = 0;
+            paymentMethod = PaymentMethod.Cash;
 
             if (string.IsNullOrWhiteSpace(customerNameTextBox.Text))
             {
@@ -360,7 +374,7 @@ namespace Car_Rental_System
 
             if (!TryGetSelectedCarId(out carId))
             {
-                MessageBox.Show("Please add or select an available car first.", "No Available Car", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Please click an available car from the grid first.", "No Car Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
 
@@ -387,6 +401,17 @@ namespace Car_Rental_System
             }
 
             totalAmount = CalculateQuickRentalTotal();
+            amountPaid = ParseOptionalPaymentAmount(paymentAmountTextBox.Text);
+
+            if (!PaymentHelper.IsValidPaymentAmount(amountPaid, totalAmount))
+            {
+                MessageBox.Show("Amount paid cannot be negative or greater than the total amount.", "Invalid Payment", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            paymentMethod = paymentMethodComboBox.SelectedItem is PaymentMethod selectedMethod
+                ? selectedMethod
+                : PaymentMethod.Cash;
             return true;
         }
 
@@ -401,9 +426,9 @@ namespace Car_Rental_System
         {
             carId = 0;
 
-            if (selectedCarComboBox.SelectedItem is CarLookupItem item && item.CarId.HasValue)
+            if (selectedQuickRentalCar?.CarId is int selectedCarId)
             {
-                carId = item.CarId.Value;
+                carId = selectedCarId;
                 return true;
             }
 
@@ -420,22 +445,20 @@ namespace Car_Rental_System
             LoadDashboardData(searchTextBox.Text);
         }
 
-        private void SelectedCarComboBox_SelectedIndexChanged(object? sender, EventArgs e)
+        private void DateOrRate_Changed(object? sender, EventArgs e)
         {
-            if (selectedCarComboBox.SelectedItem is CarLookupItem item && item.DailyRate.HasValue)
-            {
-                dailyRateTextBox.Text = item.DailyRate.Value.ToString("0.##");
-            }
-            else
-            {
-                dailyRateTextBox.Clear();
-                totalAmountTextBox.Text = RentalCalculator.FormatCurrency(0);
-            }
-
             CalculateQuickRentalTotal();
         }
 
-        private void DateOrRate_Changed(object? sender, EventArgs e)
+        private static void PaymentMethodComboBox_Format(object? sender, ListControlConvertEventArgs e)
+        {
+            if (e.ListItem is PaymentMethod paymentMethod)
+            {
+                e.Value = PaymentHelper.FormatPaymentMethod(paymentMethod);
+            }
+        }
+
+        private void PaymentAmountTextBox_TextChanged(object? sender, EventArgs e)
         {
             CalculateQuickRentalTotal();
         }
@@ -457,23 +480,41 @@ namespace Car_Rental_System
             return total;
         }
 
+        private static decimal ParseOptionalPaymentAmount(string value)
+        {
+            return string.IsNullOrWhiteSpace(value)
+                ? 0
+                : decimal.TryParse(value, out decimal amount) ? amount : -1;
+        }
+
         private void CarsGrid_CellClick(object? sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex < 0 || carsGrid.Rows[e.RowIndex].DataBoundItem == null)
+            if (!TryGetClickedCarId(e.RowIndex, out int carId))
                 return;
 
-            string plateNumber = carsGrid.Rows[e.RowIndex].Cells["PlateNo"].Value?.ToString() ?? "";
-
-            foreach (var item in selectedCarComboBox.Items.OfType<CarLookupItem>())
+            foreach (CarLookupItem item in availableCarLookupItems)
             {
-                if (item.CarName.StartsWith(plateNumber))
+                if (item.CarId == carId)
                 {
-                    selectedCarComboBox.SelectedItem = item;
+                    SelectQuickRentalCar(item);
                     break;
                 }
             }
+        }
 
-            carsGrid.ClearSelection();
+        private bool TryGetClickedCarId(int rowIndex, out int carId)
+        {
+            carId = 0;
+
+            if (rowIndex < 0 ||
+                carsGrid.Rows[rowIndex].DataBoundItem == null ||
+                !carsGrid.Columns.Contains("CarId"))
+            {
+                return false;
+            }
+
+            object? value = carsGrid.Rows[rowIndex].Cells["CarId"].Value;
+            return value != null && int.TryParse(value.ToString(), out carId);
         }
 
         private void ClearQuickRentalForm()
@@ -482,10 +523,26 @@ namespace Car_Rental_System
             rentalDatePicker.Value = DateTime.Today;
             returnDatePicker.Value = DateTime.Today.AddDays(1);
 
-            if (selectedCarComboBox.Items.Count > 0)
-                selectedCarComboBox.SelectedIndex = 0;
-
+            ClearSelectedQuickRentalCar();
+            paymentAmountTextBox.Clear();
+            paymentMethodComboBox.SelectedItem = PaymentMethod.Cash;
             CalculateQuickRentalTotal();
+        }
+
+        private void SelectQuickRentalCar(CarLookupItem car)
+        {
+            selectedQuickRentalCar = car;
+            selectedCarTextBox.Text = car.CarName;
+            dailyRateTextBox.Text = car.DailyRate?.ToString("0.##") ?? "";
+            CalculateQuickRentalTotal();
+        }
+
+        private void ClearSelectedQuickRentalCar()
+        {
+            selectedQuickRentalCar = null;
+            selectedCarTextBox.Clear();
+            dailyRateTextBox.Clear();
+            totalAmountTextBox.Text = RentalCalculator.FormatCurrency(0);
         }
 
         private void LogoutButton_Click(object? sender, EventArgs e)

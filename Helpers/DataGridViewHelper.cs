@@ -11,7 +11,9 @@ namespace Car_Rental_System.Helpers
             ["ActualReturn"] = "Actual Return",
             ["Address"] = "Address",
             ["Amount"] = "Amount",
+            ["AmountPaid"] = "Amount Paid",
             ["BaseAmount"] = "Base Amount",
+            ["Balance"] = "Balance",
             ["Brand"] = "Brand",
             ["Car"] = "Car",
             ["CarId"] = "Car ID",
@@ -29,6 +31,8 @@ namespace Car_Rental_System.Helpers
             ["LateDays"] = "Late Days",
             ["LicenseNumber"] = "License Number",
             ["Model"] = "Model",
+            ["PaymentMethod"] = "Payment Method",
+            ["PaymentStatus"] = "Payment Status",
             ["Penalty"] = "Penalty",
             ["PlateNo"] = "Plate No",
             ["PlateNumber"] = "Plate Number",
@@ -121,8 +125,9 @@ namespace Car_Rental_System.Helpers
                 "Status" => 116,
                 "RentalId" or "RentalID" or "CarId" or "CustomerId" or "CarTypeId" => 82,
                 "RentalDate" or "ReturnDate" or "ExpectedReturn" or "ActualReturn" => 120,
-                "DailyRate" or "RatePerDay" or "BaseAmount" or "TotalAmount" or "Penalty" or "Amount" => 125,
+                "DailyRate" or "RatePerDay" or "BaseAmount" or "TotalAmount" or "AmountPaid" or "Balance" or "Penalty" or "Amount" => 125,
                 "LateDays" => 92,
+                "PaymentMethod" or "PaymentStatus" => 125,
                 "PlateNo" or "PlateNumber" => 115,
                 "CarType" or "CarTypeName" or "Type" or "TypeName" => 130,
                 "Customer" or "FullName" => 170,
@@ -138,8 +143,9 @@ namespace Car_Rental_System.Helpers
                 "Status" => 78,
                 "RentalId" or "RentalID" or "CarId" or "CustomerId" or "CarTypeId" => 55,
                 "LateDays" => 62,
+                "PaymentMethod" or "PaymentStatus" => 90,
                 "RentalDate" or "ReturnDate" or "ExpectedReturn" or "ActualReturn" => 85,
-                "DailyRate" or "RatePerDay" or "BaseAmount" or "TotalAmount" or "Penalty" or "Amount" => 90,
+                "DailyRate" or "RatePerDay" or "BaseAmount" or "TotalAmount" or "AmountPaid" or "Balance" or "Penalty" or "Amount" => 90,
                 "Car" or "Description" or "Address" => 175,
                 "Customer" or "FullName" => 125,
                 _ => 100
@@ -200,6 +206,13 @@ namespace Car_Rental_System.Helpers
                 statusColumn.MinimumWidth = Math.Max(statusColumn.MinimumWidth, 116);
                 statusColumn.FillWeight = 78;
             }
+
+            DataGridViewColumn? paymentStatusColumn = grid.Columns["PaymentStatus"];
+            if (paymentStatusColumn != null)
+            {
+                paymentStatusColumn.MinimumWidth = Math.Max(paymentStatusColumn.MinimumWidth, 125);
+                paymentStatusColumn.FillWeight = 90;
+            }
         }
 
         private static void StatusCellPainting(object? sender, DataGridViewCellPaintingEventArgs e)
@@ -207,7 +220,7 @@ namespace Car_Rental_System.Helpers
             if (sender is not DataGridView grid ||
                 e.RowIndex < 0 ||
                 e.ColumnIndex < 0 ||
-                !string.Equals(grid.Columns[e.ColumnIndex].Name, "Status", StringComparison.OrdinalIgnoreCase))
+                !IsStatusColumn(grid.Columns[e.ColumnIndex].Name))
             {
                 return;
             }
@@ -246,6 +259,12 @@ namespace Car_Rental_System.Helpers
             e.Handled = true;
         }
 
+        private static bool IsStatusColumn(string columnName)
+        {
+            return string.Equals(columnName, "Status", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(columnName, "PaymentStatus", StringComparison.OrdinalIgnoreCase);
+        }
+
         private static (Color BackColor, Color BorderColor, Color ForeColor) GetStatusChipColors(string status)
         {
             Color backColor = status switch
@@ -256,6 +275,9 @@ namespace Car_Rental_System.Helpers
                 nameof(RentalStatus.Active) => Color.FromArgb(219, 234, 254),
                 AppConstants.OverdueRentalStatus => Color.FromArgb(254, 226, 226),
                 nameof(RentalStatus.Returned) => Color.FromArgb(220, 252, 231),
+                nameof(PaymentStatus.Unpaid) => Color.FromArgb(254, 226, 226),
+                nameof(PaymentStatus.Partial) => Color.FromArgb(254, 243, 199),
+                nameof(PaymentStatus.Paid) => Color.FromArgb(220, 252, 231),
                 _ => Color.White
             };
 
@@ -267,6 +289,9 @@ namespace Car_Rental_System.Helpers
                 nameof(RentalStatus.Active) => Color.FromArgb(147, 197, 253),
                 AppConstants.OverdueRentalStatus => Color.FromArgb(252, 165, 165),
                 nameof(RentalStatus.Returned) => Color.FromArgb(134, 239, 172),
+                nameof(PaymentStatus.Unpaid) => Color.FromArgb(252, 165, 165),
+                nameof(PaymentStatus.Partial) => Color.FromArgb(252, 211, 77),
+                nameof(PaymentStatus.Paid) => Color.FromArgb(134, 239, 172),
                 _ => Color.FromArgb(229, 231, 235)
             };
 
@@ -278,6 +303,9 @@ namespace Car_Rental_System.Helpers
                 nameof(RentalStatus.Active) => Color.FromArgb(30, 64, 175),
                 AppConstants.OverdueRentalStatus => Color.FromArgb(153, 27, 27),
                 nameof(RentalStatus.Returned) => Color.FromArgb(22, 101, 52),
+                nameof(PaymentStatus.Unpaid) => Color.FromArgb(153, 27, 27),
+                nameof(PaymentStatus.Partial) => Color.FromArgb(146, 64, 14),
+                nameof(PaymentStatus.Paid) => Color.FromArgb(22, 101, 52),
                 _ => Color.FromArgb(31, 41, 55)
             };
 

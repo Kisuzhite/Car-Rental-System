@@ -12,13 +12,22 @@ namespace Car_Rental_System.Services
             string customerName,
             int carId,
             DateTime rentalDate,
-            DateTime expectedReturnDate)
+            DateTime expectedReturnDate,
+            decimal amountPaid = 0,
+            PaymentMethod paymentMethod = PaymentMethod.Cash)
         {
             using var db = new AppDbContext();
             using var transaction = db.Database.BeginTransaction(IsolationLevel.Serializable);
 
             int customerId = GetOrCreateCustomerId(db, customerName);
-            RentalOperationResult result = CreateRental(db, customerId, carId, rentalDate, expectedReturnDate);
+            RentalOperationResult result = CreateRental(
+                db,
+                customerId,
+                carId,
+                rentalDate,
+                expectedReturnDate,
+                amountPaid,
+                paymentMethod);
 
             if (result.Success)
             {
@@ -32,12 +41,21 @@ namespace Car_Rental_System.Services
             int customerId,
             int carId,
             DateTime rentalDate,
-            DateTime expectedReturnDate)
+            DateTime expectedReturnDate,
+            decimal amountPaid = 0,
+            PaymentMethod paymentMethod = PaymentMethod.Cash)
         {
             using var db = new AppDbContext();
             using var transaction = db.Database.BeginTransaction(IsolationLevel.Serializable);
 
-            RentalOperationResult result = CreateRental(db, customerId, carId, rentalDate, expectedReturnDate);
+            RentalOperationResult result = CreateRental(
+                db,
+                customerId,
+                carId,
+                rentalDate,
+                expectedReturnDate,
+                amountPaid,
+                paymentMethod);
 
             if (result.Success)
             {
@@ -47,7 +65,11 @@ namespace Car_Rental_System.Services
             return result;
         }
 
-        public RentalOperationResult ProcessReturn(int rentalId, DateTime actualReturnDate)
+        public RentalOperationResult ProcessReturn(
+            int rentalId,
+            DateTime actualReturnDate,
+            decimal additionalPayment = 0,
+            PaymentMethod paymentMethod = PaymentMethod.Cash)
         {
             using var db = new AppDbContext();
             using var transaction = db.Database.BeginTransaction(IsolationLevel.Serializable);
@@ -82,9 +104,24 @@ namespace Car_Rental_System.Services
                 actualReturnDate,
                 rental.DailyRate,
                 rental.TotalAmount);
+            decimal newAmountPaid = rental.AmountPaid + additionalPayment;
+
+            if (!PaymentHelper.IsValidPaymentAmount(newAmountPaid, finalAmount))
+            {
+                return RentalOperationResult.Fail(
+                    RentalOperationError.InvalidPaymentAmount,
+                    "Invalid Payment",
+                    "Payment cannot be negative or greater than the final amount.");
+            }
 
             rental.ActualReturnDate = actualReturn;
             rental.TotalAmount = finalAmount;
+            rental.AmountPaid = newAmountPaid;
+            rental.PaymentStatus = PaymentHelper.GetPaymentStatus(finalAmount, newAmountPaid);
+            if (additionalPayment > 0)
+            {
+                rental.PaymentMethod = paymentMethod;
+            }
             rental.Status = RentalStatus.Returned;
             rental.Car.Status = CarStatus.Available;
 
@@ -97,6 +134,8 @@ namespace Car_Rental_System.Services
                 rental.RentalId,
                 rental.DailyRate,
                 finalAmount,
+                newAmountPaid,
+                rental.Balance,
                 lateDays);
         }
 
@@ -105,7 +144,9 @@ namespace Car_Rental_System.Services
             int customerId,
             int carId,
             DateTime rentalDate,
-            DateTime expectedReturnDate)
+            DateTime expectedReturnDate,
+            decimal amountPaid,
+            PaymentMethod paymentMethod)
         {
             bool hasActiveRental = db.Rentals.Any(r =>
                 r.CustomerId == customerId &&
@@ -139,6 +180,14 @@ namespace Car_Rental_System.Services
                 expectedReturnDate,
                 dailyRate);
 
+            if (!PaymentHelper.IsValidPaymentAmount(amountPaid, totalAmount))
+            {
+                return RentalOperationResult.Fail(
+                    RentalOperationError.InvalidPaymentAmount,
+                    "Invalid Payment",
+                    "Payment cannot be negative or greater than the total amount.");
+            }
+
             car.Status = CarStatus.Rented;
 
             var rental = new Rental
@@ -149,6 +198,9 @@ namespace Car_Rental_System.Services
                 ExpectedReturnDate = RentalCalculator.ToDateOnly(expectedReturnDate),
                 DailyRate = dailyRate,
                 TotalAmount = totalAmount,
+                AmountPaid = amountPaid,
+                PaymentStatus = PaymentHelper.GetPaymentStatus(totalAmount, amountPaid),
+                PaymentMethod = paymentMethod,
                 Status = RentalStatus.Active
             };
 
@@ -160,7 +212,9 @@ namespace Car_Rental_System.Services
                 "Rental transaction created successfully.",
                 rental.RentalId,
                 dailyRate,
-                totalAmount);
+                totalAmount,
+                amountPaid,
+                rental.Balance);
         }
 
         private static int GetOrCreateCustomerId(AppDbContext db, string customerName)

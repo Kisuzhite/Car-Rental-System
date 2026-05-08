@@ -68,6 +68,15 @@ namespace Car_Rental_System.Data
             {
                 e.Property(r => r.DailyRate).HasColumnType(moneyColumnType);
                 e.Property(r => r.TotalAmount).HasColumnType(moneyColumnType);
+                e.Property(r => r.AmountPaid).HasColumnType(moneyColumnType);
+                e.Property(r => r.PaymentStatus)
+                    .HasConversion<string>()
+                    .HasMaxLength(20)
+                    .IsRequired();
+                e.Property(r => r.PaymentMethod)
+                    .HasConversion<string>()
+                    .HasMaxLength(30)
+                    .IsRequired();
                 e.Property(r => r.Status)
                     .HasConversion<string>()
                     .HasMaxLength(20)

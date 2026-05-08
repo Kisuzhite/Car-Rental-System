@@ -98,9 +98,9 @@ namespace Car_Rental_System
             helperLabel.ForeColor = Color.FromArgb(31, 41, 55);
             helperLabel.Location = new Point(35, 85);
             helperLabel.Name = "helperLabel";
-            helperLabel.Size = new Size(378, 24);
+            helperLabel.Size = new Size(485, 24);
             helperLabel.TabIndex = 1;
-            helperLabel.Text = "Review inventory, active rentals, and income.";
+            helperLabel.Text = "Review inventory, active rentals, and collected payments.";
             // 
             // titleLabel
             // 
@@ -371,9 +371,9 @@ namespace Car_Rental_System
             incomeTextLabel.ForeColor = Color.FromArgb(31, 41, 55);
             incomeTextLabel.Location = new Point(23, 27);
             incomeTextLabel.Name = "incomeTextLabel";
-            incomeTextLabel.Size = new Size(148, 24);
+            incomeTextLabel.Size = new Size(163, 24);
             incomeTextLabel.TabIndex = 0;
-            incomeTextLabel.Text = "Returned Income";
+            incomeTextLabel.Text = "Collected Payments";
             // 
             // Reports
             // 

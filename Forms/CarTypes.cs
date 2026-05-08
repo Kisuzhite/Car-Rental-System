@@ -8,6 +8,7 @@ namespace Car_Rental_System
     public partial class CarTypes : Form
     {
         private int? selectedCarTypeId;
+        private bool isLoadingCarTypes;
 
         public CarTypes()
         {
@@ -21,6 +22,8 @@ namespace Car_Rental_System
 
         private void LoadCarTypes(string search = "")
         {
+            isLoadingCarTypes = true;
+
             try
             {
                 using var db = new AppDbContext();
@@ -55,11 +58,11 @@ namespace Car_Rental_System
                 DataGridViewHelper.ApplyFriendlyHeaders(carTypesGrid);
                 DataGridViewHelper.HideColumn(carTypesGrid, "CarTypeId");
                 FormatCarTypesGridColumns();
-                DataGridViewHelper.ClearSelectionWhenReady(carTypesGrid);
-                ClearForm();
+                ClearFormAfterGridLoad();
             }
             catch (Exception ex)
             {
+                isLoadingCarTypes = false;
                 AppMessageBox.ShowLocalDbWarning(ex);
             }
         }
@@ -229,6 +232,11 @@ namespace Car_Rental_System
 
         private void CarTypesGrid_SelectionChanged(object? sender, EventArgs e)
         {
+            if (isLoadingCarTypes)
+            {
+                return;
+            }
+
             if (carTypesGrid.CurrentRow?.DataBoundItem == null || !carTypesGrid.CurrentRow.Selected)
             {
                 selectedCarTypeId = null;
@@ -332,6 +340,23 @@ namespace Car_Rental_System
                 (!excludedCarTypeId.HasValue || ct.CarTypeId != excludedCarTypeId.Value));
         }
 
+        private void ClearFormAfterGridLoad()
+        {
+            ClearForm();
+
+            if (!carTypesGrid.IsHandleCreated)
+            {
+                isLoadingCarTypes = false;
+                return;
+            }
+
+            BeginInvoke(new Action(() =>
+            {
+                ClearForm();
+                isLoadingCarTypes = false;
+            }));
+        }
+
         private static void ShowDuplicateTypeMessage(string typeName)
         {
             MessageBox.Show(
@@ -349,6 +374,7 @@ namespace Car_Rental_System
             descriptionTextBox.Clear();
             isActiveCheckBox.Checked = true;
             carTypesGrid.ClearSelection();
+            carTypesGrid.CurrentCell = null;
         }
 
         private sealed class CarTypeGridRow

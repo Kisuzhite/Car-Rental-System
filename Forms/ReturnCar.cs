@@ -16,6 +16,7 @@ namespace Car_Rental_System
         private DateOnly _selectedExpectedReturn;
         private decimal _selectedDailyRate;
         private decimal _selectedBaseAmount;
+        private decimal _selectedAmountPaid;
         private DateOnly _selectedRentalDate;
 
         public ReturnCar()
@@ -25,8 +26,19 @@ namespace Car_Rental_System
 
         private void ReturnCar_Load(object? sender, EventArgs e)
         {
+            paymentMethodComboBox.Format += PaymentMethodComboBox_Format;
+            paymentMethodComboBox.DataSource = PaymentHelper.GetSelectablePaymentMethods();
+            paymentMethodComboBox.SelectedItem = PaymentMethod.Cash;
             actualReturnDatePicker.Value = DateTime.Today;
             LoadActiveRentals();
+        }
+
+        private static void PaymentMethodComboBox_Format(object? sender, ListControlConvertEventArgs e)
+        {
+            if (e.ListItem is PaymentMethod paymentMethod)
+            {
+                e.Value = PaymentHelper.FormatPaymentMethod(paymentMethod);
+            }
         }
 
         private void LoadActiveRentals(string search = "")
@@ -66,6 +78,10 @@ namespace Car_Rental_System
                         ExpectedReturn = r.ExpectedReturnDate,
                         DailyRate = r.DailyRate,
                         BaseAmount = r.TotalAmount,
+                        AmountPaid = r.AmountPaid,
+                        Balance = r.Balance,
+                        PaymentStatus = r.PaymentStatus,
+                        PaymentMethod = PaymentHelper.FormatPaymentMethod(r.PaymentMethod),
                         LateDays = RentalStatusHelper.GetLateDays(r, today),
                         Penalty = RentalStatusHelper.GetLatePenalty(r, today),
                         Status = RentalStatusHelper.GetDisplayStatus(r, today)
@@ -110,12 +126,16 @@ namespace Car_Rental_System
             _selectedExpectedReturn = row.ExpectedReturn;
             _selectedDailyRate = row.DailyRate;
             _selectedBaseAmount = row.BaseAmount;
+            _selectedAmountPaid = row.AmountPaid;
 
             customerTextBox.Text = row.Customer;
             carTextBox.Text = row.Car;
             expectedReturnTextBox.Text = _selectedExpectedReturn.ToString("d", CultureInfo.CurrentCulture);
             dailyRateTextBox.Text = _selectedDailyRate.ToString("N2");
             baseAmountTextBox.Text = _selectedBaseAmount.ToString("N2");
+            amountPaidTextBox.Text = _selectedAmountPaid.ToString("N2");
+            additionalPaymentTextBox.Clear();
+            paymentMethodComboBox.SelectedItem = PaymentMethod.Cash;
 
             CalculateFinalAmount();
         }
@@ -128,7 +148,15 @@ namespace Car_Rental_System
             }
         }
 
-        private void CalculateFinalAmount()
+        private void AdditionalPaymentTextBox_TextChanged(object? sender, EventArgs e)
+        {
+            if (selectedRentalId != null)
+            {
+                CalculateFinalAmount();
+            }
+        }
+
+        private decimal CalculateFinalAmount()
         {
             int lateDays = RentalCalculator.GetLateDays(_selectedExpectedReturn, actualReturnDatePicker.Value);
             decimal penalty = lateDays * _selectedDailyRate;
@@ -141,6 +169,16 @@ namespace Car_Rental_System
             lateDaysTextBox.Text = lateDays.ToString();
             penaltyTextBox.Text = penalty.ToString("N2");
             finalAmountTextBox.Text = finalAmount.ToString("N2");
+
+            decimal additionalPayment = ParseOptionalPaymentAmount(additionalPaymentTextBox.Text);
+            if (additionalPayment < 0)
+            {
+                additionalPayment = 0;
+            }
+
+            decimal balance = PaymentHelper.GetBalance(finalAmount, _selectedAmountPaid + additionalPayment);
+            balanceTextBox.Text = balance.ToString("N2");
+            return finalAmount;
         }
 
         private void ProcessReturnButton_Click(object? sender, EventArgs e)
@@ -159,12 +197,39 @@ namespace Car_Rental_System
                 return;
             }
 
+            decimal additionalPayment = ParseOptionalPaymentAmount(additionalPaymentTextBox.Text);
+            if (additionalPayment < 0)
+            {
+                MessageBox.Show("Payment now must be a valid amount.", "Invalid Payment", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            decimal finalAmount = CalculateFinalAmount();
+            decimal newAmountPaid = _selectedAmountPaid + additionalPayment;
+            if (!PaymentHelper.IsValidPaymentAmount(newAmountPaid, finalAmount))
+            {
+                MessageBox.Show("Payment now cannot make the total paid greater than the final amount.", "Invalid Payment", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            decimal remainingBalance = PaymentHelper.GetBalance(finalAmount, newAmountPaid);
+            if (remainingBalance > 0 && !ConfirmReturnWithRemainingBalance(remainingBalance))
+            {
+                return;
+            }
+
+            PaymentMethod paymentMethod = paymentMethodComboBox.SelectedItem is PaymentMethod selectedMethod
+                ? selectedMethod
+                : PaymentMethod.Cash;
+
             try
             {
                 var rentalService = new RentalService();
                 RentalOperationResult result = rentalService.ProcessReturn(
                     selectedRentalId.Value,
-                    actualReturnDatePicker.Value);
+                    actualReturnDatePicker.Value,
+                    additionalPayment,
+                    paymentMethod);
 
                 if (!result.Success)
                 {
@@ -180,12 +245,25 @@ namespace Car_Rental_System
                 }
 
                 MessageBox.Show(result.Message, result.Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                RentalDocumentPrinter.PromptToPrintFinalReceipt(this, result.RentalId);
                 LoadActiveRentals(searchTextBox.Text);
             }
             catch (Exception ex)
             {
                 AppMessageBox.ShowDatabaseError("Unable to process return.", ex);
             }
+        }
+
+        private static bool ConfirmReturnWithRemainingBalance(decimal remainingBalance)
+        {
+            DialogResult result = MessageBox.Show(
+                $"This rental will still have a balance of {RentalCalculator.FormatCurrency(remainingBalance)} after processing this return.\n\nThe car will be marked available, but the payment status will stay unpaid or partial.\n\nProcess return anyway?",
+                "Balance Still Unpaid",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning,
+                MessageBoxDefaultButton.Button2);
+
+            return result == DialogResult.Yes;
         }
 
         private void RefreshButton_Click(object? sender, EventArgs e)
@@ -206,14 +284,26 @@ namespace Car_Rental_System
             _selectedExpectedReturn = default;
             _selectedDailyRate = 0;
             _selectedBaseAmount = 0;
+            _selectedAmountPaid = 0;
             customerTextBox.Clear();
             carTextBox.Clear();
             expectedReturnTextBox.Clear();
             dailyRateTextBox.Clear();
             baseAmountTextBox.Clear();
+            amountPaidTextBox.Clear();
+            additionalPaymentTextBox.Clear();
+            balanceTextBox.Clear();
             lateDaysTextBox.Clear();
             penaltyTextBox.Clear();
             finalAmountTextBox.Clear();
+            paymentMethodComboBox.SelectedItem = PaymentMethod.Cash;
+        }
+
+        private static decimal ParseOptionalPaymentAmount(string value)
+        {
+            return string.IsNullOrWhiteSpace(value)
+                ? 0
+                : decimal.TryParse(value, out decimal amount) ? amount : -1;
         }
 
         private sealed class ActiveRentalGridRow
@@ -226,6 +316,10 @@ namespace Car_Rental_System
             public DateOnly ExpectedReturn { get; set; }
             public decimal DailyRate { get; set; }
             public decimal BaseAmount { get; set; }
+            public decimal AmountPaid { get; set; }
+            public decimal Balance { get; set; }
+            public PaymentStatus PaymentStatus { get; set; }
+            public string PaymentMethod { get; set; } = "";
             public int LateDays { get; set; }
             public decimal Penalty { get; set; }
             public string Status { get; set; } = "";

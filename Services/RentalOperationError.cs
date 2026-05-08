@@ -6,6 +6,7 @@ namespace Car_Rental_System.Services
         RentalAlreadyClosed,
         InvalidReturnDate,
         CustomerHasActiveRental,
-        CarNotAvailable
+        CarNotAvailable,
+        InvalidPaymentAmount
     }
 }

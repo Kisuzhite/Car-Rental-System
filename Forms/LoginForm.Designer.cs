@@ -20,9 +20,7 @@ namespace Car_Rental_System
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LoginForm));
             brandPanel = new Panel();
-            ownerBadgeLabel = new Label();
             brandSubtitleLabel = new Label();
-            brandTitleLabel = new Label();
             brandLogoPictureBox = new PictureBox();
             mainPanel = new Panel();
             exitButton = new Button();
@@ -42,27 +40,13 @@ namespace Car_Rental_System
             // brandPanel
             // 
             brandPanel.BackColor = Color.FromArgb(31, 41, 55);
-            brandPanel.Controls.Add(ownerBadgeLabel);
             brandPanel.Controls.Add(brandSubtitleLabel);
-            brandPanel.Controls.Add(brandTitleLabel);
             brandPanel.Controls.Add(brandLogoPictureBox);
             brandPanel.Dock = DockStyle.Left;
             brandPanel.Location = new Point(0, 0);
             brandPanel.Name = "brandPanel";
             brandPanel.Size = new Size(260, 488);
             brandPanel.TabIndex = 1;
-            // 
-            // ownerBadgeLabel
-            // 
-            ownerBadgeLabel.BackColor = Color.FromArgb(245, 158, 11);
-            ownerBadgeLabel.Font = new Font("Inter SemiBold", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            ownerBadgeLabel.ForeColor = Color.FromArgb(31, 41, 55);
-            ownerBadgeLabel.Location = new Point(32, 382);
-            ownerBadgeLabel.Name = "ownerBadgeLabel";
-            ownerBadgeLabel.Size = new Size(150, 34);
-            ownerBadgeLabel.TabIndex = 3;
-            ownerBadgeLabel.Text = "Owner Account";
-            ownerBadgeLabel.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // brandSubtitleLabel
             // 
@@ -73,16 +57,6 @@ namespace Car_Rental_System
             brandSubtitleLabel.Size = new Size(199, 93);
             brandSubtitleLabel.TabIndex = 2;
             brandSubtitleLabel.Text = "Manage rentals, returns, rates, customers, and reports in one place.";
-            // 
-            // brandTitleLabel
-            // 
-            brandTitleLabel.Font = new Font("Inter", 16.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            brandTitleLabel.ForeColor = Color.White;
-            brandTitleLabel.Location = new Point(32, 180);
-            brandTitleLabel.Name = "brandTitleLabel";
-            brandTitleLabel.Size = new Size(199, 42);
-            brandTitleLabel.TabIndex = 1;
-            brandTitleLabel.Text = "Owner Portal";
             // 
             // brandLogoPictureBox
             // 
@@ -248,9 +222,7 @@ namespace Car_Rental_System
 
         private Panel brandPanel;
         private PictureBox brandLogoPictureBox;
-        private Label ownerBadgeLabel;
         private Label brandSubtitleLabel;
-        private Label brandTitleLabel;
         private Panel mainPanel;
         private Button exitButton;
         private Button loginButton;

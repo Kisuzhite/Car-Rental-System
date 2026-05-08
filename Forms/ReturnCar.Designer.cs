@@ -29,6 +29,14 @@ namespace Car_Rental_System
             detailsPanel = new Panel();
             refreshButton = new Button();
             processReturnButton = new Button();
+            paymentMethodComboBox = new ComboBox();
+            paymentMethodLabel = new Label();
+            additionalPaymentTextBox = new TextBox();
+            additionalPaymentLabel = new Label();
+            balanceTextBox = new TextBox();
+            balanceLabel = new Label();
+            amountPaidTextBox = new TextBox();
+            amountPaidLabel = new Label();
             finalAmountTextBox = new TextBox();
             finalAmountLabel = new Label();
             penaltyTextBox = new TextBox();
@@ -119,6 +127,14 @@ namespace Car_Rental_System
             detailsPanel.BorderStyle = BorderStyle.FixedSingle;
             detailsPanel.Controls.Add(refreshButton);
             detailsPanel.Controls.Add(processReturnButton);
+            detailsPanel.Controls.Add(paymentMethodComboBox);
+            detailsPanel.Controls.Add(paymentMethodLabel);
+            detailsPanel.Controls.Add(additionalPaymentTextBox);
+            detailsPanel.Controls.Add(additionalPaymentLabel);
+            detailsPanel.Controls.Add(balanceTextBox);
+            detailsPanel.Controls.Add(balanceLabel);
+            detailsPanel.Controls.Add(amountPaidTextBox);
+            detailsPanel.Controls.Add(amountPaidLabel);
             detailsPanel.Controls.Add(finalAmountTextBox);
             detailsPanel.Controls.Add(finalAmountLabel);
             detailsPanel.Controls.Add(penaltyTextBox);
@@ -155,11 +171,11 @@ namespace Car_Rental_System
             refreshButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             refreshButton.ForeColor = Color.FromArgb(31, 41, 55);
             refreshButton.Image = (Image)resources.GetObject("refreshButton.Image");
-            refreshButton.Location = new Point(25, 628);
+            refreshButton.Location = new Point(25, 638);
             refreshButton.Margin = new Padding(3, 4, 3, 4);
             refreshButton.Name = "refreshButton";
             refreshButton.Size = new Size(343, 45);
-            refreshButton.TabIndex = 20;
+            refreshButton.TabIndex = 28;
             refreshButton.Text = "Refresh";
             refreshButton.TextAlign = ContentAlignment.MiddleRight;
             refreshButton.TextImageRelation = TextImageRelation.ImageBeforeText;
@@ -175,22 +191,111 @@ namespace Car_Rental_System
             processReturnButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             processReturnButton.ForeColor = Color.White;
             processReturnButton.Image = (Image)resources.GetObject("processReturnButton.Image");
-            processReturnButton.Location = new Point(25, 575);
+            processReturnButton.Location = new Point(25, 585);
             processReturnButton.Margin = new Padding(3, 4, 3, 4);
             processReturnButton.Name = "processReturnButton";
             processReturnButton.Size = new Size(343, 45);
-            processReturnButton.TabIndex = 19;
+            processReturnButton.TabIndex = 27;
             processReturnButton.Text = "Process Return";
             processReturnButton.TextAlign = ContentAlignment.MiddleRight;
             processReturnButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             processReturnButton.UseVisualStyleBackColor = false;
             processReturnButton.Click += ProcessReturnButton_Click;
             // 
+            // paymentMethodComboBox
+            // 
+            paymentMethodComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            paymentMethodComboBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            paymentMethodComboBox.FormattingEnabled = true;
+            paymentMethodComboBox.Location = new Point(208, 520);
+            paymentMethodComboBox.Margin = new Padding(3, 4, 3, 4);
+            paymentMethodComboBox.Name = "paymentMethodComboBox";
+            paymentMethodComboBox.Size = new Size(160, 32);
+            paymentMethodComboBox.TabIndex = 26;
+            // 
+            // paymentMethodLabel
+            // 
+            paymentMethodLabel.AutoSize = true;
+            paymentMethodLabel.Font = new Font("Inter", 9F);
+            paymentMethodLabel.ForeColor = Color.FromArgb(31, 41, 55);
+            paymentMethodLabel.Location = new Point(208, 493);
+            paymentMethodLabel.Name = "paymentMethodLabel";
+            paymentMethodLabel.Size = new Size(65, 22);
+            paymentMethodLabel.TabIndex = 25;
+            paymentMethodLabel.Text = "Method";
+            // 
+            // additionalPaymentTextBox
+            // 
+            additionalPaymentTextBox.BorderStyle = BorderStyle.FixedSingle;
+            additionalPaymentTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            additionalPaymentTextBox.Location = new Point(25, 520);
+            additionalPaymentTextBox.Margin = new Padding(3, 4, 3, 4);
+            additionalPaymentTextBox.Name = "additionalPaymentTextBox";
+            additionalPaymentTextBox.PlaceholderText = "0";
+            additionalPaymentTextBox.Size = new Size(160, 28);
+            additionalPaymentTextBox.TabIndex = 24;
+            additionalPaymentTextBox.TextChanged += AdditionalPaymentTextBox_TextChanged;
+            // 
+            // additionalPaymentLabel
+            // 
+            additionalPaymentLabel.AutoSize = true;
+            additionalPaymentLabel.Font = new Font("Inter", 9F);
+            additionalPaymentLabel.ForeColor = Color.FromArgb(31, 41, 55);
+            additionalPaymentLabel.Location = new Point(25, 493);
+            additionalPaymentLabel.Name = "additionalPaymentLabel";
+            additionalPaymentLabel.Size = new Size(108, 22);
+            additionalPaymentLabel.TabIndex = 23;
+            additionalPaymentLabel.Text = "Payment Now";
+            // 
+            // balanceTextBox
+            // 
+            balanceTextBox.BorderStyle = BorderStyle.FixedSingle;
+            balanceTextBox.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            balanceTextBox.Location = new Point(208, 460);
+            balanceTextBox.Margin = new Padding(3, 4, 3, 4);
+            balanceTextBox.Name = "balanceTextBox";
+            balanceTextBox.ReadOnly = true;
+            balanceTextBox.Size = new Size(160, 28);
+            balanceTextBox.TabIndex = 22;
+            // 
+            // balanceLabel
+            // 
+            balanceLabel.AutoSize = true;
+            balanceLabel.Font = new Font("Inter", 9F);
+            balanceLabel.ForeColor = Color.FromArgb(31, 41, 55);
+            balanceLabel.Location = new Point(208, 433);
+            balanceLabel.Name = "balanceLabel";
+            balanceLabel.Size = new Size(67, 22);
+            balanceLabel.TabIndex = 21;
+            balanceLabel.Text = "Balance";
+            // 
+            // amountPaidTextBox
+            // 
+            amountPaidTextBox.BorderStyle = BorderStyle.FixedSingle;
+            amountPaidTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            amountPaidTextBox.Location = new Point(25, 460);
+            amountPaidTextBox.Margin = new Padding(3, 4, 3, 4);
+            amountPaidTextBox.Name = "amountPaidTextBox";
+            amountPaidTextBox.ReadOnly = true;
+            amountPaidTextBox.Size = new Size(160, 28);
+            amountPaidTextBox.TabIndex = 20;
+            // 
+            // amountPaidLabel
+            // 
+            amountPaidLabel.AutoSize = true;
+            amountPaidLabel.Font = new Font("Inter", 9F);
+            amountPaidLabel.ForeColor = Color.FromArgb(31, 41, 55);
+            amountPaidLabel.Location = new Point(25, 433);
+            amountPaidLabel.Name = "amountPaidLabel";
+            amountPaidLabel.Size = new Size(100, 22);
+            amountPaidLabel.TabIndex = 19;
+            amountPaidLabel.Text = "Amount Paid";
+            // 
             // finalAmountTextBox
             // 
             finalAmountTextBox.BorderStyle = BorderStyle.FixedSingle;
             finalAmountTextBox.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            finalAmountTextBox.Location = new Point(208, 525);
+            finalAmountTextBox.Location = new Point(208, 400);
             finalAmountTextBox.Margin = new Padding(3, 4, 3, 4);
             finalAmountTextBox.Name = "finalAmountTextBox";
             finalAmountTextBox.ReadOnly = true;
@@ -202,7 +307,7 @@ namespace Car_Rental_System
             finalAmountLabel.AutoSize = true;
             finalAmountLabel.Font = new Font("Inter", 9F);
             finalAmountLabel.ForeColor = Color.FromArgb(31, 41, 55);
-            finalAmountLabel.Location = new Point(208, 499);
+            finalAmountLabel.Location = new Point(208, 373);
             finalAmountLabel.Name = "finalAmountLabel";
             finalAmountLabel.Size = new Size(103, 22);
             finalAmountLabel.TabIndex = 17;
@@ -212,7 +317,7 @@ namespace Car_Rental_System
             // 
             penaltyTextBox.BorderStyle = BorderStyle.FixedSingle;
             penaltyTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            penaltyTextBox.Location = new Point(25, 525);
+            penaltyTextBox.Location = new Point(25, 400);
             penaltyTextBox.Margin = new Padding(3, 4, 3, 4);
             penaltyTextBox.Name = "penaltyTextBox";
             penaltyTextBox.ReadOnly = true;
@@ -224,7 +329,7 @@ namespace Car_Rental_System
             penaltyLabel.AutoSize = true;
             penaltyLabel.Font = new Font("Inter", 9F);
             penaltyLabel.ForeColor = Color.FromArgb(31, 41, 55);
-            penaltyLabel.Location = new Point(25, 499);
+            penaltyLabel.Location = new Point(25, 373);
             penaltyLabel.Name = "penaltyLabel";
             penaltyLabel.Size = new Size(97, 22);
             penaltyLabel.TabIndex = 15;
@@ -234,7 +339,7 @@ namespace Car_Rental_System
             // 
             lateDaysTextBox.BorderStyle = BorderStyle.FixedSingle;
             lateDaysTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lateDaysTextBox.Location = new Point(208, 451);
+            lateDaysTextBox.Location = new Point(208, 340);
             lateDaysTextBox.Margin = new Padding(3, 4, 3, 4);
             lateDaysTextBox.Name = "lateDaysTextBox";
             lateDaysTextBox.ReadOnly = true;
@@ -246,7 +351,7 @@ namespace Car_Rental_System
             lateDaysLabel.AutoSize = true;
             lateDaysLabel.Font = new Font("Inter", 9F);
             lateDaysLabel.ForeColor = Color.FromArgb(31, 41, 55);
-            lateDaysLabel.Location = new Point(208, 424);
+            lateDaysLabel.Location = new Point(208, 313);
             lateDaysLabel.Name = "lateDaysLabel";
             lateDaysLabel.Size = new Size(79, 22);
             lateDaysLabel.TabIndex = 13;
@@ -256,7 +361,7 @@ namespace Car_Rental_System
             // 
             actualReturnDatePicker.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
             actualReturnDatePicker.Format = DateTimePickerFormat.Short;
-            actualReturnDatePicker.Location = new Point(25, 451);
+            actualReturnDatePicker.Location = new Point(25, 340);
             actualReturnDatePicker.Margin = new Padding(3, 4, 3, 4);
             actualReturnDatePicker.Name = "actualReturnDatePicker";
             actualReturnDatePicker.Size = new Size(159, 28);
@@ -268,7 +373,7 @@ namespace Car_Rental_System
             actualReturnLabel.AutoSize = true;
             actualReturnLabel.Font = new Font("Inter", 9F);
             actualReturnLabel.ForeColor = Color.FromArgb(31, 41, 55);
-            actualReturnLabel.Location = new Point(25, 424);
+            actualReturnLabel.Location = new Point(25, 313);
             actualReturnLabel.Name = "actualReturnLabel";
             actualReturnLabel.Size = new Size(107, 22);
             actualReturnLabel.TabIndex = 11;
@@ -278,7 +383,7 @@ namespace Car_Rental_System
             // 
             baseAmountTextBox.BorderStyle = BorderStyle.FixedSingle;
             baseAmountTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            baseAmountTextBox.Location = new Point(208, 376);
+            baseAmountTextBox.Location = new Point(208, 280);
             baseAmountTextBox.Margin = new Padding(3, 4, 3, 4);
             baseAmountTextBox.Name = "baseAmountTextBox";
             baseAmountTextBox.ReadOnly = true;
@@ -290,7 +395,7 @@ namespace Car_Rental_System
             baseAmountLabel.AutoSize = true;
             baseAmountLabel.Font = new Font("Inter", 9F);
             baseAmountLabel.ForeColor = Color.FromArgb(31, 41, 55);
-            baseAmountLabel.Location = new Point(208, 349);
+            baseAmountLabel.Location = new Point(208, 253);
             baseAmountLabel.Name = "baseAmountLabel";
             baseAmountLabel.Size = new Size(104, 22);
             baseAmountLabel.TabIndex = 9;
@@ -300,7 +405,7 @@ namespace Car_Rental_System
             // 
             dailyRateTextBox.BorderStyle = BorderStyle.FixedSingle;
             dailyRateTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            dailyRateTextBox.Location = new Point(25, 376);
+            dailyRateTextBox.Location = new Point(25, 280);
             dailyRateTextBox.Margin = new Padding(3, 4, 3, 4);
             dailyRateTextBox.Name = "dailyRateTextBox";
             dailyRateTextBox.ReadOnly = true;
@@ -312,7 +417,7 @@ namespace Car_Rental_System
             dailyRateLabel.AutoSize = true;
             dailyRateLabel.Font = new Font("Inter", 9F);
             dailyRateLabel.ForeColor = Color.FromArgb(31, 41, 55);
-            dailyRateLabel.Location = new Point(25, 349);
+            dailyRateLabel.Location = new Point(25, 253);
             dailyRateLabel.Name = "dailyRateLabel";
             dailyRateLabel.Size = new Size(81, 22);
             dailyRateLabel.TabIndex = 7;
@@ -322,7 +427,7 @@ namespace Car_Rental_System
             // 
             expectedReturnTextBox.BorderStyle = BorderStyle.FixedSingle;
             expectedReturnTextBox.Font = new Font("Segoe UI", 10F);
-            expectedReturnTextBox.Location = new Point(25, 301);
+            expectedReturnTextBox.Location = new Point(25, 220);
             expectedReturnTextBox.Margin = new Padding(3, 4, 3, 4);
             expectedReturnTextBox.Name = "expectedReturnTextBox";
             expectedReturnTextBox.ReadOnly = true;
@@ -334,7 +439,7 @@ namespace Car_Rental_System
             expectedReturnLabel.AutoSize = true;
             expectedReturnLabel.Font = new Font("Inter", 9F);
             expectedReturnLabel.ForeColor = Color.FromArgb(31, 41, 55);
-            expectedReturnLabel.Location = new Point(25, 275);
+            expectedReturnLabel.Location = new Point(25, 193);
             expectedReturnLabel.Name = "expectedReturnLabel";
             expectedReturnLabel.Size = new Size(129, 22);
             expectedReturnLabel.TabIndex = 5;
@@ -344,7 +449,7 @@ namespace Car_Rental_System
             // 
             carTextBox.BorderStyle = BorderStyle.FixedSingle;
             carTextBox.Font = new Font("Segoe UI", 10F);
-            carTextBox.Location = new Point(25, 227);
+            carTextBox.Location = new Point(25, 160);
             carTextBox.Margin = new Padding(3, 4, 3, 4);
             carTextBox.Name = "carTextBox";
             carTextBox.ReadOnly = true;
@@ -356,7 +461,7 @@ namespace Car_Rental_System
             carLabel.AutoSize = true;
             carLabel.Font = new Font("Inter", 9F);
             carLabel.ForeColor = Color.FromArgb(31, 41, 55);
-            carLabel.Location = new Point(25, 200);
+            carLabel.Location = new Point(25, 133);
             carLabel.Name = "carLabel";
             carLabel.Size = new Size(35, 22);
             carLabel.TabIndex = 3;
@@ -366,7 +471,7 @@ namespace Car_Rental_System
             // 
             customerTextBox.BorderStyle = BorderStyle.FixedSingle;
             customerTextBox.Font = new Font("Segoe UI", 10F);
-            customerTextBox.Location = new Point(25, 152);
+            customerTextBox.Location = new Point(25, 100);
             customerTextBox.Margin = new Padding(3, 4, 3, 4);
             customerTextBox.Name = "customerTextBox";
             customerTextBox.ReadOnly = true;
@@ -378,7 +483,7 @@ namespace Car_Rental_System
             customerLabel.AutoSize = true;
             customerLabel.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
             customerLabel.ForeColor = Color.FromArgb(31, 41, 55);
-            customerLabel.Location = new Point(25, 125);
+            customerLabel.Location = new Point(25, 73);
             customerLabel.Name = "customerLabel";
             customerLabel.Size = new Size(80, 22);
             customerLabel.TabIndex = 1;
@@ -521,6 +626,14 @@ namespace Car_Rental_System
         private Panel detailsPanel;
         private Button refreshButton;
         private Button processReturnButton;
+        private ComboBox paymentMethodComboBox;
+        private Label paymentMethodLabel;
+        private TextBox additionalPaymentTextBox;
+        private Label additionalPaymentLabel;
+        private TextBox balanceTextBox;
+        private Label balanceLabel;
+        private TextBox amountPaidTextBox;
+        private Label amountPaidLabel;
         private TextBox finalAmountTextBox;
         private Label finalAmountLabel;
         private TextBox penaltyTextBox;

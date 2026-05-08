@@ -23,8 +23,19 @@ namespace Car_Rental_System
 
         private void PrepareForm()
         {
+            paymentMethodComboBox.Format += PaymentMethodComboBox_Format;
+            paymentMethodComboBox.DataSource = PaymentHelper.GetSelectablePaymentMethods();
+            paymentMethodComboBox.SelectedItem = PaymentMethod.Cash;
             returnDatePicker.Value = DateTime.Today.AddDays(1);
             CalculateTotal();
+        }
+
+        private static void PaymentMethodComboBox_Format(object? sender, ListControlConvertEventArgs e)
+        {
+            if (e.ListItem is PaymentMethod paymentMethod)
+            {
+                e.Value = PaymentHelper.FormatPaymentMethod(paymentMethod);
+            }
         }
 
         private void LoadLookups()
@@ -116,6 +127,10 @@ namespace Car_Rental_System
                         RentalDate = r.RentalDate,
                         ReturnDate = r.ExpectedReturnDate,
                         TotalAmount = r.TotalAmount,
+                        r.AmountPaid,
+                        Balance = r.Balance,
+                        r.PaymentStatus,
+                        PaymentMethod = PaymentHelper.FormatPaymentMethod(r.PaymentMethod),
                         LateDays = RentalStatusHelper.GetLateDays(r, today),
                         Status = RentalStatusHelper.GetDisplayStatus(r, today)
                     })
@@ -138,7 +153,13 @@ namespace Car_Rental_System
 
         private void CreateButton_Click(object? sender, EventArgs e)
         {
-            if (!ValidateInputs(out int customerId, out int carId, out decimal dailyRate, out decimal totalAmount))
+            if (!ValidateInputs(
+                out int customerId,
+                out int carId,
+                out decimal dailyRate,
+                out decimal totalAmount,
+                out decimal amountPaid,
+                out PaymentMethod paymentMethod))
                 return;
 
             try
@@ -148,7 +169,9 @@ namespace Car_Rental_System
                     customerId,
                     carId,
                     rentalDatePicker.Value,
-                    returnDatePicker.Value);
+                    returnDatePicker.Value,
+                    amountPaid,
+                    paymentMethod);
 
                 if (!result.Success)
                 {
@@ -167,6 +190,7 @@ namespace Car_Rental_System
                 }
 
                 MessageBox.Show(result.Message, result.Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                RentalDocumentPrinter.PromptToPrintRentalAgreement(this, result.RentalId);
                 ClearForm();
                 LoadLookups();
                 LoadRentals(searchTextBox.Text);
@@ -206,12 +230,25 @@ namespace Car_Rental_System
             CalculateTotal();
         }
 
-        private bool ValidateInputs(out int customerId, out int carId, out decimal dailyRate, out decimal totalAmount)
+        private void PaymentAmountTextBox_TextChanged(object? sender, EventArgs e)
+        {
+            CalculateBalance();
+        }
+
+        private bool ValidateInputs(
+            out int customerId,
+            out int carId,
+            out decimal dailyRate,
+            out decimal totalAmount,
+            out decimal amountPaid,
+            out PaymentMethod paymentMethod)
         {
             customerId = 0;
             carId = 0;
             dailyRate = 0;
             totalAmount = 0;
+            amountPaid = 0;
+            paymentMethod = PaymentMethod.Cash;
 
             if (!TryGetSelectedValue(customerComboBox, out customerId) ||
                 !TryGetSelectedValue(carComboBox, out carId))
@@ -243,6 +280,17 @@ namespace Car_Rental_System
             }
 
             totalAmount = CalculateTotal();
+            amountPaid = ParseOptionalPaymentAmount(paymentAmountTextBox.Text);
+
+            if (!PaymentHelper.IsValidPaymentAmount(amountPaid, totalAmount))
+            {
+                MessageBox.Show("Amount paid cannot be negative or greater than the total amount.", "Invalid Payment", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            paymentMethod = paymentMethodComboBox.SelectedItem is PaymentMethod selectedMethod
+                ? selectedMethod
+                : PaymentMethod.Cash;
             return true;
         }
 
@@ -265,6 +313,7 @@ namespace Car_Rental_System
             if (!decimal.TryParse(rateTextBox.Text, out decimal dailyRate))
             {
                 totalTextBox.Text = RentalCalculator.FormatCurrency(0);
+                CalculateBalance();
                 return 0;
             }
 
@@ -274,7 +323,42 @@ namespace Car_Rental_System
                 dailyRate);
 
             totalTextBox.Text = RentalCalculator.FormatCurrency(total);
+            CalculateBalance();
             return total;
+        }
+
+        private decimal CalculateBalance()
+        {
+            decimal total = CalculateDisplayedTotalAmount();
+            decimal amountPaid = ParseOptionalPaymentAmount(paymentAmountTextBox.Text);
+            if (amountPaid < 0)
+            {
+                amountPaid = 0;
+            }
+
+            decimal balance = PaymentHelper.GetBalance(total, amountPaid);
+            balanceTextBox.Text = RentalCalculator.FormatCurrency(balance);
+            return balance;
+        }
+
+        private decimal CalculateDisplayedTotalAmount()
+        {
+            if (!decimal.TryParse(rateTextBox.Text, out decimal dailyRate))
+            {
+                return 0;
+            }
+
+            return RentalCalculator.CalculateBaseAmount(
+                rentalDatePicker.Value,
+                returnDatePicker.Value,
+                dailyRate);
+        }
+
+        private static decimal ParseOptionalPaymentAmount(string value)
+        {
+            return string.IsNullOrWhiteSpace(value)
+                ? 0
+                : decimal.TryParse(value, out decimal amount) ? amount : -1;
         }
 
         private void ClearForm()
@@ -284,6 +368,8 @@ namespace Car_Rental_System
 
             rentalDatePicker.Value = DateTime.Today;
             returnDatePicker.Value = DateTime.Today.AddDays(1);
+            paymentAmountTextBox.Clear();
+            paymentMethodComboBox.SelectedItem = PaymentMethod.Cash;
 
             rentalsGrid.ClearSelection();
             CalculateTotal();

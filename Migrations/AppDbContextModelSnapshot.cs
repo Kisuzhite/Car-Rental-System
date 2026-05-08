@@ -203,6 +203,9 @@ namespace Car_Rental_System.Migrations
                     b.Property<DateOnly?>("ActualReturnDate")
                         .HasColumnType("date");
 
+                    b.Property<decimal>("AmountPaid")
+                        .HasColumnType("decimal(10,2)");
+
                     b.Property<int>("CarId")
                         .HasColumnType("int");
 
@@ -214,6 +217,16 @@ namespace Car_Rental_System.Migrations
 
                     b.Property<DateOnly>("ExpectedReturnDate")
                         .HasColumnType("date");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("PaymentStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<DateOnly>("RentalDate")
                         .HasColumnType("date");

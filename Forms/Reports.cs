@@ -44,8 +44,7 @@ namespace Car_Rental_System
                 activeRentalsValueLabel.Text = $"{activeRentals} / {overdueRentals}";
 
                 decimal income = db.Rentals
-                    .Where(r => r.Status == RentalStatus.Returned)
-                    .Sum(r => (decimal?)r.TotalAmount) ?? 0;
+                    .Sum(r => (decimal?)r.AmountPaid) ?? 0;
                 incomeValueLabel.Text = RentalCalculator.FormatCurrency(income);
 
                 LoadRentalHistory(db, search);
@@ -71,6 +70,13 @@ namespace Car_Rental_System
                 List<RentalStatus> matchingStatuses = Enum.GetValues<RentalStatus>()
                     .Where(status => status.ToString().Contains(trimmedSearch, StringComparison.OrdinalIgnoreCase))
                     .ToList();
+                List<PaymentStatus> matchingPaymentStatuses = Enum.GetValues<PaymentStatus>()
+                    .Where(status => status.ToString().Contains(trimmedSearch, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+                List<PaymentMethod> matchingPaymentMethods = Enum.GetValues<PaymentMethod>()
+                    .Where(method => PaymentHelper.FormatPaymentMethod(method).Contains(trimmedSearch, StringComparison.OrdinalIgnoreCase) ||
+                        method.ToString().Contains(trimmedSearch, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
                 bool matchesOverdueStatus = AppConstants.OverdueRentalStatus
                     .Contains(trimmedSearch, StringComparison.OrdinalIgnoreCase);
 
@@ -81,6 +87,8 @@ namespace Car_Rental_System
                     r.Car.Model.Contains(search) ||
                     (r.Car.CarType != null && r.Car.CarType.TypeName.Contains(search)) ||
                     matchingStatuses.Contains(r.Status) ||
+                    matchingPaymentStatuses.Contains(r.PaymentStatus) ||
+                    matchingPaymentMethods.Contains(r.PaymentMethod) ||
                     (matchesOverdueStatus &&
                         r.Status == RentalStatus.Active &&
                         r.ExpectedReturnDate < today));
@@ -103,6 +111,10 @@ namespace Car_Rental_System
                     LateDays = RentalStatusHelper.GetLateDays(r, today),
                     Penalty = RentalStatusHelper.GetLatePenalty(r, today),
                     TotalAmount = r.TotalAmount,
+                    r.AmountPaid,
+                    Balance = r.Balance,
+                    r.PaymentStatus,
+                    PaymentMethod = PaymentHelper.FormatPaymentMethod(r.PaymentMethod),
                     Status = RentalStatusHelper.GetDisplayStatus(r, today)
                 })
                 .ToList();

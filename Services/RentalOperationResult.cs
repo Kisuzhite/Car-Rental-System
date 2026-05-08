@@ -10,6 +10,8 @@ namespace Car_Rental_System.Services
             int? rentalId = null,
             decimal dailyRate = 0,
             decimal totalAmount = 0,
+            decimal amountPaid = 0,
+            decimal balance = 0,
             int lateDays = 0)
         {
             Success = success;
@@ -19,6 +21,8 @@ namespace Car_Rental_System.Services
             RentalId = rentalId;
             DailyRate = dailyRate;
             TotalAmount = totalAmount;
+            AmountPaid = amountPaid;
+            Balance = balance;
             LateDays = lateDays;
         }
 
@@ -31,6 +35,8 @@ namespace Car_Rental_System.Services
         public int? RentalId { get; }
         public decimal DailyRate { get; }
         public decimal TotalAmount { get; }
+        public decimal AmountPaid { get; }
+        public decimal Balance { get; }
         public int LateDays { get; }
 
         public static RentalOperationResult Ok(
@@ -39,6 +45,8 @@ namespace Car_Rental_System.Services
             int? rentalId = null,
             decimal dailyRate = 0,
             decimal totalAmount = 0,
+            decimal amountPaid = 0,
+            decimal balance = 0,
             int lateDays = 0)
         {
             return new RentalOperationResult(
@@ -48,6 +56,8 @@ namespace Car_Rental_System.Services
                 rentalId: rentalId,
                 dailyRate: dailyRate,
                 totalAmount: totalAmount,
+                amountPaid: amountPaid,
+                balance: balance,
                 lateDays: lateDays);
         }
 

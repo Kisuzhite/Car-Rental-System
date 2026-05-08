@@ -130,8 +130,10 @@ namespace Car_Rental_System
                 customer.Address = ValidationHelper.CollapseSpaces(addressTextBox.Text);
 
                 db.SaveChanges();
+                int? activeRentalId = GetActiveRentalId(db, customer.CustomerId);
 
                 MessageBox.Show("Customer updated successfully.", "Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                RentalDocumentPrinter.PromptToPrintRentalAgreement(this, activeRentalId);
                 ClearForm();
                 LoadCustomers(searchTextBox.Text);
             }
@@ -313,6 +315,15 @@ namespace Car_Rental_System
                 "Duplicate License Number",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning);
+        }
+
+        private static int? GetActiveRentalId(AppDbContext db, int customerId)
+        {
+            return db.Rentals
+                .Where(r => r.CustomerId == customerId && r.Status == RentalStatus.Active)
+                .OrderByDescending(r => r.RentalId)
+                .Select(r => (int?)r.RentalId)
+                .FirstOrDefault();
         }
 
         private void ClearForm()
