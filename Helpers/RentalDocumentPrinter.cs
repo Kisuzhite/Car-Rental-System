@@ -110,7 +110,7 @@ namespace Car_Rental_System.Helpers
                 return;
             }
 
-            DocumentPainter painter = new(e.Graphics, e.MarginBounds);
+            DocumentPainter painter = new(e.Graphics, e.MarginBounds, AppConfiguration.GetBusinessProfile());
             painter.DrawHeader("RENTAL AGREEMENT", $"Agreement No. RA-{rental.RentalId:D6}");
 
             painter.DrawSectionTitle("Customer Details");
@@ -151,7 +151,7 @@ namespace Car_Rental_System.Helpers
                 return;
             }
 
-            DocumentPainter painter = new(e.Graphics, e.MarginBounds);
+            DocumentPainter painter = new(e.Graphics, e.MarginBounds, AppConfiguration.GetBusinessProfile());
             painter.DrawHeader("FINAL RECEIPT", $"Receipt No. FR-{rental.RentalId:D6}");
 
             DateOnly today = RentalCalculator.ToDateOnly(DateTime.Today);
@@ -167,7 +167,11 @@ namespace Car_Rental_System.Helpers
             painter.DrawSectionTitle("Receipt Details");
             painter.DrawLabelValue("Date Issued", FormatDate(today));
             painter.DrawLabelValue("Customer", rental.Customer.FullName);
-            painter.DrawLabelValue("Vehicle", $"{rental.Car.PlateNumber} - {rental.Car.Brand} {rental.Car.Model}");
+            painter.DrawLabelValue("Contact Number", rental.Customer.ContactNumber);
+            painter.DrawLabelValue("License Number", rental.Customer.LicenseNumber);
+            painter.DrawLabelValue("Plate Number", rental.Car.PlateNumber);
+            painter.DrawLabelValue("Vehicle", $"{rental.Car.Brand} {rental.Car.Model}");
+            painter.DrawLabelValue("Car Type", rental.Car.CarType?.TypeName ?? AppConstants.NotProvided);
             painter.DrawLabelValue("Rental Date", FormatDate(rental.RentalDate));
             painter.DrawLabelValue("Expected Return", FormatDate(rental.ExpectedReturnDate));
             painter.DrawLabelValue("Actual Return", rental.ActualReturnDate.HasValue ? FormatDate(rental.ActualReturnDate.Value) : AppConstants.NotProvided);
@@ -197,9 +201,9 @@ namespace Car_Rental_System.Helpers
 
         private sealed class DocumentPainter
         {
-            private const string BrandName = "Auto Avenue Car Rental";
             private readonly Graphics graphics;
             private readonly Rectangle bounds;
+            private readonly BusinessProfile businessProfile;
             private readonly Font brandFont = new("Inter", 14, FontStyle.Bold);
             private readonly Font titleFont = new("Inter", 18, FontStyle.Bold);
             private readonly Font sectionFont = new("Inter", 10, FontStyle.Bold);
@@ -210,24 +214,44 @@ namespace Car_Rental_System.Helpers
             private readonly Pen dividerPen = new(Color.FromArgb(209, 213, 219));
             private float y;
 
-            public DocumentPainter(Graphics graphics, Rectangle bounds)
+            public DocumentPainter(Graphics graphics, Rectangle bounds, BusinessProfile businessProfile)
             {
                 this.graphics = graphics;
                 this.bounds = bounds;
+                this.businessProfile = businessProfile;
                 y = bounds.Top;
             }
 
             public void DrawHeader(string title, string documentNumber)
             {
-                graphics.DrawString(BrandName, brandFont, darkBrush, bounds.Left, y);
+                RectangleF headerBounds = new(bounds.Left, y, bounds.Width - 190, 25);
+                graphics.DrawString(businessProfile.BusinessName, brandFont, darkBrush, headerBounds);
                 graphics.DrawString(DateTime.Today.ToString("MMMM d, yyyy"), bodyFont, mutedBrush, bounds.Right - 150, y + 4);
-                y += 30;
+                y += 26;
+
+                DrawBusinessProfileLine("Owner/Operator", businessProfile.OwnerName);
+                DrawBusinessProfileLine("Location", businessProfile.Location);
+                DrawBusinessProfileLine("Contact", businessProfile.ContactNumber);
+
+                if (!string.IsNullOrWhiteSpace(businessProfile.FacebookPage))
+                {
+                    DrawBusinessProfileLine("Facebook", businessProfile.FacebookPage);
+                }
+
+                y += 8;
 
                 graphics.DrawString(title, titleFont, darkBrush, bounds.Left, y);
                 graphics.DrawString(documentNumber, bodyBoldFont, darkBrush, bounds.Right - 170, y + 8);
                 y += 42;
                 DrawDivider();
                 y += 8;
+            }
+
+            private void DrawBusinessProfileLine(string label, string value)
+            {
+                RectangleF lineBounds = new(bounds.Left, y, bounds.Width - 190, 18);
+                graphics.DrawString($"{label}: {value}", bodyFont, mutedBrush, lineBounds);
+                y += 18;
             }
 
             public void DrawSectionTitle(string title)

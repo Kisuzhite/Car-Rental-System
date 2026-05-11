@@ -27,7 +27,6 @@ namespace Car_Rental_System
             titleLabel = new Label();
             bodyTable = new TableLayoutPanel();
             detailsPanel = new Panel();
-            refreshButton = new Button();
             processReturnButton = new Button();
             paymentMethodComboBox = new ComboBox();
             paymentMethodLabel = new Label();
@@ -125,7 +124,6 @@ namespace Car_Rental_System
             // 
             detailsPanel.BackColor = Color.White;
             detailsPanel.BorderStyle = BorderStyle.FixedSingle;
-            detailsPanel.Controls.Add(refreshButton);
             detailsPanel.Controls.Add(processReturnButton);
             detailsPanel.Controls.Add(paymentMethodComboBox);
             detailsPanel.Controls.Add(paymentMethodLabel);
@@ -162,26 +160,6 @@ namespace Car_Rental_System
             detailsPanel.Size = new Size(390, 694);
             detailsPanel.TabIndex = 0;
             // 
-            // refreshButton
-            // 
-            refreshButton.BackColor = Color.White;
-            refreshButton.FlatAppearance.BorderColor = Color.FromArgb(31, 41, 55);
-            refreshButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(245, 158, 11);
-            refreshButton.FlatStyle = FlatStyle.Flat;
-            refreshButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            refreshButton.ForeColor = Color.FromArgb(31, 41, 55);
-            refreshButton.Image = (Image)resources.GetObject("refreshButton.Image");
-            refreshButton.Location = new Point(25, 638);
-            refreshButton.Margin = new Padding(3, 4, 3, 4);
-            refreshButton.Name = "refreshButton";
-            refreshButton.Size = new Size(343, 45);
-            refreshButton.TabIndex = 28;
-            refreshButton.Text = "Refresh";
-            refreshButton.TextAlign = ContentAlignment.MiddleRight;
-            refreshButton.TextImageRelation = TextImageRelation.ImageBeforeText;
-            refreshButton.UseVisualStyleBackColor = false;
-            refreshButton.Click += RefreshButton_Click;
-            // 
             // processReturnButton
             // 
             processReturnButton.BackColor = Color.FromArgb(37, 99, 235);
@@ -191,7 +169,7 @@ namespace Car_Rental_System
             processReturnButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             processReturnButton.ForeColor = Color.White;
             processReturnButton.Image = (Image)resources.GetObject("processReturnButton.Image");
-            processReturnButton.Location = new Point(25, 585);
+            processReturnButton.Location = new Point(23, 566);
             processReturnButton.Margin = new Padding(3, 4, 3, 4);
             processReturnButton.Name = "processReturnButton";
             processReturnButton.Size = new Size(343, 45);
@@ -207,7 +185,7 @@ namespace Car_Rental_System
             paymentMethodComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             paymentMethodComboBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
             paymentMethodComboBox.FormattingEnabled = true;
-            paymentMethodComboBox.Location = new Point(208, 520);
+            paymentMethodComboBox.Location = new Point(208, 516);
             paymentMethodComboBox.Margin = new Padding(3, 4, 3, 4);
             paymentMethodComboBox.Name = "paymentMethodComboBox";
             paymentMethodComboBox.Size = new Size(160, 32);
@@ -530,7 +508,7 @@ namespace Car_Rental_System
             dataGridViewCellStyle2.SelectionForeColor = Color.White;
             dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
             activeRentalsGrid.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
-            activeRentalsGrid.ColumnHeadersHeight = 36;
+            activeRentalsGrid.ColumnHeadersHeight = 56;
             dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = Color.White;
             dataGridViewCellStyle3.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
@@ -624,7 +602,6 @@ namespace Car_Rental_System
         private Label titleLabel;
         private TableLayoutPanel bodyTable;
         private Panel detailsPanel;
-        private Button refreshButton;
         private Button processReturnButton;
         private ComboBox paymentMethodComboBox;
         private Label paymentMethodLabel;

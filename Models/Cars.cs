@@ -21,5 +21,6 @@ namespace Car_Rental_System.Models
         public string CarTypeName => CarType?.TypeName ?? "";
 
         public ICollection<Rental> Rentals { get; set; } = [];
+        public ICollection<Reservation> Reservations { get; set; } = [];
     }
 }

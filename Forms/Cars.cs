@@ -24,7 +24,6 @@ namespace Car_Rental_System
         {
             UpdateStatusOptions();
             LoadCarTypes();
-            LoadCarImage("");
         }
 
         private void LoadCarTypes(int? includeCarTypeId = null)
@@ -115,8 +114,6 @@ namespace Car_Rental_System
                 dailyRateTextBox.Text = car.DailyRate.ToString("0.##");
             }
             UpdateStatusOptions(car.Status);
-            imagePathTextBox.Text = car.ImagePath;
-            LoadCarImage(car.ImagePath);
         }
 
         private void AddButton_Click(object? sender, EventArgs e)
@@ -148,7 +145,7 @@ namespace Car_Rental_System
                     DailyRate = dailyRate,
                     CarTypeId = carTypeId,
                     Status = status,
-                    ImagePath = string.IsNullOrWhiteSpace(imagePathTextBox.Text) ? null : imagePathTextBox.Text.Trim()
+                    ImagePath = null
                 });
 
                 db.SaveChanges();
@@ -204,7 +201,7 @@ namespace Car_Rental_System
                 car.DailyRate = dailyRate;
                 car.CarTypeId = carTypeId;
                 car.Status = status;
-                car.ImagePath = string.IsNullOrWhiteSpace(imagePathTextBox.Text) ? null : imagePathTextBox.Text.Trim();
+                car.ImagePath = null;
 
                 db.SaveChanges();
 
@@ -335,31 +332,6 @@ namespace Car_Rental_System
             dailyRateTextBox.Clear();
         }
 
-        private void BrowseImageButton_Click(object? sender, EventArgs e)
-        {
-            using OpenFileDialog dialog = new()
-            {
-                Title = "Select Car Photo",
-                Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp"
-            };
-
-            if (dialog.ShowDialog(this) != DialogResult.OK)
-            {
-                return;
-            }
-
-            string userImagesFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Cars", "UserImages");
-            Directory.CreateDirectory(userImagesFolder);
-
-            string extension = Path.GetExtension(dialog.FileName);
-            string fileName = $"{Guid.NewGuid():N}{extension}";
-            string destination = Path.Combine(userImagesFolder, fileName);
-            File.Copy(dialog.FileName, destination, overwrite: true);
-
-            imagePathTextBox.Text = Path.Combine("Assets", "Cars", "UserImages", fileName);
-            LoadCarImage(imagePathTextBox.Text);
-        }
-
         private bool ValidateCarInputs(out int year, out int carTypeId, out decimal dailyRate, out CarStatus status)
         {
             year = 0;
@@ -472,53 +444,11 @@ namespace Car_Rental_System
             yearTextBox.Clear();
             colorTextBox.Clear();
             dailyRateTextBox.Clear();
-            imagePathTextBox.Clear();
 
             UpdateStatusOptions();
             LoadCarTypes();
 
-            LoadCarImage("");
             carsGrid.ClearSelection();
-        }
-
-        private void LoadCarImage(string? imagePath)
-        {
-            string resolvedPath = ResolveImagePath(imagePath);
-
-            if (!File.Exists(resolvedPath))
-            {
-                resolvedPath = ResolveImagePath(AppConstants.DefaultCarImagePath);
-            }
-
-            carImagePictureBox.Image?.Dispose();
-
-            if (!File.Exists(resolvedPath))
-            {
-                carImagePictureBox.Image = null;
-                return;
-            }
-
-            try
-            {
-                using Image image = Image.FromFile(resolvedPath);
-                carImagePictureBox.Image = new Bitmap(image);
-            }
-            catch
-            {
-                carImagePictureBox.Image = null;
-            }
-        }
-
-        private string ResolveImagePath(string? imagePath)
-        {
-            if (string.IsNullOrWhiteSpace(imagePath))
-            {
-                return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, AppConstants.DefaultCarImagePath);
-            }
-
-            return Path.IsPathRooted(imagePath)
-                ? imagePath
-                : Path.Combine(AppDomain.CurrentDomain.BaseDirectory, imagePath);
         }
 
         private static bool TryGetCarStatus(string statusText, out CarStatus status)

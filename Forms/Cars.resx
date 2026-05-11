@@ -130,7 +130,4 @@
   <data name="addButton.Image" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Assets\Icons\action-add-car-flaticon-white.png;System.Drawing.Bitmap, System.Drawing.Common</value>
   </data>
-  <data name="browseImageButton.Image" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Icons\action-browse-photo-flaticon-white.png;System.Drawing.Bitmap, System.Drawing.Common</value>
-  </data>
 </root>

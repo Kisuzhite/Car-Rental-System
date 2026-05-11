@@ -14,5 +14,6 @@ namespace Car_Rental_System.Models
         public bool IsArchived { get; set; }
 
         public ICollection<Rental> Rentals { get; set; } = [];
+        public ICollection<Reservation> Reservations { get; set; } = [];
     }
 }

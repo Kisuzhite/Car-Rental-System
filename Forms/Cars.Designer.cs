@@ -31,10 +31,6 @@ namespace Car_Rental_System
             deleteButton = new Button();
             updateButton = new Button();
             addButton = new Button();
-            browseImageButton = new Button();
-            imagePathTextBox = new TextBox();
-            imagePathLabel = new Label();
-            carImagePictureBox = new PictureBox();
             statusComboBox = new ComboBox();
             statusLabel = new Label();
             dailyRateTextBox = new TextBox();
@@ -60,7 +56,6 @@ namespace Car_Rental_System
             headerPanel.SuspendLayout();
             bodyTable.SuspendLayout();
             detailsPanel.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)carImagePictureBox).BeginInit();
             listPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)carsGrid).BeginInit();
             listHeaderPanel.SuspendLayout();
@@ -86,9 +81,9 @@ namespace Car_Rental_System
             helperLabel.ForeColor = Color.FromArgb(31, 41, 55);
             helperLabel.Location = new Point(35, 75);
             helperLabel.Name = "helperLabel";
-            helperLabel.Size = new Size(423, 24);
+            helperLabel.Size = new Size(354, 24);
             helperLabel.TabIndex = 1;
-            helperLabel.Text = "Manage car records, availability, rates, and photos.";
+            helperLabel.Text = "Manage car records, availability, and rates.";
             // 
             // titleLabel
             // 
@@ -127,10 +122,6 @@ namespace Car_Rental_System
             detailsPanel.Controls.Add(deleteButton);
             detailsPanel.Controls.Add(updateButton);
             detailsPanel.Controls.Add(addButton);
-            detailsPanel.Controls.Add(browseImageButton);
-            detailsPanel.Controls.Add(imagePathTextBox);
-            detailsPanel.Controls.Add(imagePathLabel);
-            detailsPanel.Controls.Add(carImagePictureBox);
             detailsPanel.Controls.Add(statusComboBox);
             detailsPanel.Controls.Add(statusLabel);
             detailsPanel.Controls.Add(dailyRateTextBox);
@@ -164,7 +155,7 @@ namespace Car_Rental_System
             clearButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             clearButton.ForeColor = Color.FromArgb(31, 41, 55);
             clearButton.Image = (Image)resources.GetObject("clearButton.Image");
-            clearButton.Location = new Point(213, 672);
+            clearButton.Location = new Point(213, 473);
             clearButton.Margin = new Padding(3, 4, 3, 4);
             clearButton.Name = "clearButton";
             clearButton.Size = new Size(158, 48);
@@ -184,7 +175,7 @@ namespace Car_Rental_System
             deleteButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             deleteButton.ForeColor = Color.White;
             deleteButton.Image = (Image)resources.GetObject("deleteButton.Image");
-            deleteButton.Location = new Point(27, 672);
+            deleteButton.Location = new Point(27, 473);
             deleteButton.Margin = new Padding(3, 4, 3, 4);
             deleteButton.Name = "deleteButton";
             deleteButton.Size = new Size(158, 48);
@@ -204,7 +195,7 @@ namespace Car_Rental_System
             updateButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             updateButton.ForeColor = Color.White;
             updateButton.Image = (Image)resources.GetObject("updateButton.Image");
-            updateButton.Location = new Point(213, 608);
+            updateButton.Location = new Point(213, 409);
             updateButton.Margin = new Padding(3, 4, 3, 4);
             updateButton.Name = "updateButton";
             updateButton.Size = new Size(158, 48);
@@ -224,7 +215,7 @@ namespace Car_Rental_System
             addButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             addButton.ForeColor = Color.White;
             addButton.Image = (Image)resources.GetObject("addButton.Image");
-            addButton.Location = new Point(27, 608);
+            addButton.Location = new Point(27, 409);
             addButton.Margin = new Padding(3, 4, 3, 4);
             addButton.Name = "addButton";
             addButton.Size = new Size(158, 48);
@@ -234,60 +225,6 @@ namespace Car_Rental_System
             addButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             addButton.UseVisualStyleBackColor = false;
             addButton.Click += AddButton_Click;
-            // 
-            // browseImageButton
-            // 
-            browseImageButton.BackColor = Color.FromArgb(37, 99, 235);
-            browseImageButton.FlatAppearance.BorderSize = 0;
-            browseImageButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(37, 99, 235);
-            browseImageButton.FlatStyle = FlatStyle.Flat;
-            browseImageButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            browseImageButton.ForeColor = Color.White;
-            browseImageButton.Image = (Image)resources.GetObject("browseImageButton.Image");
-            browseImageButton.Location = new Point(27, 556);
-            browseImageButton.Margin = new Padding(3, 4, 3, 4);
-            browseImageButton.Name = "browseImageButton";
-            browseImageButton.Size = new Size(343, 45);
-            browseImageButton.TabIndex = 18;
-            browseImageButton.Text = "Browse Photo";
-            browseImageButton.TextAlign = ContentAlignment.MiddleRight;
-            browseImageButton.TextImageRelation = TextImageRelation.ImageBeforeText;
-            browseImageButton.UseVisualStyleBackColor = false;
-            browseImageButton.Click += BrowseImageButton_Click;
-            // 
-            // imagePathTextBox
-            // 
-            imagePathTextBox.BorderStyle = BorderStyle.FixedSingle;
-            imagePathTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            imagePathTextBox.Location = new Point(27, 516);
-            imagePathTextBox.Margin = new Padding(3, 4, 3, 4);
-            imagePathTextBox.Name = "imagePathTextBox";
-            imagePathTextBox.ReadOnly = true;
-            imagePathTextBox.Size = new Size(343, 28);
-            imagePathTextBox.TabIndex = 17;
-            // 
-            // imagePathLabel
-            // 
-            imagePathLabel.AutoSize = true;
-            imagePathLabel.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            imagePathLabel.ForeColor = Color.FromArgb(31, 41, 55);
-            imagePathLabel.Location = new Point(27, 489);
-            imagePathLabel.Name = "imagePathLabel";
-            imagePathLabel.Size = new Size(88, 22);
-            imagePathLabel.TabIndex = 16;
-            imagePathLabel.Text = "Image path";
-            // 
-            // carImagePictureBox
-            // 
-            carImagePictureBox.BackColor = Color.White;
-            carImagePictureBox.BorderStyle = BorderStyle.FixedSingle;
-            carImagePictureBox.Location = new Point(27, 386);
-            carImagePictureBox.Margin = new Padding(3, 4, 3, 4);
-            carImagePictureBox.Name = "carImagePictureBox";
-            carImagePictureBox.Size = new Size(343, 87);
-            carImagePictureBox.SizeMode = PictureBoxSizeMode.Zoom;
-            carImagePictureBox.TabIndex = 15;
-            carImagePictureBox.TabStop = false;
             // 
             // statusComboBox
             // 
@@ -509,7 +446,7 @@ namespace Car_Rental_System
             dataGridViewCellStyle2.SelectionForeColor = Color.White;
             dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
             carsGrid.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
-            carsGrid.ColumnHeadersHeight = 40;
+            carsGrid.ColumnHeadersHeight = 56;
             dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = Color.White;
             dataGridViewCellStyle3.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
@@ -590,7 +527,6 @@ namespace Car_Rental_System
             bodyTable.ResumeLayout(false);
             detailsPanel.ResumeLayout(false);
             detailsPanel.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)carImagePictureBox).EndInit();
             listPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)carsGrid).EndInit();
             listHeaderPanel.ResumeLayout(false);
@@ -609,10 +545,6 @@ namespace Car_Rental_System
         private Button deleteButton;
         private Button updateButton;
         private Button addButton;
-        private Button browseImageButton;
-        private TextBox imagePathTextBox;
-        private Label imagePathLabel;
-        private PictureBox carImagePictureBox;
         private ComboBox statusComboBox;
         private Label statusLabel;
         private TextBox dailyRateTextBox;

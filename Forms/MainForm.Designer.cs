@@ -29,6 +29,7 @@ namespace Car_Rental_System
             logoutButton = new Button();
             reportsButton = new Button();
             returnsButton = new Button();
+            reservationsButton = new Button();
             rentalsButton = new Button();
             customersButton = new Button();
             ratesButton = new Button();
@@ -107,6 +108,7 @@ namespace Car_Rental_System
             sidebarPanel.Controls.Add(logoutButton);
             sidebarPanel.Controls.Add(reportsButton);
             sidebarPanel.Controls.Add(returnsButton);
+            sidebarPanel.Controls.Add(reservationsButton);
             sidebarPanel.Controls.Add(rentalsButton);
             sidebarPanel.Controls.Add(customersButton);
             sidebarPanel.Controls.Add(ratesButton);
@@ -156,12 +158,12 @@ namespace Car_Rental_System
             reportsButton.ForeColor = Color.White;
             reportsButton.Image = (Image)resources.GetObject("reportsButton.Image");
             reportsButton.ImageAlign = ContentAlignment.MiddleLeft;
-            reportsButton.Location = new Point(23, 559);
+            reportsButton.Location = new Point(23, 625);
             reportsButton.Margin = new Padding(3, 4, 3, 4);
             reportsButton.Name = "reportsButton";
             reportsButton.Padding = new Padding(16, 0, 0, 0);
             reportsButton.Size = new Size(229, 56);
-            reportsButton.TabIndex = 8;
+            reportsButton.TabIndex = 9;
             reportsButton.Text = "Reports";
             reportsButton.TextAlign = ContentAlignment.MiddleLeft;
             reportsButton.TextImageRelation = TextImageRelation.ImageBeforeText;
@@ -179,17 +181,40 @@ namespace Car_Rental_System
             returnsButton.ForeColor = Color.White;
             returnsButton.Image = (Image)resources.GetObject("returnsButton.Image");
             returnsButton.ImageAlign = ContentAlignment.MiddleLeft;
-            returnsButton.Location = new Point(23, 493);
+            returnsButton.Location = new Point(23, 559);
             returnsButton.Margin = new Padding(3, 4, 3, 4);
             returnsButton.Name = "returnsButton";
             returnsButton.Padding = new Padding(16, 0, 0, 0);
             returnsButton.Size = new Size(229, 56);
-            returnsButton.TabIndex = 7;
+            returnsButton.TabIndex = 8;
             returnsButton.Text = "Return Car";
             returnsButton.TextAlign = ContentAlignment.MiddleLeft;
             returnsButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             returnsButton.UseVisualStyleBackColor = false;
             returnsButton.Click += NavigationButton_Click;
+            // 
+            // reservationsButton
+            // 
+            reservationsButton.BackColor = Color.FromArgb(31, 41, 55);
+            reservationsButton.FlatAppearance.BorderSize = 0;
+            reservationsButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(29, 78, 216);
+            reservationsButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(37, 99, 235);
+            reservationsButton.FlatStyle = FlatStyle.Flat;
+            reservationsButton.Font = new Font("Inter SemiBold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            reservationsButton.ForeColor = Color.White;
+            reservationsButton.Image = (Image)resources.GetObject("reservationsButton.Image");
+            reservationsButton.ImageAlign = ContentAlignment.MiddleLeft;
+            reservationsButton.Location = new Point(23, 493);
+            reservationsButton.Margin = new Padding(3, 4, 3, 4);
+            reservationsButton.Name = "reservationsButton";
+            reservationsButton.Padding = new Padding(16, 0, 0, 0);
+            reservationsButton.Size = new Size(229, 56);
+            reservationsButton.TabIndex = 7;
+            reservationsButton.Text = "Reservations";
+            reservationsButton.TextAlign = ContentAlignment.MiddleLeft;
+            reservationsButton.TextImageRelation = TextImageRelation.ImageBeforeText;
+            reservationsButton.UseVisualStyleBackColor = false;
+            reservationsButton.Click += NavigationButton_Click;
             // 
             // rentalsButton
             // 
@@ -424,7 +449,7 @@ namespace Car_Rental_System
             dataGridViewCellStyle2.SelectionForeColor = Color.White;
             dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
             recentRentalsGrid.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
-            recentRentalsGrid.ColumnHeadersHeight = 40;
+            recentRentalsGrid.ColumnHeadersHeight = 56;
             dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = Color.White;
             dataGridViewCellStyle3.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
@@ -512,10 +537,10 @@ namespace Car_Rental_System
             clearButton.Font = new Font("Inter Medium", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             clearButton.ForeColor = Color.FromArgb(31, 41, 55);
             clearButton.Image = (Image)resources.GetObject("clearButton.Image");
-            clearButton.Location = new Point(205, 393);
+            clearButton.Location = new Point(183, 393);
             clearButton.Margin = new Padding(3, 4, 3, 4);
             clearButton.Name = "clearButton";
-            clearButton.Size = new Size(96, 37);
+            clearButton.Size = new Size(137, 37);
             clearButton.TabIndex = 14;
             clearButton.Text = "Clear";
             clearButton.TextAlign = ContentAlignment.MiddleRight;
@@ -698,7 +723,7 @@ namespace Car_Rental_System
             selectedCarLabel.ForeColor = Color.FromArgb(31, 41, 55);
             selectedCarLabel.Location = new Point(23, 139);
             selectedCarLabel.Name = "selectedCarLabel";
-            selectedCarLabel.Size = new Size(101, 22);
+            selectedCarLabel.Size = new Size(103, 22);
             selectedCarLabel.TabIndex = 3;
             selectedCarLabel.Text = "Selected Car";
             // 
@@ -765,7 +790,7 @@ namespace Car_Rental_System
             dataGridViewCellStyle5.SelectionForeColor = Color.White;
             dataGridViewCellStyle5.WrapMode = DataGridViewTriState.True;
             carsGrid.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
-            carsGrid.ColumnHeadersHeight = 40;
+            carsGrid.ColumnHeadersHeight = 56;
             dataGridViewCellStyle6.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle6.BackColor = Color.White;
             dataGridViewCellStyle6.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
@@ -877,7 +902,7 @@ namespace Car_Rental_System
             totalCarsTextLabel.ForeColor = Color.FromArgb(31, 41, 55);
             totalCarsTextLabel.Location = new Point(18, 14);
             totalCarsTextLabel.Name = "totalCarsTextLabel";
-            totalCarsTextLabel.Size = new Size(92, 24);
+            totalCarsTextLabel.Size = new Size(82, 22);
             totalCarsTextLabel.TabIndex = 0;
             totalCarsTextLabel.Text = "Total Cars";
             // 
@@ -912,7 +937,7 @@ namespace Car_Rental_System
             availableCarsTextLabel.ForeColor = Color.FromArgb(31, 41, 55);
             availableCarsTextLabel.Location = new Point(18, 14);
             availableCarsTextLabel.Name = "availableCarsTextLabel";
-            availableCarsTextLabel.Size = new Size(125, 24);
+            availableCarsTextLabel.Size = new Size(110, 22);
             availableCarsTextLabel.TabIndex = 0;
             availableCarsTextLabel.Text = "Available Cars";
             // 
@@ -947,7 +972,7 @@ namespace Car_Rental_System
             rentedCarsTextLabel.ForeColor = Color.FromArgb(31, 41, 55);
             rentedCarsTextLabel.Location = new Point(18, 14);
             rentedCarsTextLabel.Name = "rentedCarsTextLabel";
-            rentedCarsTextLabel.Size = new Size(144, 24);
+            rentedCarsTextLabel.Size = new Size(128, 22);
             rentedCarsTextLabel.TabIndex = 0;
             rentedCarsTextLabel.Text = "Overdue Rentals";
             // 
@@ -982,7 +1007,7 @@ namespace Car_Rental_System
             incomeTextLabel.ForeColor = Color.FromArgb(31, 41, 55);
             incomeTextLabel.Location = new Point(18, 14);
             incomeTextLabel.Name = "incomeTextLabel";
-            incomeTextLabel.Size = new Size(156, 24);
+            incomeTextLabel.Size = new Size(141, 22);
             incomeTextLabel.TabIndex = 0;
             incomeTextLabel.Text = "Monthly Collected";
             // 
@@ -1035,6 +1060,7 @@ namespace Car_Rental_System
         private Button logoutButton;
         private Button reportsButton;
         private Button returnsButton;
+        private Button reservationsButton;
         private Button rentalsButton;
         private Button customersButton;
         private Button ratesButton;

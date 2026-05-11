@@ -248,6 +248,71 @@ namespace Car_Rental_System.Migrations
                     b.ToTable("Rentals");
                 });
 
+            modelBuilder.Entity("Car_Rental_System.Models.Reservation", b =>
+                {
+                    b.Property<int>("ReservationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReservationId"));
+
+                    b.Property<int>("CarId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ContactNumber")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<int?>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("DepositAmount")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<DateOnly>("ExpectedReturnDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("PaymentReferenceNumber")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<DateOnly>("PickupDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly>("ReservationDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("ReservationId");
+
+                    b.HasIndex("CarId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("Reservations");
+                });
+
             modelBuilder.Entity("Car_Rental_System.Models.Car", b =>
                 {
                     b.HasOne("Car_Rental_System.Models.CarType", "CarType")
@@ -277,9 +342,29 @@ namespace Car_Rental_System.Migrations
                     b.Navigation("Customer");
                 });
 
+            modelBuilder.Entity("Car_Rental_System.Models.Reservation", b =>
+                {
+                    b.HasOne("Car_Rental_System.Models.Car", "Car")
+                        .WithMany("Reservations")
+                        .HasForeignKey("CarId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Car_Rental_System.Models.Customer", "Customer")
+                        .WithMany("Reservations")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Car");
+
+                    b.Navigation("Customer");
+                });
+
             modelBuilder.Entity("Car_Rental_System.Models.Car", b =>
                 {
                     b.Navigation("Rentals");
+
+                    b.Navigation("Reservations");
                 });
 
             modelBuilder.Entity("Car_Rental_System.Models.CarType", b =>
@@ -290,6 +375,8 @@ namespace Car_Rental_System.Migrations
             modelBuilder.Entity("Car_Rental_System.Models.Customer", b =>
                 {
                     b.Navigation("Rentals");
+
+                    b.Navigation("Reservations");
                 });
 #pragma warning restore 612, 618
         }

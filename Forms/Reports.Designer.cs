@@ -156,7 +156,7 @@ namespace Car_Rental_System
             dataGridViewCellStyle2.SelectionForeColor = Color.White;
             dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
             reportGrid.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
-            reportGrid.ColumnHeadersHeight = 36;
+            reportGrid.ColumnHeadersHeight = 56;
             dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = Color.White;
             dataGridViewCellStyle3.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);

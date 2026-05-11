@@ -151,7 +151,7 @@ namespace Car_Rental_System
             clearButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             clearButton.ForeColor = Color.FromArgb(31, 41, 55);
             clearButton.Image = (Image)resources.GetObject("clearButton.Image");
-            clearButton.Location = new Point(194, 544);
+            clearButton.Location = new Point(194, 501);
             clearButton.Margin = new Padding(3, 4, 3, 4);
             clearButton.Name = "clearButton";
             clearButton.Size = new Size(151, 45);
@@ -171,7 +171,7 @@ namespace Car_Rental_System
             deleteButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             deleteButton.ForeColor = Color.White;
             deleteButton.Image = (Image)resources.GetObject("deleteButton.Image");
-            deleteButton.Location = new Point(25, 544);
+            deleteButton.Location = new Point(25, 501);
             deleteButton.Margin = new Padding(3, 4, 3, 4);
             deleteButton.Name = "deleteButton";
             deleteButton.Size = new Size(151, 45);
@@ -191,7 +191,7 @@ namespace Car_Rental_System
             updateButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             updateButton.ForeColor = Color.White;
             updateButton.Image = (Image)resources.GetObject("updateButton.Image");
-            updateButton.Location = new Point(194, 483);
+            updateButton.Location = new Point(194, 438);
             updateButton.Margin = new Padding(3, 4, 3, 4);
             updateButton.Name = "updateButton";
             updateButton.Size = new Size(151, 45);
@@ -211,7 +211,7 @@ namespace Car_Rental_System
             addButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             addButton.ForeColor = Color.White;
             addButton.Image = (Image)resources.GetObject("addButton.Image");
-            addButton.Location = new Point(25, 483);
+            addButton.Location = new Point(23, 438);
             addButton.Margin = new Padding(3, 4, 3, 4);
             addButton.Name = "addButton";
             addButton.Size = new Size(151, 45);
@@ -330,7 +330,7 @@ namespace Car_Rental_System
             dataGridViewCellStyle2.SelectionForeColor = Color.White;
             dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
             carTypesGrid.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
-            carTypesGrid.ColumnHeadersHeight = 36;
+            carTypesGrid.ColumnHeadersHeight = 56;
             dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = Color.White;
             dataGridViewCellStyle3.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);

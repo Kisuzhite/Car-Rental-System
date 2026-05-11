@@ -118,16 +118,60 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="clearButton.Image" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Icons\action-clear-flaticon-dark.png;System.Drawing.Bitmap, System.Drawing.Common</value>
+  <data name="clearButton.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
+        wgAADsIBFShKgAAAApZJREFUSEvtlD1oVEEQx5+KwVzu8mb2ctmZF3mnXm531gQxIDYSK7+wtddCFASN
+        ppBgIREsLBQ0iKQQuwQrESwEG0Es/GwEBQtREDFBBMGoEBWe7CPKc8+oJJ34g8e7nf9/55aZeRtF/4mi
+        CMmMKZZZZHnSmTTWh/qiwO7mvmpPfwbajCDLHST7LPQsHJHlSPIOyEz6JXTbIWTJQtuCickMq2RtppTh
+        KIqWIst0TPZy6FsQSZKsQJIPMTUv+jVoe8j/GZBLQ2/A4DIk2dquV9dCpYgiOY4sM1r3l6I0bfO/gcyl
+        0NeCT15LB3zTxkOtXK7HQHIWSF76xqK2L8o1U0dtjip2WbXqdLinBX9yxe4MkNlUjJfYKGT3FFk+A9nz
+        qO0JP5Y+sWI3C9qcLPpbqGizAXXvxjDuIaJ2IPcQWV7HsSkXpKWo7Wg+pmy3FeKtINkvSJKladpWjHd0
+        JIgkd/OSkP0ILCOVyqrOogfIPAKyV4uxFuJuexDYDhVjQM3tyG4KSd4C9Q760/qSIMt7IBn2zfU+JHMN
+        tL1X3DsvFbYGyO5HlvvVnr4Myd2Ym/Mc5EYPsIz7kUSSqZjMASR5A2RP/ZzpF3Rqu0ex+4psZ5DlZqyb
+        O0PPd0pV2wSyk3NNzqpsTehpQZE50rVyXebfoTYfoO0t0OZxGJ8XJBnLS8PmsNINB1pOl+v1OPR5fOny
+        ntTM3lD7LcD2WH7H5HU2z/04+ng5TcF/AyW9psuvkcw5JPlENNAe5vgjSGYHsnuF7KaVtruiKFqCZK8o
+        lqwjceif/PS6ORru/WtK1KwCyYRK+jJ/PfiEsW5s9hqQmfhxFy0WRbIFWR6oxGVA9rbvi+9TrJu7Q++i
+        8BehYrmO7GZibS+E+r/JN8sllMxwJK6+AAAAAElFTkSuQmCC
+</value>
   </data>
-  <data name="deleteButton.Image" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Icons\action-delete-flaticon-white.png;System.Drawing.Bitmap, System.Drawing.Common</value>
+  <data name="deleteButton.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
+        wgAADsIBFShKgAAAAXZJREFUSEvtlc0qhHEUxtn5yFgoVohchGwkkhQhWxtlIywpN4CkEFsbES7ARwxW
+        SISauARuwu/R0Zl658yMaSzlqdP83uecOadm3v/5V1T8eQEjwCvwEsK84VhftqyZpO4Cfg/wFP2SAlqA
+        LWAX2Ac+JR0COyGOLAfsee2WpObYL0/APbAOzHpMANOJ52yYZ7ns8wZwF/vlCfiQ1Br9UpLUZt+Nfp6A
+        OSsE3hJ/6HPiM8nZvNW+AzOxX0EBl8CkpCZJDZJqnVOS6p3Ns5zxFHAR+xQVcAoMOncA88aSxoEx5wWg
+        3WuGgOPQpriAs+w7DgwAD87bwKbzI9DvPAqchDbFlRwgqVfSlfurwLLztZ0F5/8B/wOCwmvaD9w4245a
+        c74F+px/NWDIuQs4cF60A2bsG7bTfbszyhpgq+L7JJskVeZW5Hp+ktO5FT8IWAHOgUagDqjxPWT7xyJl
+        nuesJi1pKfYpKknVfqFkClyVMTL+c1XFPn9DX7184w6loPJHAAAAAElFTkSuQmCC
+</value>
   </data>
-  <data name="updateButton.Image" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Icons\action-update-flaticon-white.png;System.Drawing.Bitmap, System.Drawing.Common</value>
+  <data name="updateButton.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
+        wgAADsIBFShKgAAAAedJREFUSEvd1cuLz1EYx/Epd1ssyGZ2/gBEysJCdjYu4zJjzMJCSWyUhcteskOS
+        lBI7W5fUlIZMsbK3wMY1Cylej55xfvrN0/c3Zsu7Tj3n+Tznc77n/M45v6Gh/w7swKsWL8UEHuA9frSW
+        ceZSW1495iQiDkVE4CjetXgS5zHeWsaTTfuAseozEOzLgW3wNayqNT0iYjgibrTaK1XvBFvxtQ16iYO1
+        poK9rf5q1TrBmojY2VZwpOpdYE+b5EDVZsBibIuIhVWbL7iFLxGxrGopTrStX1G1QUTEFlyPiEXZx+q2
+        isO1NosfY6rmB4ENzWyqf9V4kl6zq38Ln3Gm5rvARvzMu1C3NCLOpld/boY2YNZ5xomIOFVy/eYL+rWm
+        j6Ve8zMT5CUruZNtG063/vrW7zRP0qNzgoj4hHM131aRppfxDfcHmSd5y9Or5lN4hKc1n+D43768R0Q8
+        x8OaT5PRZrK2agk25V2p+X6wsnmMVi1nXoKPuFu1+ZKrw+Z6sv4QEbsGfkEHOIbb7YEcrnonuNRu9KwT
+        1QV241n7qO/51NSaTnCxTXIH66reI38v3Gy1Ocn+WjOQ3C68bQOncaH9CWXLeLppr/PtafF49ZmTfMQw
+        gnt40+5BtowzN9I7tniB7dXj3+cXqOSNggJSeHUAAAAASUVORK5CYII=
+</value>
   </data>
-  <data name="addButton.Image" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Icons\action-add-type-flaticon-white.png;System.Drawing.Bitmap, System.Drawing.Common</value>
+  <data name="addButton.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
+        wgAADsIBFShKgAAAAbNJREFUSEvdlVlKA0EQhl0heji3GFyyXEJEb+ES3IKnEHc8gkR9UiOiKK6oaHzy
+        5SupUINtZSaZ53zQBP6/q7vT1VXT1dXRAINACdgGXsUAXkwriciAj0sFkAeebcEvYA9YtbEP1M17AqZ8
+        fEuAsgWfA2NAJmZOBsgCFzZ3yc+JJVh8TUT6vO8RkX5gPdUmwIRN3PBeO4CKxea810CTpYkELkWk2/sK
+        MC8ic15XRKQHqNkDaLpSDS7aCYa8FwHcAtdejwBGbI2899TUl/EpIr3eiwDOgBOvR2jO7MXteE+DP4Bd
+        r4cAp0DV6yF20Dev6+7618qhBswCd8C9/f7YCLUZF7Oia4Vag4QNtIqPglG3EWoFFxO/AfCe4oqqwLHX
+        QxKvyFqBJjmxuFImWf9hbJILjU4mMuy9COCmzTMdtaue9p6a2lu00GpaNN5XrAE2B/8V2pU2yNhCU7TM
+        7QQV77UD2LTYrPf+ASxH/Ugbmfc91uyiPrTo/Vi0K1qAtuLxuI+K9a6c9S6du+DntEQ/IsCjBX8DB9qW
+        bRyqZt4DMOnjU2GnLAJb0dfNFtVEqlZITGjH8AuRWJoL+SsZWwAAAABJRU5ErkJggg==
+</value>
   </data>
 </root>

@@ -23,20 +23,27 @@ namespace Car_Rental_System.Helpers
             ["ContactNumber"] = "Contact Number",
             ["Customer"] = "Customer",
             ["CustomerId"] = "Customer ID",
+            ["CustomerName"] = "Customer Name",
             ["DailyRate"] = "Daily Rate",
             ["Description"] = "Description",
+            ["DepositAmount"] = "Deposit Amount",
             ["ExpectedReturn"] = "Expected Return",
+            ["ExpectedReturnDate"] = "Expected Return",
             ["FullName"] = "Full Name",
             ["ImagePath"] = "Image Path",
             ["LateDays"] = "Late Days",
             ["LicenseNumber"] = "License Number",
             ["Model"] = "Model",
             ["PaymentMethod"] = "Payment Method",
+            ["PaymentReferenceNumber"] = "Payment Reference",
             ["PaymentStatus"] = "Payment Status",
             ["Penalty"] = "Penalty",
             ["PlateNo"] = "Plate No",
             ["PlateNumber"] = "Plate Number",
+            ["PickupDate"] = "Pickup Date",
             ["RatePerDay"] = "Rate Per Day",
+            ["ReservationDate"] = "Reservation Date",
+            ["ReservationId"] = "Reservation ID",
             ["RentalDate"] = "Rental Date",
             ["RentalId"] = "Rental ID",
             ["RentalID"] = "Rental ID",
@@ -86,7 +93,7 @@ namespace Car_Rental_System.Helpers
             grid.RowHeadersVisible = false;
             grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            grid.ColumnHeadersHeight = 44;
+            grid.ColumnHeadersHeight = 56;
             grid.RowTemplate.Height = 46;
 
             grid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(17, 24, 39);
@@ -96,7 +103,7 @@ namespace Car_Rental_System.Helpers
             grid.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
             grid.ColumnHeadersDefaultCellStyle.Padding = new Padding(12, 0, 8, 0);
             grid.ColumnHeadersDefaultCellStyle.Font = new Font("Inter SemiBold", 9F, FontStyle.Bold);
-            grid.ColumnHeadersDefaultCellStyle.WrapMode = DataGridViewTriState.False;
+            grid.ColumnHeadersDefaultCellStyle.WrapMode = DataGridViewTriState.True;
 
             grid.DefaultCellStyle.BackColor = Color.White;
             grid.DefaultCellStyle.ForeColor = Color.FromArgb(31, 41, 55);
@@ -115,7 +122,23 @@ namespace Car_Rental_System.Helpers
         private static void ApplyColumnSizing(DataGridViewColumn column)
         {
             column.MinimumWidth = Math.Max(column.MinimumWidth, GetMinimumColumnWidth(column.Name));
+            column.MinimumWidth = Math.Max(column.MinimumWidth, GetHeaderMinimumWidth(column));
             column.FillWeight = GetColumnFillWeight(column.Name);
+        }
+
+        private static int GetHeaderMinimumWidth(DataGridViewColumn column)
+        {
+            string headerText = string.IsNullOrWhiteSpace(column.HeaderText)
+                ? column.Name
+                : column.HeaderText;
+
+            Size textSize = TextRenderer.MeasureText(
+                headerText,
+                new Font("Inter SemiBold", 9F, FontStyle.Bold),
+                new Size(int.MaxValue, int.MaxValue),
+                TextFormatFlags.NoPadding);
+
+            return Math.Min(Math.Max(textSize.Width + 34, 82), 220);
         }
 
         private static int GetMinimumColumnWidth(string columnName)
@@ -123,14 +146,15 @@ namespace Car_Rental_System.Helpers
             return columnName switch
             {
                 "Status" => 116,
-                "RentalId" or "RentalID" or "CarId" or "CustomerId" or "CarTypeId" => 82,
-                "RentalDate" or "ReturnDate" or "ExpectedReturn" or "ActualReturn" => 120,
-                "DailyRate" or "RatePerDay" or "BaseAmount" or "TotalAmount" or "AmountPaid" or "Balance" or "Penalty" or "Amount" => 125,
+                "RentalId" or "RentalID" or "ReservationId" or "CarId" or "CustomerId" or "CarTypeId" => 82,
+                "RentalDate" or "ReturnDate" or "ExpectedReturn" or "ExpectedReturnDate" or "ActualReturn" or "ReservationDate" or "PickupDate" => 120,
+                "DailyRate" or "RatePerDay" or "BaseAmount" or "TotalAmount" or "AmountPaid" or "DepositAmount" or "Balance" or "Penalty" or "Amount" => 125,
                 "LateDays" => 92,
                 "PaymentMethod" or "PaymentStatus" => 125,
+                "PaymentReferenceNumber" => 160,
                 "PlateNo" or "PlateNumber" => 115,
                 "CarType" or "CarTypeName" or "Type" or "TypeName" => 130,
-                "Customer" or "FullName" => 170,
+                "Customer" or "FullName" or "CustomerName" => 170,
                 "Car" or "Description" or "Address" => 240,
                 _ => 100
             };
@@ -141,13 +165,13 @@ namespace Car_Rental_System.Helpers
             return columnName switch
             {
                 "Status" => 78,
-                "RentalId" or "RentalID" or "CarId" or "CustomerId" or "CarTypeId" => 55,
+                "RentalId" or "RentalID" or "ReservationId" or "CarId" or "CustomerId" or "CarTypeId" => 55,
                 "LateDays" => 62,
                 "PaymentMethod" or "PaymentStatus" => 90,
-                "RentalDate" or "ReturnDate" or "ExpectedReturn" or "ActualReturn" => 85,
-                "DailyRate" or "RatePerDay" or "BaseAmount" or "TotalAmount" or "AmountPaid" or "Balance" or "Penalty" or "Amount" => 90,
+                "RentalDate" or "ReturnDate" or "ExpectedReturn" or "ExpectedReturnDate" or "ActualReturn" or "ReservationDate" or "PickupDate" => 85,
+                "DailyRate" or "RatePerDay" or "BaseAmount" or "TotalAmount" or "AmountPaid" or "DepositAmount" or "Balance" or "Penalty" or "Amount" => 90,
                 "Car" or "Description" or "Address" => 175,
-                "Customer" or "FullName" => 125,
+                "Customer" or "FullName" or "CustomerName" => 125,
                 _ => 100
             };
         }
@@ -278,6 +302,10 @@ namespace Car_Rental_System.Helpers
                 nameof(PaymentStatus.Unpaid) => Color.FromArgb(254, 226, 226),
                 nameof(PaymentStatus.Partial) => Color.FromArgb(254, 243, 199),
                 nameof(PaymentStatus.Paid) => Color.FromArgb(220, 252, 231),
+                nameof(ReservationStatus.Pending) => Color.FromArgb(254, 243, 199),
+                nameof(ReservationStatus.Confirmed) => Color.FromArgb(219, 234, 254),
+                nameof(ReservationStatus.Cancelled) => Color.FromArgb(243, 244, 246),
+                nameof(ReservationStatus.Converted) => Color.FromArgb(220, 252, 231),
                 _ => Color.White
             };
 
@@ -292,6 +320,10 @@ namespace Car_Rental_System.Helpers
                 nameof(PaymentStatus.Unpaid) => Color.FromArgb(252, 165, 165),
                 nameof(PaymentStatus.Partial) => Color.FromArgb(252, 211, 77),
                 nameof(PaymentStatus.Paid) => Color.FromArgb(134, 239, 172),
+                nameof(ReservationStatus.Pending) => Color.FromArgb(252, 211, 77),
+                nameof(ReservationStatus.Confirmed) => Color.FromArgb(147, 197, 253),
+                nameof(ReservationStatus.Cancelled) => Color.FromArgb(209, 213, 219),
+                nameof(ReservationStatus.Converted) => Color.FromArgb(134, 239, 172),
                 _ => Color.FromArgb(229, 231, 235)
             };
 
@@ -306,6 +338,10 @@ namespace Car_Rental_System.Helpers
                 nameof(PaymentStatus.Unpaid) => Color.FromArgb(153, 27, 27),
                 nameof(PaymentStatus.Partial) => Color.FromArgb(146, 64, 14),
                 nameof(PaymentStatus.Paid) => Color.FromArgb(22, 101, 52),
+                nameof(ReservationStatus.Pending) => Color.FromArgb(146, 64, 14),
+                nameof(ReservationStatus.Confirmed) => Color.FromArgb(30, 64, 175),
+                nameof(ReservationStatus.Cancelled) => Color.FromArgb(75, 85, 99),
+                nameof(ReservationStatus.Converted) => Color.FromArgb(22, 101, 52),
                 _ => Color.FromArgb(31, 41, 55)
             };
 

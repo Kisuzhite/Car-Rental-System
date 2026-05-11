@@ -53,6 +53,24 @@ namespace Car_Rental_System.Helpers
             return (userName, passwordHash);
         }
 
+        public static BusinessProfile GetBusinessProfile()
+        {
+            return new BusinessProfile(
+                GetConfiguredValueOrDefault("BusinessProfile", "BusinessName", AppConstants.DefaultBusinessName),
+                GetConfiguredValueOrDefault("BusinessProfile", "OwnerName", AppConstants.DefaultBusinessOwnerName),
+                GetConfiguredValueOrDefault("BusinessProfile", "Location", AppConstants.DefaultBusinessLocation),
+                GetConfiguredValueOrDefault("BusinessProfile", "ContactNumber", AppConstants.DefaultBusinessContactNumber),
+                GetConfiguredValueOrDefault("BusinessProfile", "FacebookPage", AppConstants.DefaultBusinessFacebookPage));
+        }
+
+        private static string GetConfiguredValueOrDefault(string section, string key, string defaultValue)
+        {
+            string? configuredValue = GetJsonValue(section, key);
+            return string.IsNullOrWhiteSpace(configuredValue)
+                ? defaultValue
+                : configuredValue;
+        }
+
         private static string? GetJsonValue(params string[] path)
         {
             foreach (string configPath in GetCandidateConfigPaths())

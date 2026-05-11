@@ -18,9 +18,10 @@ namespace Car_Rental_System.Helpers
         public static void ShowDatabaseError(string action, Exception exception)
         {
             Debug.WriteLine(exception);
+            Exception rootCause = exception.GetBaseException();
 
             MessageBox.Show(
-                $"{action}\n\nThe database operation could not be completed. Please check your data and try again.\n\nTechnical details were written to the Visual Studio Output window.",
+                $"{action}\n\nThe database operation could not be completed. Please check your data and try again.\n\nDetails: {rootCause.Message}",
                 "Database Error",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);

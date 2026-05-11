@@ -233,6 +233,7 @@ namespace Car_Rental_System
                 : selectedButton == ratesButton ? new CarTypes()
                 : selectedButton == customersButton ? new Customers()
                 : selectedButton == rentalsButton ? new Rentals()
+                : selectedButton == reservationsButton ? new Reservations()
                 : selectedButton == returnsButton ? new ReturnCar()
                 : selectedButton == reportsButton ? new Reports()
                 : null;
@@ -244,7 +245,7 @@ namespace Car_Rental_System
 
         private void ResetNavigationButtons()
         {
-            Button[] buttons = { dashboardButton, carsButton, ratesButton, customersButton, rentalsButton, returnsButton, reportsButton };
+            Button[] buttons = { dashboardButton, carsButton, ratesButton, customersButton, rentalsButton, reservationsButton, returnsButton, reportsButton };
 
             foreach (Button button in buttons)
             {

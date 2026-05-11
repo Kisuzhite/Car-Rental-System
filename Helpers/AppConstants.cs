@@ -14,6 +14,11 @@ namespace Car_Rental_System.Helpers
         public const string CurrencyPrefix = "P ";
         public const string NotProvided = "Not provided";
         public const string OwnerRole = "Owner";
+        public const string DefaultBusinessName = "Auto Avenue Car Rental";
+        public const string DefaultBusinessOwnerName = "Owner / Operator";
+        public const string DefaultBusinessLocation = "Business location not set";
+        public const string DefaultBusinessContactNumber = "Contact number not set";
+        public const string DefaultBusinessFacebookPage = "";
 
         public static readonly string DefaultCarImagePath =
             Path.Combine("Assets", "Cars", "default-car.png");

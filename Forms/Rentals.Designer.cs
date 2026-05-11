@@ -154,7 +154,7 @@ namespace Car_Rental_System
             clearButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             clearButton.ForeColor = Color.FromArgb(31, 41, 55);
             clearButton.Image = (Image)resources.GetObject("clearButton.Image");
-            clearButton.Location = new Point(25, 600);
+            clearButton.Location = new Point(23, 596);
             clearButton.Margin = new Padding(3, 4, 3, 4);
             clearButton.Name = "clearButton";
             clearButton.Size = new Size(343, 45);
@@ -174,7 +174,7 @@ namespace Car_Rental_System
             createButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             createButton.ForeColor = Color.White;
             createButton.Image = (Image)resources.GetObject("createButton.Image");
-            createButton.Location = new Point(25, 545);
+            createButton.Location = new Point(25, 533);
             createButton.Margin = new Padding(3, 4, 3, 4);
             createButton.Name = "createButton";
             createButton.Size = new Size(343, 45);
@@ -203,7 +203,7 @@ namespace Car_Rental_System
             paymentMethodLabel.ForeColor = Color.FromArgb(31, 41, 55);
             paymentMethodLabel.Location = new Point(25, 455);
             paymentMethodLabel.Name = "paymentMethodLabel";
-            paymentMethodLabel.Size = new Size(134, 22);
+            paymentMethodLabel.Size = new Size(131, 22);
             paymentMethodLabel.TabIndex = 20;
             paymentMethodLabel.Text = "Payment Method";
             // 
@@ -225,7 +225,7 @@ namespace Car_Rental_System
             balanceLabel.ForeColor = Color.FromArgb(31, 41, 55);
             balanceLabel.Location = new Point(208, 380);
             balanceLabel.Name = "balanceLabel";
-            balanceLabel.Size = new Size(65, 22);
+            balanceLabel.Size = new Size(67, 22);
             balanceLabel.TabIndex = 18;
             balanceLabel.Text = "Balance";
             // 
@@ -248,7 +248,7 @@ namespace Car_Rental_System
             paymentAmountLabel.ForeColor = Color.FromArgb(31, 41, 55);
             paymentAmountLabel.Location = new Point(25, 380);
             paymentAmountLabel.Name = "paymentAmountLabel";
-            paymentAmountLabel.Size = new Size(104, 22);
+            paymentAmountLabel.Size = new Size(100, 22);
             paymentAmountLabel.TabIndex = 16;
             paymentAmountLabel.Text = "Amount Paid";
             // 
@@ -429,7 +429,7 @@ namespace Car_Rental_System
             dataGridViewCellStyle2.SelectionForeColor = Color.White;
             dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
             rentalsGrid.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
-            rentalsGrid.ColumnHeadersHeight = 36;
+            rentalsGrid.ColumnHeadersHeight = 56;
             dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = Color.White;
             dataGridViewCellStyle3.Font = new Font("Segoe UI", 9F);

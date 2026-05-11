@@ -266,11 +266,6 @@ namespace Car_Rental_System
             return result == DialogResult.Yes;
         }
 
-        private void RefreshButton_Click(object? sender, EventArgs e)
-        {
-            LoadActiveRentals(searchTextBox.Text);
-        }
-
         private void SearchTextBox_TextChanged(object? sender, EventArgs e)
         {
             LoadActiveRentals(searchTextBox.Text);

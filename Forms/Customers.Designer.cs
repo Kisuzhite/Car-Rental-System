@@ -158,10 +158,10 @@ namespace Car_Rental_System
             deleteButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             deleteButton.ForeColor = Color.White;
             deleteButton.Image = (Image)resources.GetObject("deleteButton.Image");
-            deleteButton.Location = new Point(115, 597);
+            deleteButton.Location = new Point(25, 597);
             deleteButton.Margin = new Padding(3, 4, 3, 4);
             deleteButton.Name = "deleteButton";
-            deleteButton.Size = new Size(151, 45);
+            deleteButton.Size = new Size(320, 45);
             deleteButton.TabIndex = 11;
             deleteButton.Text = "Delete";
             deleteButton.TextAlign = ContentAlignment.MiddleRight;
@@ -339,7 +339,7 @@ namespace Car_Rental_System
             dataGridViewCellStyle2.SelectionForeColor = Color.White;
             dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
             customersGrid.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
-            customersGrid.ColumnHeadersHeight = 36;
+            customersGrid.ColumnHeadersHeight = 56;
             dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = Color.White;
             dataGridViewCellStyle3.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
