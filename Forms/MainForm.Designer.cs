@@ -47,7 +47,6 @@ namespace Car_Rental_System
             recentTitleLabel = new Label();
             mainTable = new TableLayoutPanel();
             quickRentalPanel = new Panel();
-            clearButton = new Button();
             createRentalButton = new Button();
             paymentMethodComboBox = new ComboBox();
             paymentMethodLabel = new Label();
@@ -502,7 +501,6 @@ namespace Car_Rental_System
             // 
             quickRentalPanel.BackColor = Color.White;
             quickRentalPanel.BorderStyle = BorderStyle.FixedSingle;
-            quickRentalPanel.Controls.Add(clearButton);
             quickRentalPanel.Controls.Add(createRentalButton);
             quickRentalPanel.Controls.Add(paymentMethodComboBox);
             quickRentalPanel.Controls.Add(paymentMethodLabel);
@@ -527,27 +525,6 @@ namespace Car_Rental_System
             quickRentalPanel.Name = "quickRentalPanel";
             quickRentalPanel.Size = new Size(345, 445);
             quickRentalPanel.TabIndex = 0;
-            // 
-            // clearButton
-            // 
-            clearButton.BackColor = Color.White;
-            clearButton.FlatAppearance.BorderColor = Color.FromArgb(31, 41, 55);
-            clearButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(243, 244, 246);
-            clearButton.FlatStyle = FlatStyle.Flat;
-            clearButton.Font = new Font("Inter Medium", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            clearButton.ForeColor = Color.FromArgb(31, 41, 55);
-            clearButton.Image = (Image)resources.GetObject("clearButton.Image");
-            clearButton.Location = new Point(183, 393);
-            clearButton.Margin = new Padding(3, 4, 3, 4);
-            clearButton.Name = "clearButton";
-            clearButton.Size = new Size(137, 37);
-            clearButton.TabIndex = 14;
-            clearButton.Text = "Clear";
-            clearButton.TextAlign = ContentAlignment.MiddleRight;
-            clearButton.TextImageRelation = TextImageRelation.ImageBeforeText;
-            clearButton.UseVisualStyleBackColor = false;
-            clearButton.Click += ClearButton_Click;
-            // 
             // createRentalButton
             // 
             createRentalButton.BackColor = Color.FromArgb(37, 99, 235);
@@ -560,7 +537,7 @@ namespace Car_Rental_System
             createRentalButton.Location = new Point(23, 393);
             createRentalButton.Margin = new Padding(3, 4, 3, 4);
             createRentalButton.Name = "createRentalButton";
-            createRentalButton.Size = new Size(152, 37);
+            createRentalButton.Size = new Size(297, 37);
             createRentalButton.TabIndex = 13;
             createRentalButton.Text = "Create Rental";
             createRentalButton.TextAlign = ContentAlignment.MiddleRight;
@@ -1078,7 +1055,6 @@ namespace Car_Rental_System
         private Label recentTitleLabel;
         private TableLayoutPanel mainTable;
         private Panel quickRentalPanel;
-        private Button clearButton;
         private Button createRentalButton;
         private ComboBox paymentMethodComboBox;
         private Label paymentMethodLabel;

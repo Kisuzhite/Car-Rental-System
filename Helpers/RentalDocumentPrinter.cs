@@ -1,7 +1,7 @@
 using System.Drawing.Printing;
 using Car_Rental_System.Data;
 using Car_Rental_System.Models;
-using Microsoft.EntityFrameworkCore;
+using Car_Rental_System.Repositories;
 
 namespace Car_Rental_System.Helpers
 {
@@ -13,17 +13,17 @@ namespace Car_Rental_System.Helpers
             FinalReceipt
         }
 
-        public static void PromptToPrintRentalAgreement(Form owner, int? rentalId)
+        public static Task PromptToPrintRentalAgreementAsync(Form owner, int? rentalId)
         {
-            PromptToPrint(owner, rentalId, RentalDocumentKind.RentalAgreement);
+            return PromptToPrintAsync(owner, rentalId, RentalDocumentKind.RentalAgreement);
         }
 
-        public static void PromptToPrintFinalReceipt(Form owner, int? rentalId)
+        public static Task PromptToPrintFinalReceiptAsync(Form owner, int? rentalId)
         {
-            PromptToPrint(owner, rentalId, RentalDocumentKind.FinalReceipt);
+            return PromptToPrintAsync(owner, rentalId, RentalDocumentKind.FinalReceipt);
         }
 
-        private static void PromptToPrint(Form owner, int? rentalId, RentalDocumentKind documentKind)
+        private static async Task PromptToPrintAsync(Form owner, int? rentalId, RentalDocumentKind documentKind)
         {
             if (!rentalId.HasValue)
             {
@@ -48,10 +48,8 @@ namespace Car_Rental_System.Helpers
             try
             {
                 using var db = new AppDbContext();
-                Rental? rental = db.Rentals
-                    .Include(r => r.Customer)
-                    .Include(r => r.Car).ThenInclude(c => c.CarType)
-                    .FirstOrDefault(r => r.RentalId == rentalId.Value);
+                var rentalRepository = new RentalRepository(db);
+                Rental? rental = await rentalRepository.GetForDocumentAsync(rentalId.Value);
 
                 if (rental == null)
                 {

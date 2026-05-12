@@ -1,15 +1,17 @@
-﻿using Car_Rental_System.Data;
 using Car_Rental_System.Helpers;
 using Car_Rental_System.Models;
+using Car_Rental_System.Presenters;
 using Car_Rental_System.Services;
-using Microsoft.EntityFrameworkCore;
+using Car_Rental_System.ViewModels;
+using Car_Rental_System.Views;
 
 namespace Car_Rental_System
 {
-    public partial class MainForm : Form
+    public partial class MainForm : Form, IMainFormView
     {
         private readonly Padding dashboardPadding;
         private readonly AppUser currentUser;
+        private readonly MainFormPresenter presenter;
         private readonly List<CarLookupItem> availableCarLookupItems = [];
         private Form? activeModuleForm;
         private CarLookupItem? selectedQuickRentalCar;
@@ -23,35 +25,63 @@ namespace Car_Rental_System
             InitializeComponent();
             this.currentUser = currentUser;
             dashboardPadding = contentPanel.Padding;
+            presenter = new MainFormPresenter(this);
         }
 
-        private void MainForm_Load(object? sender, EventArgs e)
+        public string DashboardSearchText => searchTextBox.Text;
+
+        void IMainFormView.BindDashboard(DashboardData dashboardData)
+        {
+            totalCarsValueLabel.Text = dashboardData.TotalCars.ToString();
+            availableCarsValueLabel.Text = dashboardData.AvailableCars.ToString();
+            rentedCarsValueLabel.Text = dashboardData.OverdueRentals.ToString();
+            incomeValueLabel.Text = RentalCalculator.FormatCurrency(dashboardData.MonthlyCollected);
+
+            carsGrid.Columns.Clear();
+            carsGrid.DataSource = dashboardData.AvailableCarsGrid;
+            DataGridViewHelper.ApplyFriendlyHeaders(carsGrid);
+            DataGridViewHelper.HideColumn(carsGrid, "CarId");
+            DataGridViewHelper.ApplyStatusFormatting(carsGrid);
+            carsGrid.ClearSelection();
+
+            recentRentalsGrid.Columns.Clear();
+            recentRentalsGrid.DataSource = dashboardData.RecentRentals;
+            DataGridViewHelper.ApplyFriendlyHeaders(recentRentalsGrid);
+            DataGridViewHelper.ApplyStatusFormatting(recentRentalsGrid);
+            recentRentalsGrid.ClearSelection();
+        }
+
+        void IMainFormView.RefreshAvailableCarSelection(List<CarLookupItem> availableCars)
+        {
+            availableCarLookupItems.Clear();
+            availableCarLookupItems.AddRange(availableCars);
+
+            if (selectedQuickRentalCar != null &&
+                !availableCarLookupItems.Any(c => c.CarId == selectedQuickRentalCar.CarId))
+            {
+                ClearSelectedQuickRentalCar();
+            }
+        }
+
+        private async void MainForm_Load(object? sender, EventArgs e)
         {
             dateLabel.Text = DateTime.Now.ToString("MMMM d, yyyy");
             staffBadgeLabel.Text = $"{currentUser.Role} Account";
             SetActiveNavigationButton(dashboardButton);
             PrepareDashboardForm();
 
-            if (TryPrepareDatabase())
+            if (await TryPrepareDatabaseAsync())
             {
-                LoadDashboardData();
+                await LoadDashboardDataAsync();
             }
         }
 
-        private static bool TryPrepareDatabase()
+        private static async Task<bool> TryPrepareDatabaseAsync()
         {
             try
             {
-                using var db = new AppDbContext();
-
-                if (!db.Database.CanConnect())
-                {
-                    throw new InvalidOperationException("The database connection could not be opened.");
-                }
-
-                List<string> pendingMigrations = db.Database.GetPendingMigrations().ToList();
-
-                if (pendingMigrations.Count > 0)
+                bool databaseIsReady = await MainFormPresenter.DatabaseIsReadyAsync();
+                if (!databaseIsReady)
                 {
                     MessageBox.Show(
                         "The database needs to be updated before the app can continue.\n\nRun this command from the project folder:\n\ndotnet ef database update",
@@ -80,15 +110,11 @@ namespace Car_Rental_System
             CalculateQuickRentalTotal();
         }
 
-        private void LoadDashboardData(string search = "")
+        private async Task LoadDashboardDataAsync()
         {
             try
             {
-                using var db = new AppDbContext();
-                LoadDashboardStats(db);
-                LoadAvailableCars(db, search);
-                LoadRecentRentals(db);
-                LoadAvailableCarLookup(db);
+                await presenter.LoadDashboardDataAsync();
             }
             catch (Exception ex)
             {
@@ -96,125 +122,7 @@ namespace Car_Rental_System
             }
         }
 
-        private void LoadDashboardStats(AppDbContext db)
-        {
-            DateOnly today = RentalCalculator.ToDateOnly(DateTime.Today);
-
-            totalCarsValueLabel.Text = db.Cars.Count().ToString();
-            availableCarsValueLabel.Text = db.Cars.Count(c => c.Status == CarStatus.Available).ToString();
-            rentedCarsValueLabel.Text = db.Rentals.Count(r =>
-                r.Status == RentalStatus.Active &&
-                r.ExpectedReturnDate < today).ToString();
-
-            DateOnly firstOfMonth = new(DateTime.Today.Year, DateTime.Today.Month, 1);
-            DateOnly firstOfNextMonth = firstOfMonth.AddMonths(1);
-
-            decimal income = db.Rentals
-                .Where(r => r.ActualReturnDate >= firstOfMonth
-                    && r.ActualReturnDate < firstOfNextMonth)
-                .Sum(r => (decimal?)r.AmountPaid) ?? 0;
-
-            incomeValueLabel.Text = RentalCalculator.FormatCurrency(income);
-        }
-
-        private void LoadAvailableCars(AppDbContext db, string search)
-        {
-            var query = db.Cars
-                .Where(c => c.Status == CarStatus.Available)
-                .AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                query = query.Where(c =>
-                    c.PlateNumber.Contains(search) ||
-                    c.Brand.Contains(search) ||
-                    c.Model.Contains(search) ||
-                    (c.CarType != null && c.CarType.TypeName.Contains(search)));
-            }
-
-            var cars = query
-                .OrderBy(c => c.Brand).ThenBy(c => c.Model)
-                .Select(c => new
-                {
-                    c.CarId,
-                    PlateNo = c.PlateNumber,
-                    Type = c.CarType != null ? c.CarType.TypeName : AppConstants.NotProvided,
-                    c.Brand,
-                    c.Model,
-                    RatePerDay = c.CarType != null ? c.CarType.DailyRate : c.DailyRate,
-                    c.Status
-                })
-                .ToList();
-
-            carsGrid.Columns.Clear();
-            carsGrid.DataSource = cars;
-            DataGridViewHelper.ApplyFriendlyHeaders(carsGrid);
-            DataGridViewHelper.HideColumn(carsGrid, "CarId");
-            DataGridViewHelper.ApplyStatusFormatting(carsGrid);
-            carsGrid.ClearSelection();
-        }
-
-        private void LoadRecentRentals(AppDbContext db)
-        {
-            DateOnly today = RentalCalculator.ToDateOnly(DateTime.Today);
-
-            var rentals = db.Rentals
-                .Include(r => r.Customer)
-                .Include(r => r.Car).ThenInclude(c => c.CarType)
-                .OrderByDescending(r => r.RentalId)
-                .Take(10)
-                .ToList()
-                .Select(r => new
-                {
-                    RentalID = r.RentalId,
-                    Customer = r.Customer.FullName,
-                    Car = r.Car.PlateNumber + " - " + r.Car.Brand + " " + r.Car.Model +
-                        (r.Car.CarType != null ? " (" + r.Car.CarType.TypeName + ")" : ""),
-                    ReturnDate = r.ExpectedReturnDate,
-                    Amount = r.TotalAmount,
-                    r.AmountPaid,
-                    Balance = r.Balance,
-                    r.PaymentStatus,
-                    Status = RentalStatusHelper.GetDisplayStatus(r, today)
-                })
-                .ToList();
-
-            recentRentalsGrid.Columns.Clear();
-            recentRentalsGrid.DataSource = rentals;
-            DataGridViewHelper.ApplyFriendlyHeaders(recentRentalsGrid);
-            DataGridViewHelper.ApplyStatusFormatting(recentRentalsGrid);
-            recentRentalsGrid.ClearSelection();
-        }
-
-        private void LoadAvailableCarLookup(AppDbContext db)
-        {
-            var cars = db.Cars
-                .Where(c => c.Status == CarStatus.Available)
-                .OrderBy(c => c.Brand).ThenBy(c => c.Model)
-                .Select(c => new CarLookupItem
-                {
-                    CarId = c.CarId,
-                    CarName = c.PlateNumber + " - " + c.Brand + " " + c.Model +
-                        (c.CarType != null ? " (" + c.CarType.TypeName + ")" : ""),
-                    DailyRate = c.CarType != null ? (decimal?)c.CarType.DailyRate : c.DailyRate
-                })
-                .ToList();
-
-            availableCarLookupItems.Clear();
-            availableCarLookupItems.AddRange(cars);
-
-            if (selectedQuickRentalCar != null &&
-                !availableCarLookupItems.Any(c => c.CarId == selectedQuickRentalCar.CarId))
-            {
-                ClearSelectedQuickRentalCar();
-            }
-        }
-
-        // -------------------------------------------------------
-        // NAVIGATION
-        // -------------------------------------------------------
-
-        private void NavigationButton_Click(object? sender, EventArgs e)
+        private async void NavigationButton_Click(object? sender, EventArgs e)
         {
             if (sender is not Button selectedButton) return;
 
@@ -225,7 +133,7 @@ namespace Car_Rental_System
             if (selectedButton == dashboardButton)
             {
                 ShowDashboard();
-                LoadDashboardData(searchTextBox.Text);
+                await LoadDashboardDataAsync();
                 return;
             }
 
@@ -304,26 +212,16 @@ namespace Car_Rental_System
             moduleForm.Show();
         }
 
-        private void CreateRentalButton_Click(object? sender, EventArgs e)
+        private async void CreateRentalButton_Click(object? sender, EventArgs e)
         {
-            if (!ValidateQuickRental(
-                out int carId,
-                out decimal dailyRate,
-                out decimal totalAmount,
-                out decimal amountPaid,
-                out PaymentMethod paymentMethod))
+            if (!ValidateQuickRental(out QuickRentalFormInput input))
+            {
                 return;
+            }
 
             try
             {
-                var rentalService = new RentalService();
-                RentalOperationResult result = rentalService.CreateQuickRental(
-                    customerNameTextBox.Text,
-                    carId,
-                    rentalDatePicker.Value,
-                    returnDatePicker.Value,
-                    amountPaid,
-                    paymentMethod);
+                RentalOperationResult result = await presenter.CreateQuickRentalAsync(input);
 
                 if (!result.Success)
                 {
@@ -333,14 +231,16 @@ namespace Car_Rental_System
                         MessageBoxButtons.OK,
                         GetRentalFailureIcon(result));
 
-                    if (result.CarWasUnavailable)
-                        LoadDashboardData(searchTextBox.Text);
+                    if (result.CarWasUnavailable || result.HasScheduleConflict)
+                    {
+                        await LoadDashboardDataAsync();
+                    }
                     return;
                 }
 
                 MessageBox.Show(result.Message, result.Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ClearQuickRentalForm();
-                LoadDashboardData(searchTextBox.Text);
+                await LoadDashboardDataAsync();
             }
             catch (Exception ex)
             {
@@ -348,18 +248,9 @@ namespace Car_Rental_System
             }
         }
 
-        private bool ValidateQuickRental(
-            out int carId,
-            out decimal dailyRate,
-            out decimal totalAmount,
-            out decimal amountPaid,
-            out PaymentMethod paymentMethod)
+        private bool ValidateQuickRental(out QuickRentalFormInput input)
         {
-            carId = 0;
-            dailyRate = 0;
-            totalAmount = 0;
-            amountPaid = 0;
-            paymentMethod = PaymentMethod.Cash;
+            input = new QuickRentalFormInput("", 0, rentalDatePicker.Value, returnDatePicker.Value, 0, PaymentMethod.Cash);
 
             if (string.IsNullOrWhiteSpace(customerNameTextBox.Text))
             {
@@ -373,7 +264,7 @@ namespace Car_Rental_System
                 return false;
             }
 
-            if (!TryGetSelectedCarId(out carId))
+            if (!TryGetSelectedCarId(out int carId))
             {
                 MessageBox.Show("Please click an available car from the grid first.", "No Car Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
@@ -385,7 +276,7 @@ namespace Car_Rental_System
                 return false;
             }
 
-            if (!decimal.TryParse(dailyRateTextBox.Text, out dailyRate))
+            if (!decimal.TryParse(dailyRateTextBox.Text, out decimal dailyRate))
             {
                 MessageBox.Show("Daily rate must be a valid amount.", "Invalid Rate", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
@@ -401,8 +292,8 @@ namespace Car_Rental_System
                 return false;
             }
 
-            totalAmount = CalculateQuickRentalTotal();
-            amountPaid = ParseOptionalPaymentAmount(paymentAmountTextBox.Text);
+            decimal totalAmount = CalculateQuickRentalTotal();
+            decimal amountPaid = ParseOptionalPaymentAmount(paymentAmountTextBox.Text);
 
             if (!PaymentHelper.IsValidPaymentAmount(amountPaid, totalAmount))
             {
@@ -410,9 +301,17 @@ namespace Car_Rental_System
                 return false;
             }
 
-            paymentMethod = paymentMethodComboBox.SelectedItem is PaymentMethod selectedMethod
+            PaymentMethod paymentMethod = paymentMethodComboBox.SelectedItem is PaymentMethod selectedMethod
                 ? selectedMethod
                 : PaymentMethod.Cash;
+
+            input = new QuickRentalFormInput(
+                customerNameTextBox.Text,
+                carId,
+                rentalDatePicker.Value,
+                returnDatePicker.Value,
+                amountPaid,
+                paymentMethod);
             return true;
         }
 
@@ -436,14 +335,9 @@ namespace Car_Rental_System
             return false;
         }
 
-        private void ClearButton_Click(object? sender, EventArgs e)
+        private async void SearchTextBox_TextChanged(object? sender, EventArgs e)
         {
-            ClearQuickRentalForm();
-        }
-
-        private void SearchTextBox_TextChanged(object? sender, EventArgs e)
-        {
-            LoadDashboardData(searchTextBox.Text);
+            await LoadDashboardDataAsync();
         }
 
         private void DateOrRate_Changed(object? sender, EventArgs e)
@@ -558,13 +452,5 @@ namespace Car_Rental_System
 
             Close();
         }
-    }
-
-    // Helper class to replace DataTable rows in the car combo box
-    public class CarLookupItem
-    {
-        public int? CarId { get; set; }
-        public string CarName { get; set; } = "";
-        public decimal? DailyRate { get; set; }
     }
 }

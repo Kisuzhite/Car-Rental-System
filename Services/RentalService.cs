@@ -2,13 +2,14 @@ using System.Data;
 using Car_Rental_System.Data;
 using Car_Rental_System.Helpers;
 using Car_Rental_System.Models;
+using Car_Rental_System.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace Car_Rental_System.Services
 {
     internal sealed class RentalService
     {
-        public RentalOperationResult CreateQuickRental(
+        public async Task<RentalOperationResult> CreateQuickRentalAsync(
             string customerName,
             int carId,
             DateTime rentalDate,
@@ -19,8 +20,9 @@ namespace Car_Rental_System.Services
             using var db = new AppDbContext();
             using var transaction = db.Database.BeginTransaction(IsolationLevel.Serializable);
 
-            int customerId = GetOrCreateCustomerId(db, customerName);
-            RentalOperationResult result = CreateRental(
+            var customerRepository = new CustomerRepository(db);
+            int customerId = await customerRepository.GetOrCreateByNameAsync(customerName);
+            RentalOperationResult result = await CreateRentalAsync(
                 db,
                 customerId,
                 carId,
@@ -31,13 +33,13 @@ namespace Car_Rental_System.Services
 
             if (result.Success)
             {
-                transaction.Commit();
+                await transaction.CommitAsync();
             }
 
             return result;
         }
 
-        public RentalOperationResult CreateRental(
+        public async Task<RentalOperationResult> CreateRentalAsync(
             int customerId,
             int carId,
             DateTime rentalDate,
@@ -48,7 +50,7 @@ namespace Car_Rental_System.Services
             using var db = new AppDbContext();
             using var transaction = db.Database.BeginTransaction(IsolationLevel.Serializable);
 
-            RentalOperationResult result = CreateRental(
+            RentalOperationResult result = await CreateRentalAsync(
                 db,
                 customerId,
                 carId,
@@ -59,13 +61,13 @@ namespace Car_Rental_System.Services
 
             if (result.Success)
             {
-                transaction.Commit();
+                await transaction.CommitAsync();
             }
 
             return result;
         }
 
-        public RentalOperationResult ProcessReturn(
+        public async Task<RentalOperationResult> ProcessReturnAsync(
             int rentalId,
             DateTime actualReturnDate,
             decimal additionalPayment = 0,
@@ -73,12 +75,9 @@ namespace Car_Rental_System.Services
         {
             using var db = new AppDbContext();
             using var transaction = db.Database.BeginTransaction(IsolationLevel.Serializable);
+            var rentalRepository = new RentalRepository(db);
 
-            var rental = db.Rentals
-                .Include(r => r.Car)
-                .FirstOrDefault(r =>
-                    r.RentalId == rentalId &&
-                    r.Status == RentalStatus.Active);
+            Rental? rental = await rentalRepository.GetActiveByIdWithCarAsync(rentalId);
 
             if (rental == null)
             {
@@ -125,8 +124,8 @@ namespace Car_Rental_System.Services
             rental.Status = RentalStatus.Returned;
             rental.Car.Status = CarStatus.Available;
 
-            db.SaveChanges();
-            transaction.Commit();
+            await rentalRepository.SaveChangesAsync();
+            await transaction.CommitAsync();
 
             return RentalOperationResult.Ok(
                 "Return Complete",
@@ -139,7 +138,7 @@ namespace Car_Rental_System.Services
                 lateDays);
         }
 
-        private static RentalOperationResult CreateRental(
+        private static async Task<RentalOperationResult> CreateRentalAsync(
             AppDbContext db,
             int customerId,
             int carId,
@@ -148,9 +147,11 @@ namespace Car_Rental_System.Services
             decimal amountPaid,
             PaymentMethod paymentMethod)
         {
-            bool hasActiveRental = db.Rentals.Any(r =>
-                r.CustomerId == customerId &&
-                r.Status == RentalStatus.Active);
+            var rentalRepository = new RentalRepository(db);
+            var carRepository = new CarRepository(db);
+            var reservationRepository = new ReservationRepository(db);
+
+            bool hasActiveRental = await rentalRepository.CustomerHasActiveRentalAsync(customerId);
 
             if (hasActiveRental)
             {
@@ -163,7 +164,7 @@ namespace Car_Rental_System.Services
             DateOnly rentalStart = RentalCalculator.ToDateOnly(rentalDate);
             DateOnly rentalEnd = RentalCalculator.ToDateOnly(expectedReturnDate);
 
-            if (ReservationService.HasCarScheduleConflict(db, carId, rentalStart, rentalEnd))
+            if (await reservationRepository.HasCarScheduleConflictAsync(carId, rentalStart, rentalEnd))
             {
                 return RentalOperationResult.Fail(
                     RentalOperationError.ScheduleConflict,
@@ -171,11 +172,7 @@ namespace Car_Rental_System.Services
                     "This car already has an active rental or reservation for those dates. Choose another car or adjust the dates.");
             }
 
-            var car = db.Cars
-                .Include(c => c.CarType)
-                .FirstOrDefault(c =>
-                    c.CarId == carId &&
-                    c.Status == CarStatus.Available);
+            Car? car = await carRepository.GetAvailableByIdWithTypeAsync(carId);
 
             if (car == null)
             {
@@ -215,8 +212,8 @@ namespace Car_Rental_System.Services
                 Status = RentalStatus.Active
             };
 
-            db.Rentals.Add(rental);
-            db.SaveChanges();
+            rentalRepository.Add(rental);
+            await rentalRepository.SaveChangesAsync();
 
             return RentalOperationResult.Ok(
                 "Saved",
@@ -228,29 +225,5 @@ namespace Car_Rental_System.Services
                 rental.Balance);
         }
 
-        private static int GetOrCreateCustomerId(AppDbContext db, string customerName)
-        {
-            customerName = ValidationHelper.CollapseSpaces(customerName);
-
-            var existing = db.Customers
-                .Where(c => !c.IsArchived && c.FullName == customerName)
-                .OrderByDescending(c => c.CustomerId)
-                .FirstOrDefault();
-
-            if (existing != null)
-                return existing.CustomerId;
-
-            var newCustomer = new Customer
-            {
-                FullName = customerName,
-                ContactNumber = AppConstants.NotProvided,
-                LicenseNumber = AppConstants.NotProvided,
-                Address = AppConstants.NotProvided
-            };
-
-            db.Customers.Add(newCustomer);
-            db.SaveChanges();
-            return newCustomer.CustomerId;
-        }
     }
 }

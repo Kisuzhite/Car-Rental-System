@@ -1,18 +1,18 @@
 using System.Globalization;
-using Car_Rental_System.Data;
 using Car_Rental_System.Helpers;
 using Car_Rental_System.Models;
+using Car_Rental_System.Presenters;
 using Car_Rental_System.Services;
-using Microsoft.EntityFrameworkCore;
+using Car_Rental_System.ViewModels;
+using Car_Rental_System.Views;
 
 namespace Car_Rental_System
 {
-    public partial class ReturnCar : Form
+    public partial class ReturnCar : Form, IReturnCarView
     {
+        private readonly ReturnCarPresenter presenter;
         private int? selectedRentalId;
         private int? selectedCarId;
-
-        // Store selected row data for calculations after grid binding changes
         private DateOnly _selectedExpectedReturn;
         private decimal _selectedDailyRate;
         private decimal _selectedBaseAmount;
@@ -22,15 +22,32 @@ namespace Car_Rental_System
         public ReturnCar()
         {
             InitializeComponent();
+            presenter = new ReturnCarPresenter(this);
         }
 
-        private void ReturnCar_Load(object? sender, EventArgs e)
+        public string SearchText => searchTextBox.Text;
+
+        void IReturnCarView.BindActiveRentals(List<ActiveRentalGridRow> rentals)
+        {
+            activeRentalsGrid.Columns.Clear();
+            activeRentalsGrid.DataSource = rentals;
+
+            DataGridViewHelper.ApplyFriendlyHeaders(activeRentalsGrid);
+            DataGridViewHelper.HideColumn(activeRentalsGrid, "RentalId");
+            DataGridViewHelper.HideColumn(activeRentalsGrid, "CarId");
+            DataGridViewHelper.ApplyStatusFormatting(activeRentalsGrid);
+            activeRentalsGrid.ClearSelection();
+            ClearDetails();
+            DataGridViewHelper.ClearSelectionWhenReady(activeRentalsGrid);
+        }
+
+        private async void ReturnCar_Load(object? sender, EventArgs e)
         {
             paymentMethodComboBox.Format += PaymentMethodComboBox_Format;
             paymentMethodComboBox.DataSource = PaymentHelper.GetSelectablePaymentMethods();
             paymentMethodComboBox.SelectedItem = PaymentMethod.Cash;
             actualReturnDatePicker.Value = DateTime.Today;
-            LoadActiveRentals();
+            await LoadActiveRentalsAsync();
         }
 
         private static void PaymentMethodComboBox_Format(object? sender, ListControlConvertEventArgs e)
@@ -41,63 +58,11 @@ namespace Car_Rental_System
             }
         }
 
-        private void LoadActiveRentals(string search = "")
+        private async Task LoadActiveRentalsAsync()
         {
             try
             {
-                using var db = new AppDbContext();
-                DateOnly today = RentalCalculator.ToDateOnly(DateTime.Today);
-
-                var query = db.Rentals
-                    .Where(r => r.Status == RentalStatus.Active)
-                    .Include(r => r.Customer)
-                    .Include(r => r.Car).ThenInclude(c => c.CarType)
-                    .AsQueryable();
-
-                if (!string.IsNullOrWhiteSpace(search))
-                {
-                    query = query.Where(r =>
-                        r.Customer.FullName.Contains(search) ||
-                        r.Car.PlateNumber.Contains(search) ||
-                        r.Car.Brand.Contains(search) ||
-                        r.Car.Model.Contains(search) ||
-                        (r.Car.CarType != null && r.Car.CarType.TypeName.Contains(search)));
-                }
-
-                var rentals = query
-                    .OrderBy(r => r.ExpectedReturnDate)
-                    .ToList()
-                    .Select(r => new ActiveRentalGridRow
-                    {
-                        RentalId = r.RentalId,
-                        CarId = r.CarId,
-                        Customer = r.Customer.FullName,
-                        Car = r.Car.PlateNumber + " - " + r.Car.Brand + " " + r.Car.Model +
-                            (r.Car.CarType != null ? " (" + r.Car.CarType.TypeName + ")" : ""),
-                        RentalDate = r.RentalDate,
-                        ExpectedReturn = r.ExpectedReturnDate,
-                        DailyRate = r.DailyRate,
-                        BaseAmount = r.TotalAmount,
-                        AmountPaid = r.AmountPaid,
-                        Balance = r.Balance,
-                        PaymentStatus = r.PaymentStatus,
-                        PaymentMethod = PaymentHelper.FormatPaymentMethod(r.PaymentMethod),
-                        LateDays = RentalStatusHelper.GetLateDays(r, today),
-                        Penalty = RentalStatusHelper.GetLatePenalty(r, today),
-                        Status = RentalStatusHelper.GetDisplayStatus(r, today)
-                    })
-                    .ToList();
-
-                activeRentalsGrid.Columns.Clear();
-                activeRentalsGrid.DataSource = rentals;
-
-                DataGridViewHelper.ApplyFriendlyHeaders(activeRentalsGrid);
-                DataGridViewHelper.HideColumn(activeRentalsGrid, "RentalId");
-                DataGridViewHelper.HideColumn(activeRentalsGrid, "CarId");
-                DataGridViewHelper.ApplyStatusFormatting(activeRentalsGrid);
-                activeRentalsGrid.ClearSelection();
-                ClearDetails();
-                DataGridViewHelper.ClearSelectionWhenReady(activeRentalsGrid);
+                await presenter.LoadActiveRentalsAsync();
             }
             catch (Exception ex)
             {
@@ -107,13 +72,8 @@ namespace Car_Rental_System
 
         private void ActiveRentalsGrid_SelectionChanged(object? sender, EventArgs e)
         {
-            if (activeRentalsGrid.CurrentRow?.DataBoundItem == null || !activeRentalsGrid.CurrentRow.Selected)
-            {
-                ClearDetails();
-                return;
-            }
-
-            if (activeRentalsGrid.CurrentRow.DataBoundItem is not ActiveRentalGridRow row)
+            if (activeRentalsGrid.CurrentRow?.DataBoundItem is not ActiveRentalGridRow row ||
+                !activeRentalsGrid.CurrentRow.Selected)
             {
                 ClearDetails();
                 return;
@@ -181,7 +141,7 @@ namespace Car_Rental_System
             return finalAmount;
         }
 
-        private void ProcessReturnButton_Click(object? sender, EventArgs e)
+        private async void ProcessReturnButton_Click(object? sender, EventArgs e)
         {
             if (selectedRentalId == null || selectedCarId == null)
             {
@@ -224,12 +184,11 @@ namespace Car_Rental_System
 
             try
             {
-                var rentalService = new RentalService();
-                RentalOperationResult result = rentalService.ProcessReturn(
+                RentalOperationResult result = await presenter.ProcessReturnAsync(new ReturnFormInput(
                     selectedRentalId.Value,
                     actualReturnDatePicker.Value,
                     additionalPayment,
-                    paymentMethod);
+                    paymentMethod));
 
                 if (!result.Success)
                 {
@@ -240,13 +199,15 @@ namespace Car_Rental_System
                         result.RentalWasAlreadyClosed ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
 
                     if (result.RentalWasAlreadyClosed)
-                        LoadActiveRentals(searchTextBox.Text);
+                    {
+                        await LoadActiveRentalsAsync();
+                    }
                     return;
                 }
 
                 MessageBox.Show(result.Message, result.Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
-                RentalDocumentPrinter.PromptToPrintFinalReceipt(this, result.RentalId);
-                LoadActiveRentals(searchTextBox.Text);
+                await RentalDocumentPrinter.PromptToPrintFinalReceiptAsync(this, result.RentalId);
+                await LoadActiveRentalsAsync();
             }
             catch (Exception ex)
             {
@@ -266,9 +227,9 @@ namespace Car_Rental_System
             return result == DialogResult.Yes;
         }
 
-        private void SearchTextBox_TextChanged(object? sender, EventArgs e)
+        private async void SearchTextBox_TextChanged(object? sender, EventArgs e)
         {
-            LoadActiveRentals(searchTextBox.Text);
+            await LoadActiveRentalsAsync();
         }
 
         private void ClearDetails()
@@ -299,25 +260,6 @@ namespace Car_Rental_System
             return string.IsNullOrWhiteSpace(value)
                 ? 0
                 : decimal.TryParse(value, out decimal amount) ? amount : -1;
-        }
-
-        private sealed class ActiveRentalGridRow
-        {
-            public int RentalId { get; set; }
-            public int CarId { get; set; }
-            public string Customer { get; set; } = "";
-            public string Car { get; set; } = "";
-            public DateOnly RentalDate { get; set; }
-            public DateOnly ExpectedReturn { get; set; }
-            public decimal DailyRate { get; set; }
-            public decimal BaseAmount { get; set; }
-            public decimal AmountPaid { get; set; }
-            public decimal Balance { get; set; }
-            public PaymentStatus PaymentStatus { get; set; }
-            public string PaymentMethod { get; set; } = "";
-            public int LateDays { get; set; }
-            public decimal Penalty { get; set; }
-            public string Status { get; set; } = "";
         }
     }
 }

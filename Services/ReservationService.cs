@@ -2,20 +2,22 @@ using System.Data;
 using Car_Rental_System.Data;
 using Car_Rental_System.Helpers;
 using Car_Rental_System.Models;
+using Car_Rental_System.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace Car_Rental_System.Services
 {
     internal sealed class ReservationService
     {
-        public ReservationOperationResult ConvertToRental(int reservationId)
+        public async Task<ReservationOperationResult> ConvertToRentalAsync(int reservationId)
         {
             using var db = new AppDbContext();
             using var transaction = db.Database.BeginTransaction(IsolationLevel.Serializable);
+            var reservationRepository = new ReservationRepository(db);
+            var customerRepository = new CustomerRepository(db);
+            var rentalRepository = new RentalRepository(db);
 
-            var reservation = db.Reservations
-                .Include(r => r.Car).ThenInclude(c => c.CarType)
-                .FirstOrDefault(r => r.ReservationId == reservationId);
+            Reservation? reservation = await reservationRepository.GetByIdWithCarAsync(reservationId);
 
             if (reservation == null)
             {
@@ -42,8 +44,7 @@ namespace Car_Rental_System.Services
                     "Convert this reservation on the pickup date when the customer takes the car.");
             }
 
-            if (HasCarScheduleConflict(
-                    db,
+            if (await reservationRepository.HasCarScheduleConflictAsync(
                     reservation.CarId,
                     reservation.PickupDate,
                     reservation.ExpectedReturnDate,
@@ -55,11 +56,11 @@ namespace Car_Rental_System.Services
                     "This car already has another active rental or reservation for those dates.");
             }
 
-            int customerId = GetOrCreateCustomerId(db, reservation.CustomerName, reservation.ContactNumber);
+            int customerId = await customerRepository.GetOrCreateByNameAndContactAsync(
+                reservation.CustomerName,
+                reservation.ContactNumber);
 
-            bool hasActiveRental = db.Rentals.Any(r =>
-                r.CustomerId == customerId &&
-                r.Status == RentalStatus.Active);
+            bool hasActiveRental = await rentalRepository.CustomerHasActiveRentalAsync(customerId);
 
             if (hasActiveRental)
             {
@@ -108,41 +109,15 @@ namespace Car_Rental_System.Services
                 Status = RentalStatus.Active
             };
 
-            db.Rentals.Add(rental);
-            db.SaveChanges();
-            transaction.Commit();
+            rentalRepository.Add(rental);
+            await rentalRepository.SaveChangesAsync();
+            await transaction.CommitAsync();
 
             return ReservationOperationResult.Ok(
                 "Converted",
                 "Reservation converted to an active rental.",
                 reservation.ReservationId,
                 rental.RentalId);
-        }
-
-        public static bool HasCarScheduleConflict(
-            AppDbContext db,
-            int carId,
-            DateOnly pickupDate,
-            DateOnly expectedReturnDate,
-            int? excludedReservationId = null)
-        {
-            bool rentalConflict = db.Rentals.Any(r =>
-                r.CarId == carId &&
-                r.Status == RentalStatus.Active &&
-                pickupDate <= r.ExpectedReturnDate &&
-                r.RentalDate <= expectedReturnDate);
-
-            if (rentalConflict)
-            {
-                return true;
-            }
-
-            return db.Reservations.Any(r =>
-                r.CarId == carId &&
-                (r.Status == ReservationStatus.Pending || r.Status == ReservationStatus.Confirmed) &&
-                (!excludedReservationId.HasValue || r.ReservationId != excludedReservationId.Value) &&
-                pickupDate <= r.ExpectedReturnDate &&
-                r.PickupDate <= expectedReturnDate);
         }
 
         public static bool DateRangesOverlap(
@@ -152,40 +127,6 @@ namespace Car_Rental_System.Services
             DateOnly existingEnd)
         {
             return start <= existingEnd && existingStart <= end;
-        }
-
-        private static int GetOrCreateCustomerId(AppDbContext db, string customerName, string contactNumber)
-        {
-            customerName = ValidationHelper.CollapseSpaces(customerName);
-            contactNumber = ValidationHelper.CollapseSpaces(contactNumber);
-
-            var existing = db.Customers
-                .Where(c => !c.IsArchived && c.FullName == customerName)
-                .OrderByDescending(c => c.CustomerId)
-                .FirstOrDefault();
-
-            if (existing != null)
-            {
-                if (string.Equals(existing.ContactNumber, AppConstants.NotProvided, StringComparison.OrdinalIgnoreCase))
-                {
-                    existing.ContactNumber = contactNumber;
-                    db.SaveChanges();
-                }
-
-                return existing.CustomerId;
-            }
-
-            var newCustomer = new Customer
-            {
-                FullName = customerName,
-                ContactNumber = contactNumber,
-                LicenseNumber = AppConstants.NotProvided,
-                Address = AppConstants.NotProvided
-            };
-
-            db.Customers.Add(newCustomer);
-            db.SaveChanges();
-            return newCustomer.CustomerId;
         }
     }
 }

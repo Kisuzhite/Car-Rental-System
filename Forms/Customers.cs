@@ -1,60 +1,43 @@
-﻿using Car_Rental_System.Data;
 using Car_Rental_System.Helpers;
-using Car_Rental_System.Models;
-using Microsoft.EntityFrameworkCore;
+using Car_Rental_System.Presenters;
+using Car_Rental_System.ViewModels;
+using Car_Rental_System.Views;
 
 namespace Car_Rental_System
 {
-    public partial class Customers : Form
+    public partial class Customers : Form, ICustomersView
     {
+        private readonly CustomersPresenter presenter;
         private int? selectedCustomerId;
 
         public Customers()
         {
             InitializeComponent();
+            presenter = new CustomersPresenter(this);
         }
 
-        private void Customers_Load(object? sender, EventArgs e)
+        public string SearchText => searchTextBox.Text;
+
+        void ICustomersView.BindCustomers(List<CustomerGridRow> customers)
         {
-            LoadCustomers();
+            customersGrid.Columns.Clear();
+            customersGrid.DataSource = customers;
+
+            DataGridViewHelper.ApplyFriendlyHeaders(customersGrid);
+            DataGridViewHelper.HideColumn(customersGrid, "CustomerId");
+            BeginInvoke(new Action(ClearForm));
         }
 
-        private void LoadCustomers(string search = "")
+        private async void Customers_Load(object? sender, EventArgs e)
+        {
+            await LoadCustomersAsync();
+        }
+
+        private async Task LoadCustomersAsync()
         {
             try
             {
-                using var db = new AppDbContext();
-
-                var query = db.Customers
-                    .Where(c => !c.IsArchived)
-                    .AsQueryable();
-
-                if (!string.IsNullOrWhiteSpace(search))
-                {
-                    query = query.Where(c =>
-                        c.FullName.Contains(search) ||
-                        c.ContactNumber.Contains(search) ||
-                        c.LicenseNumber.Contains(search));
-                }
-
-                var customers = query
-                    .OrderByDescending(c => c.CustomerId)
-                    .Select(c => new CustomerGridRow
-                    {
-                        CustomerId = c.CustomerId,
-                        FullName = c.FullName,
-                        ContactNumber = c.ContactNumber,
-                        LicenseNumber = c.LicenseNumber,
-                        Address = c.Address
-                    })
-                    .ToList();
-
-                customersGrid.Columns.Clear();
-                customersGrid.DataSource = customers;
-
-                DataGridViewHelper.ApplyFriendlyHeaders(customersGrid);
-                DataGridViewHelper.HideColumn(customersGrid, "CustomerId");
-                BeginInvoke(new Action(ClearForm));
+                await presenter.LoadCustomersAsync();
             }
             catch (Exception ex)
             {
@@ -62,36 +45,23 @@ namespace Car_Rental_System
             }
         }
 
-        private void AddButton_Click(object? sender, EventArgs e)
+        private async void AddButton_Click(object? sender, EventArgs e)
         {
-            if (!ValidateInputs()) return;
+            if (!ValidateInputs(out CustomerFormInput input))
+            {
+                return;
+            }
 
             try
             {
-                using var db = new AppDbContext();
+                PresenterResult result = await presenter.AddCustomerAsync(input);
+                AppMessageBox.ShowPresenterResult(result);
 
-                string licenseNumber = ValidationHelper.NormalizeLicenseNumber(licenseTextBox.Text);
-
-                if (IsDuplicateLicenseNumber(db, licenseNumber))
+                if (result.Success)
                 {
-                    ShowDuplicateLicenseMessage(licenseNumber);
-                    return;
+                    ClearForm();
+                    await LoadCustomersAsync();
                 }
-
-                var customer = new Customer
-                {
-                    FullName = ValidationHelper.CollapseSpaces(nameTextBox.Text),
-                    ContactNumber = ValidationHelper.CollapseSpaces(contactTextBox.Text),
-                    LicenseNumber = licenseNumber,
-                    Address = ValidationHelper.CollapseSpaces(addressTextBox.Text)
-                };
-
-                db.Customers.Add(customer);
-                db.SaveChanges();
-
-                MessageBox.Show("Customer added successfully.", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                ClearForm();
-                LoadCustomers(searchTextBox.Text);
             }
             catch (Exception ex)
             {
@@ -99,7 +69,7 @@ namespace Car_Rental_System
             }
         }
 
-        private void UpdateButton_Click(object? sender, EventArgs e)
+        private async void UpdateButton_Click(object? sender, EventArgs e)
         {
             if (selectedCustomerId == null)
             {
@@ -107,35 +77,24 @@ namespace Car_Rental_System
                 return;
             }
 
-            if (!ValidateInputs()) return;
+            if (!ValidateInputs(out CustomerFormInput input))
+            {
+                return;
+            }
 
             try
             {
-                using var db = new AppDbContext();
+                PresenterResult result = await presenter.UpdateCustomerAsync(selectedCustomerId.Value, input);
+                AppMessageBox.ShowPresenterResult(result);
 
-                var customer = db.Customers.Find(selectedCustomerId.Value);
-                if (customer == null) return;
-
-                string licenseNumber = ValidationHelper.NormalizeLicenseNumber(licenseTextBox.Text);
-
-                if (IsDuplicateLicenseNumber(db, licenseNumber, selectedCustomerId.Value))
+                if (!result.Success)
                 {
-                    ShowDuplicateLicenseMessage(licenseNumber);
                     return;
                 }
 
-                customer.FullName = ValidationHelper.CollapseSpaces(nameTextBox.Text);
-                customer.ContactNumber = ValidationHelper.CollapseSpaces(contactTextBox.Text);
-                customer.LicenseNumber = licenseNumber;
-                customer.Address = ValidationHelper.CollapseSpaces(addressTextBox.Text);
-
-                db.SaveChanges();
-                int? activeRentalId = GetActiveRentalId(db, customer.CustomerId);
-
-                MessageBox.Show("Customer updated successfully.", "Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                RentalDocumentPrinter.PromptToPrintRentalAgreement(this, activeRentalId);
+                await RentalDocumentPrinter.PromptToPrintRentalAgreementAsync(this, result.RentalId);
                 ClearForm();
-                LoadCustomers(searchTextBox.Text);
+                await LoadCustomersAsync();
             }
             catch (Exception ex)
             {
@@ -143,7 +102,7 @@ namespace Car_Rental_System
             }
         }
 
-        private void DeleteButton_Click(object? sender, EventArgs e)
+        private async void DeleteButton_Click(object? sender, EventArgs e)
         {
             if (selectedCustomerId == null)
             {
@@ -153,66 +112,32 @@ namespace Car_Rental_System
 
             try
             {
-                using var db = new AppDbContext();
-
-                var customer = db.Customers
-                    .Include(c => c.Rentals)
-                    .FirstOrDefault(c => c.CustomerId == selectedCustomerId.Value);
-
-                if (customer == null)
+                CustomerDeletePreview preview = await presenter.PreviewDeleteAsync(selectedCustomerId.Value);
+                if (!preview.CanContinue)
                 {
-                    MessageBox.Show("Customer not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    LoadCustomers(searchTextBox.Text);
+                    MessageBox.Show(preview.Message, preview.Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
-                bool hasActiveRentals = customer.Rentals.Any(r =>
-                    r.Status == RentalStatus.Active);
-
-                if (hasActiveRentals)
-                {
-                    MessageBox.Show(
-                        "This customer still has an active rental. Process the return before deleting the customer.",
-                        "Active Rental Found",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
-                    return;
-                }
-
-                bool hasRentalHistory = customer.Rentals.Any();
-
-                string confirmMessage = hasRentalHistory
-                    ? "This customer has rental history. Archive the customer instead of deleting their records?"
-                    : "Are you sure you want to delete this customer?";
-
-                DialogResult result = MessageBox.Show(
-                    confirmMessage,
-                    hasRentalHistory ? "Confirm Archive" : "Confirm Delete",
+                DialogResult confirmation = MessageBox.Show(
+                    preview.Message,
+                    preview.Title,
                     MessageBoxButtons.YesNo,
-                    hasRentalHistory ? MessageBoxIcon.Information : MessageBoxIcon.Question);
+                    preview.HasRentalHistory ? MessageBoxIcon.Information : MessageBoxIcon.Question);
 
-                if (result != DialogResult.Yes) return;
-
-                if (hasRentalHistory)
+                if (confirmation != DialogResult.Yes)
                 {
-                    customer.IsArchived = true;
-                }
-                else
-                {
-                    db.Customers.Remove(customer);
+                    return;
                 }
 
-                db.SaveChanges();
+                PresenterResult result = await presenter.DeleteCustomerAsync(selectedCustomerId.Value);
+                AppMessageBox.ShowPresenterResult(result);
 
-                MessageBox.Show(
-                    hasRentalHistory
-                        ? "Customer archived successfully. Rental history was preserved."
-                        : "Customer deleted successfully.",
-                    hasRentalHistory ? "Archived" : "Deleted",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
-                ClearForm();
-                LoadCustomers(searchTextBox.Text);
+                if (result.Success)
+                {
+                    ClearForm();
+                    await LoadCustomersAsync();
+                }
             }
             catch (Exception ex)
             {
@@ -225,20 +150,15 @@ namespace Car_Rental_System
             ClearForm();
         }
 
-        private void SearchTextBox_TextChanged(object? sender, EventArgs e)
+        private async void SearchTextBox_TextChanged(object? sender, EventArgs e)
         {
-            LoadCustomers(searchTextBox.Text);
+            await LoadCustomersAsync();
         }
 
         private void CustomersGrid_SelectionChanged(object? sender, EventArgs e)
         {
-            if (customersGrid.CurrentRow?.DataBoundItem == null || !customersGrid.CurrentRow.Selected)
-            {
-                selectedCustomerId = null;
-                return;
-            }
-
-            if (customersGrid.CurrentRow.DataBoundItem is not CustomerGridRow row)
+            if (customersGrid.CurrentRow?.DataBoundItem is not CustomerGridRow row ||
+                !customersGrid.CurrentRow.Selected)
             {
                 selectedCustomerId = null;
                 return;
@@ -251,12 +171,13 @@ namespace Car_Rental_System
             addressTextBox.Text = row.Address;
         }
 
-        private bool ValidateInputs()
+        private bool ValidateInputs(out CustomerFormInput input)
         {
             string fullName = ValidationHelper.CollapseSpaces(nameTextBox.Text);
             string contactNumber = ValidationHelper.CollapseSpaces(contactTextBox.Text);
             string licenseNumber = ValidationHelper.NormalizeLicenseNumber(licenseTextBox.Text);
             string address = ValidationHelper.CollapseSpaces(addressTextBox.Text);
+            input = new CustomerFormInput(fullName, contactNumber, licenseNumber, address);
 
             if (string.IsNullOrWhiteSpace(fullName) ||
                 string.IsNullOrWhiteSpace(contactNumber) ||
@@ -294,38 +215,6 @@ namespace Car_Rental_System
             return true;
         }
 
-        private static bool IsDuplicateLicenseNumber(AppDbContext db, string licenseNumber, int? excludedCustomerId = null)
-        {
-            licenseNumber = ValidationHelper.NormalizeLicenseNumber(licenseNumber);
-
-            if (string.Equals(licenseNumber, AppConstants.NotProvided, StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-
-            return db.Customers.Any(c =>
-                c.LicenseNumber == licenseNumber &&
-                (!excludedCustomerId.HasValue || c.CustomerId != excludedCustomerId.Value));
-        }
-
-        private static void ShowDuplicateLicenseMessage(string licenseNumber)
-        {
-            MessageBox.Show(
-                $"A customer with license number '{licenseNumber}' already exists.",
-                "Duplicate License Number",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
-        }
-
-        private static int? GetActiveRentalId(AppDbContext db, int customerId)
-        {
-            return db.Rentals
-                .Where(r => r.CustomerId == customerId && r.Status == RentalStatus.Active)
-                .OrderByDescending(r => r.RentalId)
-                .Select(r => (int?)r.RentalId)
-                .FirstOrDefault();
-        }
-
         private void ClearForm()
         {
             selectedCustomerId = null;
@@ -334,15 +223,6 @@ namespace Car_Rental_System
             licenseTextBox.Clear();
             addressTextBox.Clear();
             customersGrid.ClearSelection();
-        }
-
-        private sealed class CustomerGridRow
-        {
-            public int CustomerId { get; set; }
-            public string FullName { get; set; } = "";
-            public string ContactNumber { get; set; } = "";
-            public string LicenseNumber { get; set; } = "";
-            public string Address { get; set; } = "";
         }
     }
 }

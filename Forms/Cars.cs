@@ -1,51 +1,66 @@
-using Car_Rental_System.Data;
 using Car_Rental_System.Helpers;
 using Car_Rental_System.Models;
-using Microsoft.EntityFrameworkCore;
+using Car_Rental_System.Presenters;
+using Car_Rental_System.ViewModels;
+using Car_Rental_System.Views;
 
 namespace Car_Rental_System
 {
-    public partial class Cars : Form
+    public partial class Cars : Form, ICarsView
     {
+        private readonly CarsPresenter presenter;
         private int? selectedCarId;
 
         public Cars()
         {
             InitializeComponent();
+            presenter = new CarsPresenter(this);
         }
 
-        private void Cars_Load(object? sender, EventArgs e)
+        public string SearchText => searchTextBox.Text;
+
+        void ICarsView.BindCarTypes(List<CarTypeLookupItem> carTypes)
         {
-            PrepareForm();
-            LoadCars();
+            carTypeComboBox.DisplayMember = "DisplayName";
+            carTypeComboBox.ValueMember = "CarTypeId";
+            carTypeComboBox.DataSource = carTypes;
         }
 
-        private void PrepareForm()
+        void ICarsView.BindCars(List<Car> cars)
+        {
+            carsGrid.Columns.Clear();
+            carsGrid.DataSource = cars;
+
+            DataGridViewHelper.ApplyFriendlyHeaders(carsGrid);
+            DataGridViewHelper.HideColumn(carsGrid, "CarId");
+            DataGridViewHelper.HideColumn(carsGrid, "CarTypeId");
+            DataGridViewHelper.HideColumn(carsGrid, "CarType");
+            DataGridViewHelper.HideColumn(carsGrid, "ImagePath");
+            DataGridViewHelper.HideColumn(carsGrid, "Rentals");
+            DataGridViewHelper.HideColumn(carsGrid, "Reservations");
+            DataGridViewHelper.MoveColumnToEnd(carsGrid, "Status");
+            DataGridViewHelper.ApplyStatusFormatting(carsGrid);
+
+            BeginInvoke(new Action(async () => await ClearFormAsync()));
+        }
+
+        private async void Cars_Load(object? sender, EventArgs e)
+        {
+            await PrepareFormAsync();
+            await LoadCarsAsync();
+        }
+
+        private async Task PrepareFormAsync()
         {
             UpdateStatusOptions();
-            LoadCarTypes();
+            await LoadCarTypesAsync();
         }
 
-        private void LoadCarTypes(int? includeCarTypeId = null)
+        private async Task LoadCarTypesAsync(int? includeCarTypeId = null)
         {
             try
             {
-                using AppDbContext db = new();
-
-                var carTypes = db.CarTypes
-                    .Where(ct => ct.IsActive || (includeCarTypeId.HasValue && ct.CarTypeId == includeCarTypeId.Value))
-                    .OrderBy(ct => ct.TypeName)
-                    .Select(ct => new CarTypeLookupItem
-                    {
-                        CarTypeId = ct.CarTypeId,
-                        TypeName = ct.TypeName,
-                        DailyRate = ct.DailyRate
-                    })
-                    .ToList();
-
-                carTypeComboBox.DisplayMember = "DisplayName";
-                carTypeComboBox.ValueMember = "CarTypeId";
-                carTypeComboBox.DataSource = carTypes;
+                await presenter.LoadCarTypesAsync(includeCarTypeId);
             }
             catch (Exception ex)
             {
@@ -53,38 +68,11 @@ namespace Car_Rental_System
             }
         }
 
-        private void LoadCars(string search = "")
+        private async Task LoadCarsAsync()
         {
             try
             {
-                using AppDbContext db = new();
-
-                string trimmed = search.Trim();
-
-                List<Car> cars = db.Cars
-                    .Include(c => c.CarType)
-                    .Where(c => c.Status != CarStatus.Rented &&
-                                (trimmed == "" ||
-                                 c.PlateNumber.Contains(trimmed) ||
-                                 c.Brand.Contains(trimmed) ||
-                                 c.Model.Contains(trimmed) ||
-                                 (c.CarType != null && c.CarType.TypeName.Contains(trimmed))))
-                    .OrderByDescending(c => c.CarId)
-                    .ToList();
-
-                carsGrid.Columns.Clear();
-                carsGrid.DataSource = cars;
-
-                DataGridViewHelper.ApplyFriendlyHeaders(carsGrid);
-                DataGridViewHelper.HideColumn(carsGrid, "CarId");
-                DataGridViewHelper.HideColumn(carsGrid, "CarTypeId");
-                DataGridViewHelper.HideColumn(carsGrid, "CarType");
-                DataGridViewHelper.HideColumn(carsGrid, "ImagePath");
-                DataGridViewHelper.HideColumn(carsGrid, "Rentals");
-                DataGridViewHelper.MoveColumnToEnd(carsGrid, "Status");
-                DataGridViewHelper.ApplyStatusFormatting(carsGrid);
-
-                BeginInvoke(new Action(ClearForm));
+                await presenter.LoadCarsAsync();
             }
             catch (Exception ex)
             {
@@ -92,7 +80,7 @@ namespace Car_Rental_System
             }
         }
 
-        private void CarsGrid_SelectionChanged(object? sender, EventArgs e)
+        private async void CarsGrid_SelectionChanged(object? sender, EventArgs e)
         {
             if (carsGrid.CurrentRow?.DataBoundItem is not Car car || !carsGrid.CurrentRow.Selected)
             {
@@ -101,58 +89,48 @@ namespace Car_Rental_System
             }
 
             selectedCarId = car.CarId;
+            int carId = car.CarId;
             plateTextBox.Text = car.PlateNumber;
             brandTextBox.Text = car.Brand;
             modelTextBox.Text = car.Model;
             yearTextBox.Text = car.Year.ToString();
             colorTextBox.Text = car.Color;
             dailyRateTextBox.Text = car.DailyRate.ToString("0.##");
-            LoadCarTypes(car.CarTypeId);
+            await LoadCarTypesAsync(car.CarTypeId);
+
+            if (selectedCarId != carId)
+            {
+                return;
+            }
+
             carTypeComboBox.SelectedValue = car.CarTypeId ?? -1;
             if (car.CarTypeId == null)
             {
                 dailyRateTextBox.Text = car.DailyRate.ToString("0.##");
             }
+
             UpdateStatusOptions(car.Status);
         }
 
-        private void AddButton_Click(object? sender, EventArgs e)
+        private async void AddButton_Click(object? sender, EventArgs e)
         {
-            if (!ValidateCarInputs(out int year, out int carTypeId, out decimal dailyRate, out CarStatus status))
+            if (!ValidateCarInputs(out CarFormInput input))
             {
                 return;
             }
 
             try
             {
-                using AppDbContext db = new();
+                PresenterResult result = await presenter.AddCarAsync(input);
+                AppMessageBox.ShowPresenterResult(result);
 
-                string plateNumber = ValidationHelper.NormalizePlateNumber(plateTextBox.Text);
-
-                if (IsDuplicatePlateNumber(db, plateNumber))
+                if (!result.Success)
                 {
-                    ShowDuplicatePlateMessage(plateNumber);
                     return;
                 }
 
-                db.Cars.Add(new Car
-                {
-                    PlateNumber = plateNumber,
-                    Brand = ValidationHelper.CollapseSpaces(brandTextBox.Text),
-                    Model = ValidationHelper.CollapseSpaces(modelTextBox.Text),
-                    Year = year,
-                    Color = ValidationHelper.CollapseSpaces(colorTextBox.Text),
-                    DailyRate = dailyRate,
-                    CarTypeId = carTypeId,
-                    Status = status,
-                    ImagePath = null
-                });
-
-                db.SaveChanges();
-
-                MessageBox.Show("Car added successfully.", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                ClearForm();
-                LoadCars(searchTextBox.Text);
+                await ClearFormAsync();
+                await LoadCarsAsync();
             }
             catch (Exception ex)
             {
@@ -160,7 +138,7 @@ namespace Car_Rental_System
             }
         }
 
-        private void UpdateButton_Click(object? sender, EventArgs e)
+        private async void UpdateButton_Click(object? sender, EventArgs e)
         {
             if (selectedCarId == null)
             {
@@ -168,46 +146,23 @@ namespace Car_Rental_System
                 return;
             }
 
-            if (!ValidateCarInputs(out int year, out int carTypeId, out decimal dailyRate, out CarStatus status))
+            if (!ValidateCarInputs(out CarFormInput input))
             {
                 return;
             }
 
             try
             {
-                using AppDbContext db = new();
+                PresenterResult result = await presenter.UpdateCarAsync(selectedCarId.Value, input);
+                AppMessageBox.ShowPresenterResult(result);
 
-                Car? car = db.Cars.Find(selectedCarId.Value);
-
-                if (car == null)
+                if (!result.Success)
                 {
-                    MessageBox.Show("Car not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
-                string plateNumber = ValidationHelper.NormalizePlateNumber(plateTextBox.Text);
-
-                if (IsDuplicatePlateNumber(db, plateNumber, selectedCarId.Value))
-                {
-                    ShowDuplicatePlateMessage(plateNumber);
-                    return;
-                }
-
-                car.PlateNumber = plateNumber;
-                car.Brand = ValidationHelper.CollapseSpaces(brandTextBox.Text);
-                car.Model = ValidationHelper.CollapseSpaces(modelTextBox.Text);
-                car.Year = year;
-                car.Color = ValidationHelper.CollapseSpaces(colorTextBox.Text);
-                car.DailyRate = dailyRate;
-                car.CarTypeId = carTypeId;
-                car.Status = status;
-                car.ImagePath = null;
-
-                db.SaveChanges();
-
-                MessageBox.Show("Car updated successfully.", "Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                ClearForm();
-                LoadCars(searchTextBox.Text);
+                await ClearFormAsync();
+                await LoadCarsAsync();
             }
             catch (Exception ex)
             {
@@ -215,7 +170,7 @@ namespace Car_Rental_System
             }
         }
 
-        private void DeleteButton_Click(object? sender, EventArgs e)
+        private async void DeleteButton_Click(object? sender, EventArgs e)
         {
             if (selectedCarId == null)
             {
@@ -223,102 +178,51 @@ namespace Car_Rental_System
                 return;
             }
 
-            if (!CanDeleteSelectedCar())
-            {
-                return;
-            }
-
-            DialogResult result = MessageBox.Show(
-                "Are you sure you want to delete this car?",
-                "Confirm Delete",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
-
-            if (result != DialogResult.Yes)
-            {
-                return;
-            }
-
             try
             {
-                using AppDbContext db = new();
-
-                Car? car = db.Cars.Find(selectedCarId.Value);
-
-                if (car != null)
+                PresenterResult canDelete = await presenter.CanDeleteCarAsync(selectedCarId.Value);
+                if (!canDelete.Success)
                 {
-                    db.Cars.Remove(car);
-                    db.SaveChanges();
+                    AppMessageBox.ShowPresenterResult(canDelete);
+                    return;
                 }
 
-                MessageBox.Show("Car deleted successfully.", "Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                ClearForm();
-                LoadCars(searchTextBox.Text);
+                DialogResult confirmation = MessageBox.Show(
+                    "Are you sure you want to delete this car?",
+                    "Confirm Delete",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+                if (confirmation != DialogResult.Yes)
+                {
+                    return;
+                }
+
+                PresenterResult result = await presenter.DeleteCarAsync(selectedCarId.Value);
+                AppMessageBox.ShowPresenterResult(result);
+
+                if (!result.Success)
+                {
+                    return;
+                }
+
+                await ClearFormAsync();
+                await LoadCarsAsync();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    "Unable to delete car. If this car already has a rental record, keep it and change its status instead.\n\n" + ex.Message,
-                    "Database Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                AppMessageBox.ShowDatabaseError("Unable to delete car.", ex);
             }
         }
 
-        private bool CanDeleteSelectedCar()
+        private async void ClearButton_Click(object? sender, EventArgs e)
         {
-            if (selectedCarId == null)
-            {
-                return false;
-            }
-
-            try
-            {
-                using AppDbContext db = new();
-
-                bool hasActiveRental = db.Rentals.Any(r =>
-                    r.CarId == selectedCarId.Value &&
-                    r.Status == RentalStatus.Active);
-
-                if (hasActiveRental)
-                {
-                    MessageBox.Show(
-                        "This car has an active rental. Process the return before deleting it.",
-                        "Car Is Currently Rented",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
-                    return false;
-                }
-
-                bool hasRentalHistory = db.Rentals.Any(r => r.CarId == selectedCarId.Value);
-
-                if (hasRentalHistory)
-                {
-                    MessageBox.Show(
-                        "This car has rental history, so it cannot be deleted without breaking reports. Change its status to Maintenance instead.",
-                        "Car Has Rental History",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
-                    return false;
-                }
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                AppMessageBox.ShowDatabaseError("Unable to check car rental history.", ex);
-                return false;
-            }
+            await ClearFormAsync();
         }
 
-        private void ClearButton_Click(object? sender, EventArgs e)
+        private async void SearchTextBox_TextChanged(object? sender, EventArgs e)
         {
-            ClearForm();
-        }
-
-        private void SearchTextBox_TextChanged(object? sender, EventArgs e)
-        {
-            LoadCars(searchTextBox.Text);
+            await LoadCarsAsync();
         }
 
         private void CarTypeComboBox_SelectedIndexChanged(object? sender, EventArgs e)
@@ -332,12 +236,9 @@ namespace Car_Rental_System
             dailyRateTextBox.Clear();
         }
 
-        private bool ValidateCarInputs(out int year, out int carTypeId, out decimal dailyRate, out CarStatus status)
+        private bool ValidateCarInputs(out CarFormInput input)
         {
-            year = 0;
-            carTypeId = 0;
-            dailyRate = 0;
-            status = CarStatus.Available;
+            input = new CarFormInput("", "", "", 0, "", 0, 0, CarStatus.Available);
 
             string plateNumber = ValidationHelper.NormalizePlateNumber(plateTextBox.Text);
             string brand = ValidationHelper.CollapseSpaces(brandTextBox.Text);
@@ -365,19 +266,19 @@ namespace Car_Rental_System
                 return false;
             }
 
-            if (!TryGetSelectedStatus(out status))
+            if (!TryGetSelectedStatus(out CarStatus status))
             {
                 MessageBox.Show("Please select a valid car status.", "Invalid Status", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
 
-            if (!int.TryParse(yearTextBox.Text, out year))
+            if (!int.TryParse(yearTextBox.Text, out int year))
             {
                 MessageBox.Show("Year must be a valid number.", "Invalid Year", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
 
-            if (!TryGetSelectedCarType(out carTypeId, out dailyRate))
+            if (!TryGetSelectedCarType(out int carTypeId, out decimal dailyRate))
             {
                 MessageBox.Show("Please select an active car type/rate first.", "Missing Car Type", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
@@ -399,6 +300,7 @@ namespace Car_Rental_System
                 return false;
             }
 
+            input = new CarFormInput(plateNumber, brand, model, year, color, carTypeId, dailyRate, status);
             return true;
         }
 
@@ -417,25 +319,7 @@ namespace Car_Rental_System
             return true;
         }
 
-        private static bool IsDuplicatePlateNumber(AppDbContext db, string plateNumber, int? excludedCarId = null)
-        {
-            plateNumber = ValidationHelper.NormalizePlateNumber(plateNumber);
-
-            return db.Cars.Any(c =>
-                c.PlateNumber == plateNumber &&
-                (!excludedCarId.HasValue || c.CarId != excludedCarId.Value));
-        }
-
-        private static void ShowDuplicatePlateMessage(string plateNumber)
-        {
-            MessageBox.Show(
-                $"A car with plate number '{plateNumber}' already exists.",
-                "Duplicate Plate Number",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
-        }
-
-        private void ClearForm()
+        private async Task ClearFormAsync()
         {
             selectedCarId = null;
             plateTextBox.Clear();
@@ -446,7 +330,7 @@ namespace Car_Rental_System
             dailyRateTextBox.Clear();
 
             UpdateStatusOptions();
-            LoadCarTypes();
+            await LoadCarTypesAsync();
 
             carsGrid.ClearSelection();
         }
@@ -485,13 +369,5 @@ namespace Car_Rental_System
                 ? CarStatus.Maintenance
                 : CarStatus.Available;
         }
-    }
-
-    public class CarTypeLookupItem
-    {
-        public int CarTypeId { get; set; }
-        public string TypeName { get; set; } = "";
-        public decimal DailyRate { get; set; }
-        public string DisplayName => TypeName;
     }
 }

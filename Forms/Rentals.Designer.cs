@@ -27,7 +27,6 @@ namespace Car_Rental_System
             titleLabel = new Label();
             bodyTable = new TableLayoutPanel();
             detailsPanel = new Panel();
-            clearButton = new Button();
             createButton = new Button();
             paymentMethodComboBox = new ComboBox();
             paymentMethodLabel = new Label();
@@ -117,7 +116,6 @@ namespace Car_Rental_System
             // 
             detailsPanel.BackColor = Color.White;
             detailsPanel.BorderStyle = BorderStyle.FixedSingle;
-            detailsPanel.Controls.Add(clearButton);
             detailsPanel.Controls.Add(createButton);
             detailsPanel.Controls.Add(paymentMethodComboBox);
             detailsPanel.Controls.Add(paymentMethodLabel);
@@ -144,27 +142,6 @@ namespace Car_Rental_System
             detailsPanel.Name = "detailsPanel";
             detailsPanel.Size = new Size(390, 694);
             detailsPanel.TabIndex = 0;
-            // 
-            // clearButton
-            // 
-            clearButton.BackColor = Color.White;
-            clearButton.FlatAppearance.BorderColor = Color.FromArgb(31, 41, 55);
-            clearButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(243, 244, 246);
-            clearButton.FlatStyle = FlatStyle.Flat;
-            clearButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            clearButton.ForeColor = Color.FromArgb(31, 41, 55);
-            clearButton.Image = (Image)resources.GetObject("clearButton.Image");
-            clearButton.Location = new Point(23, 596);
-            clearButton.Margin = new Padding(3, 4, 3, 4);
-            clearButton.Name = "clearButton";
-            clearButton.Size = new Size(343, 45);
-            clearButton.TabIndex = 23;
-            clearButton.Text = "Clear";
-            clearButton.TextAlign = ContentAlignment.MiddleRight;
-            clearButton.TextImageRelation = TextImageRelation.ImageBeforeText;
-            clearButton.UseVisualStyleBackColor = false;
-            clearButton.Click += ClearButton_Click;
-            // 
             // createButton
             // 
             createButton.BackColor = Color.FromArgb(37, 99, 235);
@@ -522,7 +499,6 @@ namespace Car_Rental_System
         private Label titleLabel;
         private TableLayoutPanel bodyTable;
         private Panel detailsPanel;
-        private Button clearButton;
         private Button createButton;
         private ComboBox paymentMethodComboBox;
         private Label paymentMethodLabel;

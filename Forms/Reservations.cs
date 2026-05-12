@@ -1,26 +1,59 @@
-using Car_Rental_System.Data;
 using Car_Rental_System.Helpers;
 using Car_Rental_System.Models;
+using Car_Rental_System.Presenters;
 using Car_Rental_System.Services;
-using Microsoft.EntityFrameworkCore;
+using Car_Rental_System.ViewModels;
+using Car_Rental_System.Views;
 
 namespace Car_Rental_System
 {
-    public partial class Reservations : Form
+    public partial class Reservations : Form, IReservationsView
     {
+        private readonly ReservationsPresenter presenter;
         private int? selectedReservationId;
         private bool isLoadingReservations;
 
         public Reservations()
         {
             InitializeComponent();
+            presenter = new ReservationsPresenter(this);
         }
 
-        private void Reservations_Load(object? sender, EventArgs e)
+        public string SearchText => searchTextBox.Text;
+
+        void IReservationsView.BindAvailableCars(List<ReservationCarLookupItem> cars)
+        {
+            carComboBox.DataSource = cars;
+            carComboBox.DisplayMember = "CarName";
+            carComboBox.ValueMember = "CarId";
+
+            if (cars.Count == 0)
+            {
+                rateTextBox.Clear();
+                estimatedTotalTextBox.Text = RentalCalculator.FormatCurrency(0);
+            }
+
+            CarComboBox_SelectedIndexChanged(this, EventArgs.Empty);
+        }
+
+        void IReservationsView.BindReservations(List<ReservationGridRow> reservations)
+        {
+            reservationsGrid.Columns.Clear();
+            reservationsGrid.DataSource = reservations;
+
+            DataGridViewHelper.ApplyFriendlyHeaders(reservationsGrid);
+            DataGridViewHelper.HideColumn(reservationsGrid, "ReservationId");
+            DataGridViewHelper.HideColumn(reservationsGrid, "CarId");
+            DataGridViewHelper.ApplyStatusFormatting(reservationsGrid);
+            FormatReservationsGridColumns();
+            ClearFormAfterGridLoad();
+        }
+
+        private async void Reservations_Load(object? sender, EventArgs e)
         {
             PrepareForm();
-            LoadLookups();
-            LoadReservations();
+            await LoadLookupsAsync();
+            await LoadReservationsAsync();
         }
 
         private void PrepareForm()
@@ -43,35 +76,11 @@ namespace Car_Rental_System
             }
         }
 
-        private void LoadLookups()
+        private async Task LoadLookupsAsync()
         {
             try
             {
-                using var db = new AppDbContext();
-                var cars = db.Cars
-                    .Where(c => c.Status == CarStatus.Available)
-                    .OrderBy(c => c.Brand)
-                    .ThenBy(c => c.Model)
-                    .Select(c => new ReservationCarLookupItem
-                    {
-                        CarId = c.CarId,
-                        CarName = c.PlateNumber + " - " + c.Brand + " " + c.Model +
-                            (c.CarType != null ? " (" + c.CarType.TypeName + ")" : ""),
-                        DailyRate = c.CarType != null ? c.CarType.DailyRate : c.DailyRate
-                    })
-                    .ToList();
-
-                carComboBox.DataSource = cars;
-                carComboBox.DisplayMember = "CarName";
-                carComboBox.ValueMember = "CarId";
-
-                if (cars.Count == 0)
-                {
-                    rateTextBox.Clear();
-                    estimatedTotalTextBox.Text = RentalCalculator.FormatCurrency(0);
-                }
-
-                CarComboBox_SelectedIndexChanged(this, EventArgs.Empty);
+                await presenter.LoadLookupsAsync();
             }
             catch (Exception ex)
             {
@@ -79,63 +88,13 @@ namespace Car_Rental_System
             }
         }
 
-        private void LoadReservations(string search = "")
+        private async Task LoadReservationsAsync()
         {
             isLoadingReservations = true;
 
             try
             {
-                using var db = new AppDbContext();
-                string trimmed = search.Trim();
-
-                var query = db.Reservations
-                    .Include(r => r.Car).ThenInclude(c => c.CarType)
-                    .AsQueryable();
-
-                if (!string.IsNullOrWhiteSpace(trimmed))
-                {
-                    query = query.Where(r =>
-                        r.CustomerName.Contains(trimmed) ||
-                        r.ContactNumber.Contains(trimmed) ||
-                        r.PaymentReferenceNumber.Contains(trimmed) ||
-                        r.Car.PlateNumber.Contains(trimmed) ||
-                        r.Car.Brand.Contains(trimmed) ||
-                        r.Car.Model.Contains(trimmed) ||
-                        (r.Car.CarType != null && r.Car.CarType.TypeName.Contains(trimmed)));
-                }
-
-                var reservations = query
-                    .OrderBy(r => r.Status == ReservationStatus.Converted)
-                    .ThenBy(r => r.Status == ReservationStatus.Cancelled)
-                    .ThenBy(r => r.PickupDate)
-                    .ToList()
-                    .Select(r => new ReservationGridRow
-                    {
-                        ReservationId = r.ReservationId,
-                        CarId = r.CarId,
-                        CustomerName = r.CustomerName,
-                        ContactNumber = r.ContactNumber,
-                        Car = r.Car.PlateNumber + " - " + r.Car.Brand + " " + r.Car.Model +
-                            (r.Car.CarType != null ? " (" + r.Car.CarType.TypeName + ")" : ""),
-                        ReservationDate = r.ReservationDate,
-                        PickupDate = r.PickupDate,
-                        ExpectedReturnDate = r.ExpectedReturnDate,
-                        DepositAmount = r.DepositAmount,
-                        PaymentMethod = PaymentHelper.FormatPaymentMethod(r.PaymentMethod),
-                        PaymentReferenceNumber = r.PaymentReferenceNumber,
-                        Status = r.Status
-                    })
-                    .ToList();
-
-                reservationsGrid.Columns.Clear();
-                reservationsGrid.DataSource = reservations;
-
-                DataGridViewHelper.ApplyFriendlyHeaders(reservationsGrid);
-                DataGridViewHelper.HideColumn(reservationsGrid, "ReservationId");
-                DataGridViewHelper.HideColumn(reservationsGrid, "CarId");
-                DataGridViewHelper.ApplyStatusFormatting(reservationsGrid);
-                FormatReservationsGridColumns();
-                ClearFormAfterGridLoad();
+                await presenter.LoadReservationsAsync();
             }
             catch (Exception ex)
             {
@@ -144,50 +103,22 @@ namespace Car_Rental_System
             }
         }
 
-        private void AddButton_Click(object? sender, EventArgs e)
+        private async void AddButton_Click(object? sender, EventArgs e)
         {
-            if (!ValidateInputs(
-                    out int carId,
-                    out string customerName,
-                    out string contactNumber,
-                    out DateOnly pickupDate,
-                    out DateOnly expectedReturnDate,
-                    out decimal depositAmount,
-                    out PaymentMethod paymentMethod,
-                    out string paymentReferenceNumber))
+            if (!ValidateInputs(out ReservationFormInput input))
             {
                 return;
             }
 
             try
             {
-                using var db = new AppDbContext();
+                PresenterResult result = await presenter.AddReservationAsync(input);
+                AppMessageBox.ShowPresenterResult(result);
 
-                if (ReservationService.HasCarScheduleConflict(db, carId, pickupDate, expectedReturnDate))
+                if (result.Success)
                 {
-                    ShowScheduleConflictMessage();
-                    return;
+                    await LoadReservationsAsync();
                 }
-
-                db.Reservations.Add(new Reservation
-                {
-                    CarId = carId,
-                    CustomerName = customerName,
-                    ContactNumber = contactNumber,
-                    ReservationDate = RentalCalculator.ToDateOnly(DateTime.Today),
-                    PickupDate = pickupDate,
-                    ExpectedReturnDate = expectedReturnDate,
-                    DepositAmount = depositAmount,
-                    PaymentMethod = paymentMethod,
-                    PaymentReferenceNumber = paymentReferenceNumber,
-                    Source = "Facebook",
-                    Status = ReservationStatus.Confirmed
-                });
-
-                db.SaveChanges();
-
-                MessageBox.Show("Reservation saved successfully.", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LoadReservations(searchTextBox.Text);
             }
             catch (Exception ex)
             {
@@ -195,7 +126,7 @@ namespace Car_Rental_System
             }
         }
 
-        private void UpdateButton_Click(object? sender, EventArgs e)
+        private async void UpdateButton_Click(object? sender, EventArgs e)
         {
             if (selectedReservationId == null)
             {
@@ -203,63 +134,20 @@ namespace Car_Rental_System
                 return;
             }
 
+            if (!ValidateInputs(out ReservationFormInput input))
+            {
+                return;
+            }
+
             try
             {
-                using var db = new AppDbContext();
-                var reservation = db.Reservations.Find(selectedReservationId.Value);
-                if (reservation == null)
+                PresenterResult result = await presenter.UpdateReservationAsync(selectedReservationId.Value, input);
+                AppMessageBox.ShowPresenterResult(result);
+
+                if (result.Success)
                 {
-                    MessageBox.Show("Reservation not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    LoadReservations(searchTextBox.Text);
-                    return;
+                    await LoadReservationsAsync();
                 }
-
-                if (reservation.Status == ReservationStatus.Converted)
-                {
-                    MessageBox.Show("This reservation has already been converted to a rental.", "Already Converted", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    LoadReservations(searchTextBox.Text);
-                    return;
-                }
-
-                if (reservation.Status == ReservationStatus.Cancelled)
-                {
-                    MessageBox.Show("Cancelled reservations cannot be edited. Create a new reservation instead.", "Already Cancelled", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    LoadReservations(searchTextBox.Text);
-                    return;
-                }
-
-                if (!ValidateInputs(
-                        out int carId,
-                        out string customerName,
-                        out string contactNumber,
-                        out DateOnly pickupDate,
-                        out DateOnly expectedReturnDate,
-                        out decimal depositAmount,
-                        out PaymentMethod paymentMethod,
-                        out string paymentReferenceNumber))
-                {
-                    return;
-                }
-
-                if (ReservationService.HasCarScheduleConflict(db, carId, pickupDate, expectedReturnDate, selectedReservationId.Value))
-                {
-                    ShowScheduleConflictMessage();
-                    return;
-                }
-
-                reservation.CarId = carId;
-                reservation.CustomerName = customerName;
-                reservation.ContactNumber = contactNumber;
-                reservation.PickupDate = pickupDate;
-                reservation.ExpectedReturnDate = expectedReturnDate;
-                reservation.DepositAmount = depositAmount;
-                reservation.PaymentMethod = paymentMethod;
-                reservation.PaymentReferenceNumber = paymentReferenceNumber;
-
-                db.SaveChanges();
-
-                MessageBox.Show("Reservation updated successfully.", "Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LoadReservations(searchTextBox.Text);
             }
             catch (Exception ex)
             {
@@ -267,7 +155,7 @@ namespace Car_Rental_System
             }
         }
 
-        private void CancelReservationButton_Click(object? sender, EventArgs e)
+        private async void CancelReservationButton_Click(object? sender, EventArgs e)
         {
             if (selectedReservationId == null)
             {
@@ -275,39 +163,26 @@ namespace Car_Rental_System
                 return;
             }
 
-            DialogResult result = MessageBox.Show(
+            DialogResult confirmation = MessageBox.Show(
                 "Cancel this reservation?",
                 "Confirm Cancellation",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question);
 
-            if (result != DialogResult.Yes)
+            if (confirmation != DialogResult.Yes)
             {
                 return;
             }
 
             try
             {
-                using var db = new AppDbContext();
-                var reservation = db.Reservations.Find(selectedReservationId.Value);
-                if (reservation == null)
+                PresenterResult result = await presenter.CancelReservationAsync(selectedReservationId.Value);
+                AppMessageBox.ShowPresenterResult(result);
+
+                if (result.Success)
                 {
-                    MessageBox.Show("Reservation not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    LoadReservations(searchTextBox.Text);
-                    return;
+                    await LoadReservationsAsync();
                 }
-
-                if (reservation.Status == ReservationStatus.Converted)
-                {
-                    MessageBox.Show("Converted reservations cannot be cancelled.", "Already Converted", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
-
-                reservation.Status = ReservationStatus.Cancelled;
-                db.SaveChanges();
-
-                MessageBox.Show("Reservation cancelled.", "Cancelled", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LoadReservations(searchTextBox.Text);
             }
             catch (Exception ex)
             {
@@ -315,7 +190,7 @@ namespace Car_Rental_System
             }
         }
 
-        private void ConvertButton_Click(object? sender, EventArgs e)
+        private async void ConvertButton_Click(object? sender, EventArgs e)
         {
             if (selectedReservationId == null)
             {
@@ -323,39 +198,38 @@ namespace Car_Rental_System
                 return;
             }
 
-            DialogResult result = MessageBox.Show(
+            DialogResult confirmation = MessageBox.Show(
                 "Convert this reservation to an active rental now?",
                 "Convert to Rental",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question);
 
-            if (result != DialogResult.Yes)
+            if (confirmation != DialogResult.Yes)
             {
                 return;
             }
 
             try
             {
-                var reservationService = new ReservationService();
-                ReservationOperationResult operationResult = reservationService.ConvertToRental(selectedReservationId.Value);
+                ReservationOperationResult result = await presenter.ConvertToRentalAsync(selectedReservationId.Value);
 
-                if (!operationResult.Success)
+                if (!result.Success)
                 {
                     MessageBox.Show(
-                        operationResult.Message,
-                        operationResult.Title,
+                        result.Message,
+                        result.Title,
                         MessageBoxButtons.OK,
-                        operationResult.HasScheduleConflict || operationResult.CarWasUnavailable ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
+                        result.HasScheduleConflict || result.CarWasUnavailable ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
 
-                    LoadLookups();
-                    LoadReservations(searchTextBox.Text);
+                    await LoadLookupsAsync();
+                    await LoadReservationsAsync();
                     return;
                 }
 
-                MessageBox.Show(operationResult.Message, operationResult.Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
-                RentalDocumentPrinter.PromptToPrintRentalAgreement(this, operationResult.RentalId);
-                LoadLookups();
-                LoadReservations(searchTextBox.Text);
+                MessageBox.Show(result.Message, result.Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                await RentalDocumentPrinter.PromptToPrintRentalAgreementAsync(this, result.RentalId);
+                await LoadLookupsAsync();
+                await LoadReservationsAsync();
             }
             catch (Exception ex)
             {
@@ -368,9 +242,9 @@ namespace Car_Rental_System
             ClearForm();
         }
 
-        private void SearchTextBox_TextChanged(object? sender, EventArgs e)
+        private async void SearchTextBox_TextChanged(object? sender, EventArgs e)
         {
-            LoadReservations(searchTextBox.Text);
+            await LoadReservationsAsync();
         }
 
         private void CarComboBox_SelectedIndexChanged(object? sender, EventArgs e)
@@ -422,24 +296,15 @@ namespace Car_Rental_System
             UpdateActionButtons(row.Status);
         }
 
-        private bool ValidateInputs(
-            out int carId,
-            out string customerName,
-            out string contactNumber,
-            out DateOnly pickupDate,
-            out DateOnly expectedReturnDate,
-            out decimal depositAmount,
-            out PaymentMethod paymentMethod,
-            out string paymentReferenceNumber)
+        private bool ValidateInputs(out ReservationFormInput input)
         {
-            carId = 0;
-            customerName = ValidationHelper.CollapseSpaces(customerNameTextBox.Text);
-            contactNumber = ValidationHelper.CollapseSpaces(contactTextBox.Text);
-            pickupDate = RentalCalculator.ToDateOnly(pickupDatePicker.Value);
-            expectedReturnDate = RentalCalculator.ToDateOnly(returnDatePicker.Value);
-            depositAmount = 0;
-            paymentMethod = PaymentMethod.Cash;
-            paymentReferenceNumber = ValidationHelper.CollapseSpaces(paymentReferenceTextBox.Text);
+            int carId = 0;
+            string customerName = ValidationHelper.CollapseSpaces(customerNameTextBox.Text);
+            string contactNumber = ValidationHelper.CollapseSpaces(contactTextBox.Text);
+            DateOnly pickupDate = RentalCalculator.ToDateOnly(pickupDatePicker.Value);
+            DateOnly expectedReturnDate = RentalCalculator.ToDateOnly(returnDatePicker.Value);
+            string paymentReferenceNumber = ValidationHelper.CollapseSpaces(paymentReferenceTextBox.Text);
+            input = new ReservationFormInput(carId, customerName, contactNumber, pickupDate, expectedReturnDate, 0, PaymentMethod.Cash, paymentReferenceNumber);
 
             if (!ValidationHelper.IsValidPersonName(customerName))
             {
@@ -472,7 +337,7 @@ namespace Car_Rental_System
             }
 
             decimal estimatedTotal = CalculateEstimatedTotal();
-            depositAmount = ParseOptionalPaymentAmount(depositTextBox.Text);
+            decimal depositAmount = ParseOptionalPaymentAmount(depositTextBox.Text);
 
             if (!PaymentHelper.IsValidPaymentAmount(depositAmount, estimatedTotal))
             {
@@ -480,7 +345,7 @@ namespace Car_Rental_System
                 return false;
             }
 
-            paymentMethod = paymentMethodComboBox.SelectedItem is PaymentMethod selectedMethod
+            PaymentMethod paymentMethod = paymentMethodComboBox.SelectedItem is PaymentMethod selectedMethod
                 ? selectedMethod
                 : PaymentMethod.Cash;
 
@@ -494,6 +359,15 @@ namespace Car_Rental_System
                 return false;
             }
 
+            input = new ReservationFormInput(
+                carId,
+                customerName,
+                contactNumber,
+                pickupDate,
+                expectedReturnDate,
+                depositAmount,
+                paymentMethod,
+                paymentReferenceNumber);
             return true;
         }
 
@@ -602,52 +476,16 @@ namespace Car_Rental_System
 
         private void UpdateActionButtons(ReservationStatus? status)
         {
-            bool canChangeReservation = selectedReservationId.HasValue &&
-                status is ReservationStatus.Pending or ReservationStatus.Confirmed;
-
-            SetActionButtonState(updateButton, canChangeReservation);
-            SetActionButtonState(cancelReservationButton, canChangeReservation);
-            SetActionButtonState(convertButton, canChangeReservation);
+            SetActionButtonStyle(updateButton);
+            SetActionButtonStyle(cancelReservationButton);
+            SetActionButtonStyle(convertButton);
         }
 
-        private static void SetActionButtonState(Button button, bool enabled)
+        private static void SetActionButtonStyle(Button button)
         {
-            button.Enabled = enabled;
-            button.ForeColor = enabled
-                ? Color.White
-                : Color.FromArgb(107, 114, 128);
-        }
-
-        private static void ShowScheduleConflictMessage()
-        {
-            MessageBox.Show(
-                "This car already has an active rental or reservation for those dates.",
-                "Schedule Conflict",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-        }
-
-        private sealed class ReservationCarLookupItem
-        {
-            public int CarId { get; set; }
-            public string CarName { get; set; } = "";
-            public decimal DailyRate { get; set; }
-        }
-
-        private sealed class ReservationGridRow
-        {
-            public int ReservationId { get; set; }
-            public int CarId { get; set; }
-            public string CustomerName { get; set; } = "";
-            public string ContactNumber { get; set; } = "";
-            public string Car { get; set; } = "";
-            public DateOnly ReservationDate { get; set; }
-            public DateOnly PickupDate { get; set; }
-            public DateOnly ExpectedReturnDate { get; set; }
-            public decimal DepositAmount { get; set; }
-            public string PaymentMethod { get; set; } = "";
-            public string PaymentReferenceNumber { get; set; } = "";
-            public ReservationStatus Status { get; set; }
+            button.Enabled = true;
+            button.ForeColor = Color.White;
+            button.UseVisualStyleBackColor = false;
         }
     }
 }

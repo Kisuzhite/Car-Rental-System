@@ -1,19 +1,43 @@
 using Car_Rental_System.Models;
-using Car_Rental_System.Services;
+using Car_Rental_System.Presenters;
+using Car_Rental_System.Views;
 
 namespace Car_Rental_System
 {
-    public partial class LoginForm : Form
+    public partial class LoginForm : Form, ILoginView
     {
-        private readonly AuthService authService = new();
+        private readonly LoginPresenter presenter;
 
         internal AppUser? AuthenticatedUser { get; private set; }
 
         public LoginForm()
         {
             InitializeComponent();
+            presenter = new LoginPresenter(this);
             AcceptButton = loginButton;
             CancelButton = exitButton;
+        }
+
+        public string UserName => userNameTextBox.Text;
+        public string Password => passwordTextBox.Text;
+
+        public void ShowLoginStatus(string message)
+        {
+            statusLabel.Text = message;
+
+            if (!string.IsNullOrWhiteSpace(message) &&
+                message.StartsWith("Invalid", StringComparison.OrdinalIgnoreCase))
+            {
+                passwordTextBox.SelectAll();
+                passwordTextBox.Focus();
+            }
+        }
+
+        void ILoginView.CompleteLogin(AppUser user)
+        {
+            AuthenticatedUser = user;
+            DialogResult = DialogResult.OK;
+            Close();
         }
 
         private void LoginForm_Load(object? sender, EventArgs e)
@@ -23,28 +47,9 @@ namespace Car_Rental_System
 
         private void LoginButton_Click(object? sender, EventArgs e)
         {
-            statusLabel.Text = "";
-
-            if (string.IsNullOrWhiteSpace(userNameTextBox.Text) ||
-                string.IsNullOrWhiteSpace(passwordTextBox.Text))
-            {
-                statusLabel.Text = "Enter the owner username and password.";
-                return;
-            }
-
             try
             {
-                if (authService.TrySignIn(userNameTextBox.Text, passwordTextBox.Text, out AppUser? user))
-                {
-                    AuthenticatedUser = user;
-                    DialogResult = DialogResult.OK;
-                    Close();
-                    return;
-                }
-
-                statusLabel.Text = "Invalid owner username or password.";
-                passwordTextBox.SelectAll();
-                passwordTextBox.Focus();
+                presenter.SignIn();
             }
             catch (Exception ex)
             {

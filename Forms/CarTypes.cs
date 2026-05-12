@@ -1,64 +1,47 @@
-using Car_Rental_System.Data;
 using Car_Rental_System.Helpers;
-using Car_Rental_System.Models;
-using Microsoft.EntityFrameworkCore;
+using Car_Rental_System.Presenters;
+using Car_Rental_System.ViewModels;
+using Car_Rental_System.Views;
 
 namespace Car_Rental_System
 {
-    public partial class CarTypes : Form
+    public partial class CarTypes : Form, ICarTypesView
     {
+        private readonly CarTypesPresenter presenter;
         private int? selectedCarTypeId;
         private bool isLoadingCarTypes;
 
         public CarTypes()
         {
             InitializeComponent();
+            presenter = new CarTypesPresenter(this);
         }
 
-        private void CarTypes_Load(object? sender, EventArgs e)
+        public string SearchText => searchTextBox.Text;
+
+        void ICarTypesView.BindCarTypes(List<CarTypeGridRow> carTypes)
         {
-            LoadCarTypes();
+            carTypesGrid.Columns.Clear();
+            carTypesGrid.DataSource = carTypes;
+
+            DataGridViewHelper.ApplyFriendlyHeaders(carTypesGrid);
+            DataGridViewHelper.HideColumn(carTypesGrid, "CarTypeId");
+            FormatCarTypesGridColumns();
+            ClearFormAfterGridLoad();
         }
 
-        private void LoadCarTypes(string search = "")
+        private async void CarTypes_Load(object? sender, EventArgs e)
+        {
+            await LoadCarTypesAsync();
+        }
+
+        private async Task LoadCarTypesAsync()
         {
             isLoadingCarTypes = true;
 
             try
             {
-                using var db = new AppDbContext();
-
-                string trimmed = search.Trim();
-
-                var query = db.CarTypes.AsQueryable();
-
-                if (!string.IsNullOrWhiteSpace(trimmed))
-                {
-                    query = query.Where(ct =>
-                        ct.TypeName.Contains(trimmed) ||
-                        ct.Description.Contains(trimmed));
-                }
-
-                var carTypes = query
-                    .OrderByDescending(ct => ct.IsActive)
-                    .ThenBy(ct => ct.TypeName)
-                    .Select(ct => new CarTypeGridRow
-                    {
-                        CarTypeId = ct.CarTypeId,
-                        TypeName = ct.TypeName,
-                        DailyRate = ct.DailyRate,
-                        Description = ct.Description,
-                        Status = ct.IsActive ? "Active" : "Inactive"
-                    })
-                    .ToList();
-
-                carTypesGrid.Columns.Clear();
-                carTypesGrid.DataSource = carTypes;
-
-                DataGridViewHelper.ApplyFriendlyHeaders(carTypesGrid);
-                DataGridViewHelper.HideColumn(carTypesGrid, "CarTypeId");
-                FormatCarTypesGridColumns();
-                ClearFormAfterGridLoad();
+                await presenter.LoadCarTypesAsync();
             }
             catch (Exception ex)
             {
@@ -67,35 +50,22 @@ namespace Car_Rental_System
             }
         }
 
-        private void AddButton_Click(object? sender, EventArgs e)
+        private async void AddButton_Click(object? sender, EventArgs e)
         {
-            if (!ValidateInputs(out string typeName, out decimal dailyRate, out string description))
+            if (!ValidateInputs(out CarTypeFormInput input))
             {
                 return;
             }
 
             try
             {
-                using var db = new AppDbContext();
+                PresenterResult result = await presenter.AddCarTypeAsync(input);
+                AppMessageBox.ShowPresenterResult(result);
 
-                if (IsDuplicateTypeName(db, typeName))
+                if (result.Success)
                 {
-                    ShowDuplicateTypeMessage(typeName);
-                    return;
+                    await LoadCarTypesAsync();
                 }
-
-                db.CarTypes.Add(new CarType
-                {
-                    TypeName = typeName,
-                    DailyRate = dailyRate,
-                    Description = description,
-                    IsActive = isActiveCheckBox.Checked
-                });
-
-                db.SaveChanges();
-
-                MessageBox.Show("Car type saved successfully.", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LoadCarTypes(searchTextBox.Text);
             }
             catch (Exception ex)
             {
@@ -103,7 +73,7 @@ namespace Car_Rental_System
             }
         }
 
-        private void UpdateButton_Click(object? sender, EventArgs e)
+        private async void UpdateButton_Click(object? sender, EventArgs e)
         {
             if (selectedCarTypeId == null)
             {
@@ -111,43 +81,20 @@ namespace Car_Rental_System
                 return;
             }
 
-            if (!ValidateInputs(out string typeName, out decimal dailyRate, out string description))
+            if (!ValidateInputs(out CarTypeFormInput input))
             {
                 return;
             }
 
             try
             {
-                using var db = new AppDbContext();
+                PresenterResult result = await presenter.UpdateCarTypeAsync(selectedCarTypeId.Value, input);
+                AppMessageBox.ShowPresenterResult(result);
 
-                var carType = db.CarTypes.Find(selectedCarTypeId.Value);
-                if (carType == null)
+                if (result.Success)
                 {
-                    MessageBox.Show("Car type not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    LoadCarTypes(searchTextBox.Text);
-                    return;
+                    await LoadCarTypesAsync();
                 }
-
-                if (IsDuplicateTypeName(db, typeName, selectedCarTypeId.Value))
-                {
-                    ShowDuplicateTypeMessage(typeName);
-                    return;
-                }
-
-                carType.TypeName = typeName;
-                carType.DailyRate = dailyRate;
-                carType.Description = description;
-                carType.IsActive = isActiveCheckBox.Checked;
-
-                foreach (Car car in db.Cars.Where(c => c.CarTypeId == carType.CarTypeId))
-                {
-                    car.DailyRate = dailyRate;
-                }
-
-                db.SaveChanges();
-
-                MessageBox.Show("Car type updated successfully.", "Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LoadCarTypes(searchTextBox.Text);
             }
             catch (Exception ex)
             {
@@ -155,7 +102,7 @@ namespace Car_Rental_System
             }
         }
 
-        private void DeleteButton_Click(object? sender, EventArgs e)
+        private async void DeleteButton_Click(object? sender, EventArgs e)
         {
             if (selectedCarTypeId == null)
             {
@@ -165,54 +112,32 @@ namespace Car_Rental_System
 
             try
             {
-                using var db = new AppDbContext();
-
-                var carType = db.CarTypes
-                    .Include(ct => ct.Cars)
-                    .FirstOrDefault(ct => ct.CarTypeId == selectedCarTypeId.Value);
-
-                if (carType == null)
+                CarTypeDeletePreview preview = await presenter.PreviewDeleteAsync(selectedCarTypeId.Value);
+                if (!preview.CanContinue)
                 {
-                    MessageBox.Show("Car type not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    LoadCarTypes(searchTextBox.Text);
+                    MessageBox.Show(preview.Message, preview.Title, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    await LoadCarTypesAsync();
                     return;
                 }
 
-                bool hasCars = carType.Cars.Any();
-
-                string message = hasCars
-                    ? "This car type is assigned to cars. Deactivate it instead of deleting it?"
-                    : "Are you sure you want to delete this car type?";
-
-                DialogResult result = MessageBox.Show(
-                    message,
-                    hasCars ? "Confirm Deactivate" : "Confirm Delete",
+                DialogResult confirmation = MessageBox.Show(
+                    preview.Message,
+                    preview.Title,
                     MessageBoxButtons.YesNo,
-                    hasCars ? MessageBoxIcon.Information : MessageBoxIcon.Question);
+                    preview.HasCars ? MessageBoxIcon.Information : MessageBoxIcon.Question);
 
-                if (result != DialogResult.Yes)
+                if (confirmation != DialogResult.Yes)
                 {
                     return;
                 }
 
-                if (hasCars)
+                PresenterResult result = await presenter.DeleteCarTypeAsync(selectedCarTypeId.Value);
+                AppMessageBox.ShowPresenterResult(result);
+
+                if (result.Success)
                 {
-                    carType.IsActive = false;
+                    await LoadCarTypesAsync();
                 }
-                else
-                {
-                    db.CarTypes.Remove(carType);
-                }
-
-                db.SaveChanges();
-
-                MessageBox.Show(
-                    hasCars ? "Car type deactivated successfully." : "Car type deleted successfully.",
-                    hasCars ? "Deactivated" : "Deleted",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
-
-                LoadCarTypes(searchTextBox.Text);
             }
             catch (Exception ex)
             {
@@ -225,9 +150,9 @@ namespace Car_Rental_System
             ClearForm();
         }
 
-        private void SearchTextBox_TextChanged(object? sender, EventArgs e)
+        private async void SearchTextBox_TextChanged(object? sender, EventArgs e)
         {
-            LoadCarTypes(searchTextBox.Text);
+            await LoadCarTypesAsync();
         }
 
         private void CarTypesGrid_SelectionChanged(object? sender, EventArgs e)
@@ -237,13 +162,8 @@ namespace Car_Rental_System
                 return;
             }
 
-            if (carTypesGrid.CurrentRow?.DataBoundItem == null || !carTypesGrid.CurrentRow.Selected)
-            {
-                selectedCarTypeId = null;
-                return;
-            }
-
-            if (carTypesGrid.CurrentRow.DataBoundItem is not CarTypeGridRow row)
+            if (carTypesGrid.CurrentRow?.DataBoundItem is not CarTypeGridRow row ||
+                !carTypesGrid.CurrentRow.Selected)
             {
                 selectedCarTypeId = null;
                 return;
@@ -289,11 +209,11 @@ namespace Car_Rental_System
             carTypesGrid.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
         }
 
-        private bool ValidateInputs(out string typeName, out decimal dailyRate, out string description)
+        private bool ValidateInputs(out CarTypeFormInput input)
         {
-            typeName = ValidationHelper.CollapseSpaces(typeNameTextBox.Text);
-            description = ValidationHelper.CollapseSpaces(descriptionTextBox.Text);
-            dailyRate = 0;
+            string typeName = ValidationHelper.CollapseSpaces(typeNameTextBox.Text);
+            string description = ValidationHelper.CollapseSpaces(descriptionTextBox.Text);
+            input = new CarTypeFormInput(typeName, 0, description, isActiveCheckBox.Checked);
 
             if (string.IsNullOrWhiteSpace(typeName) ||
                 string.IsNullOrWhiteSpace(dailyRateTextBox.Text))
@@ -308,7 +228,7 @@ namespace Car_Rental_System
                 return false;
             }
 
-            if (!decimal.TryParse(dailyRateTextBox.Text, out dailyRate))
+            if (!decimal.TryParse(dailyRateTextBox.Text, out decimal dailyRate))
             {
                 MessageBox.Show("Daily rate must be a valid amount.", "Invalid Rate", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
@@ -330,14 +250,8 @@ namespace Car_Rental_System
                 return false;
             }
 
+            input = new CarTypeFormInput(typeName, dailyRate, description, isActiveCheckBox.Checked);
             return true;
-        }
-
-        private static bool IsDuplicateTypeName(AppDbContext db, string typeName, int? excludedCarTypeId = null)
-        {
-            return db.CarTypes.Any(ct =>
-                ct.TypeName == typeName &&
-                (!excludedCarTypeId.HasValue || ct.CarTypeId != excludedCarTypeId.Value));
         }
 
         private void ClearFormAfterGridLoad()
@@ -357,15 +271,6 @@ namespace Car_Rental_System
             }));
         }
 
-        private static void ShowDuplicateTypeMessage(string typeName)
-        {
-            MessageBox.Show(
-                $"A car type named '{typeName}' already exists.",
-                "Duplicate Car Type",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
-        }
-
         private void ClearForm()
         {
             selectedCarTypeId = null;
@@ -375,15 +280,6 @@ namespace Car_Rental_System
             isActiveCheckBox.Checked = true;
             carTypesGrid.ClearSelection();
             carTypesGrid.CurrentCell = null;
-        }
-
-        private sealed class CarTypeGridRow
-        {
-            public int CarTypeId { get; set; }
-            public string TypeName { get; set; } = "";
-            public decimal DailyRate { get; set; }
-            public string Description { get; set; } = "";
-            public string Status { get; set; } = "";
         }
     }
 }

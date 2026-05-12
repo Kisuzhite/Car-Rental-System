@@ -7,7 +7,7 @@ namespace Car_Rental_System.Helpers
         public static PaymentMethod[] GetSelectablePaymentMethods()
         {
             return Enum.GetValues<PaymentMethod>()
-                .Where(method => method != PaymentMethod.Other)
+                .Where(method => method is not PaymentMethod.Card and not PaymentMethod.Other)
                 .ToArray();
         }
 

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Car_Rental_System.Presenters;
 
 namespace Car_Rental_System.Helpers
 {
@@ -25,6 +26,25 @@ namespace Car_Rental_System.Helpers
                 "Database Error",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
+        }
+
+        public static void ShowPresenterResult(PresenterResult result)
+        {
+            MessageBox.Show(
+                result.Message,
+                result.Title,
+                MessageBoxButtons.OK,
+                GetMessageBoxIcon(result.Kind));
+        }
+
+        public static MessageBoxIcon GetMessageBoxIcon(PresenterMessageKind kind)
+        {
+            return kind switch
+            {
+                PresenterMessageKind.Warning => MessageBoxIcon.Warning,
+                PresenterMessageKind.Error => MessageBoxIcon.Error,
+                _ => MessageBoxIcon.Information
+            };
         }
     }
 }
