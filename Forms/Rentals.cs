@@ -296,7 +296,7 @@ namespace Car_Rental_System
 
         private static MessageBoxIcon GetRentalFailureIcon(RentalOperationResult result)
         {
-            return result.CarWasUnavailable
+            return result.CarWasUnavailable || result.HasScheduleConflict
                 ? MessageBoxIcon.Information
                 : MessageBoxIcon.Warning;
         }

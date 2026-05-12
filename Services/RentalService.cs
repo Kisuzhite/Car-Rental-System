@@ -160,6 +160,17 @@ namespace Car_Rental_System.Services
                     "This customer already has an active rental.\nProcess the return first before renting another car.");
             }
 
+            DateOnly rentalStart = RentalCalculator.ToDateOnly(rentalDate);
+            DateOnly rentalEnd = RentalCalculator.ToDateOnly(expectedReturnDate);
+
+            if (ReservationService.HasCarScheduleConflict(db, carId, rentalStart, rentalEnd))
+            {
+                return RentalOperationResult.Fail(
+                    RentalOperationError.ScheduleConflict,
+                    "Schedule Conflict",
+                    "This car already has an active rental or reservation for those dates. Choose another car or adjust the dates.");
+            }
+
             var car = db.Cars
                 .Include(c => c.CarType)
                 .FirstOrDefault(c =>
@@ -194,8 +205,8 @@ namespace Car_Rental_System.Services
             {
                 CustomerId = customerId,
                 CarId = carId,
-                RentalDate = RentalCalculator.ToDateOnly(rentalDate),
-                ExpectedReturnDate = RentalCalculator.ToDateOnly(expectedReturnDate),
+                RentalDate = rentalStart,
+                ExpectedReturnDate = rentalEnd,
                 DailyRate = dailyRate,
                 TotalAmount = totalAmount,
                 AmountPaid = amountPaid,

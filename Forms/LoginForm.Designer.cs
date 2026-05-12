@@ -52,7 +52,7 @@ namespace Car_Rental_System
             // 
             brandSubtitleLabel.Font = new Font("Inter", 10F);
             brandSubtitleLabel.ForeColor = Color.FromArgb(209, 213, 219);
-            brandSubtitleLabel.Location = new Point(32, 244);
+            brandSubtitleLabel.Location = new Point(31, 236);
             brandSubtitleLabel.Name = "brandSubtitleLabel";
             brandSubtitleLabel.Size = new Size(199, 93);
             brandSubtitleLabel.TabIndex = 2;

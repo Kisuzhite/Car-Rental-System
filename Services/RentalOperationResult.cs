@@ -32,6 +32,7 @@ namespace Car_Rental_System.Services
         public RentalOperationError Error { get; }
         public bool CarWasUnavailable => Error == RentalOperationError.CarNotAvailable;
         public bool RentalWasAlreadyClosed => Error == RentalOperationError.RentalAlreadyClosed;
+        public bool HasScheduleConflict => Error == RentalOperationError.ScheduleConflict;
         public int? RentalId { get; }
         public decimal DailyRate { get; }
         public decimal TotalAmount { get; }

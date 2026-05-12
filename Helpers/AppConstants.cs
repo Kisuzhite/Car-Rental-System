@@ -19,8 +19,5 @@ namespace Car_Rental_System.Helpers
         public const string DefaultBusinessLocation = "Business location not set";
         public const string DefaultBusinessContactNumber = "Contact number not set";
         public const string DefaultBusinessFacebookPage = "";
-
-        public static readonly string DefaultCarImagePath =
-            Path.Combine("Assets", "Cars", "default-car.png");
     }
 }

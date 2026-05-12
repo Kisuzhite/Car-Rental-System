@@ -535,16 +535,21 @@ namespace Car_Rental_System
                 : decimal.TryParse(value, out decimal amount) ? amount : -1;
         }
 
-        private void SelectCar(int carId)
+        private bool SelectCar(int carId)
         {
             foreach (object item in carComboBox.Items)
             {
                 if (item is ReservationCarLookupItem car && car.CarId == carId)
                 {
                     carComboBox.SelectedItem = item;
-                    return;
+                    return true;
                 }
             }
+
+            carComboBox.SelectedIndex = -1;
+            rateTextBox.Clear();
+            CalculateEstimatedTotal();
+            return false;
         }
 
         private void FormatReservationsGridColumns()
@@ -591,19 +596,26 @@ namespace Car_Rental_System
 
             reservationsGrid.ClearSelection();
             reservationsGrid.CurrentCell = null;
-            UpdateActionButtons(ReservationStatus.Confirmed);
+            UpdateActionButtons(null);
             CalculateEstimatedTotal();
         }
 
-        private void UpdateActionButtons(ReservationStatus status)
+        private void UpdateActionButtons(ReservationStatus? status)
         {
-            updateButton.Enabled = true;
-            cancelReservationButton.Enabled = true;
-            convertButton.Enabled = true;
+            bool canChangeReservation = selectedReservationId.HasValue &&
+                status is ReservationStatus.Pending or ReservationStatus.Confirmed;
 
-            updateButton.ForeColor = Color.White;
-            cancelReservationButton.ForeColor = Color.White;
-            convertButton.ForeColor = Color.White;
+            SetActionButtonState(updateButton, canChangeReservation);
+            SetActionButtonState(cancelReservationButton, canChangeReservation);
+            SetActionButtonState(convertButton, canChangeReservation);
+        }
+
+        private static void SetActionButtonState(Button button, bool enabled)
+        {
+            button.Enabled = enabled;
+            button.ForeColor = enabled
+                ? Color.White
+                : Color.FromArgb(107, 114, 128);
         }
 
         private static void ShowScheduleConflictMessage()

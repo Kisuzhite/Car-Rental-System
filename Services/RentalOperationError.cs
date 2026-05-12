@@ -7,6 +7,7 @@ namespace Car_Rental_System.Services
         InvalidReturnDate,
         CustomerHasActiveRental,
         CarNotAvailable,
+        ScheduleConflict,
         InvalidPaymentAmount
     }
 }
