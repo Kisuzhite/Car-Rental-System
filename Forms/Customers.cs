@@ -1,4 +1,4 @@
-using Car_Rental_System.Helpers;
+﻿using Car_Rental_System.Helpers;
 using Car_Rental_System.Presenters;
 using Car_Rental_System.ViewModels;
 using Car_Rental_System.Views;
@@ -20,7 +20,6 @@ namespace Car_Rental_System
 
         void ICustomersView.BindCustomers(List<CustomerGridRow> customers)
         {
-            customersGrid.Columns.Clear();
             customersGrid.DataSource = customers;
 
             DataGridViewHelper.ApplyFriendlyHeaders(customersGrid);
@@ -226,3 +225,4 @@ namespace Car_Rental_System
         }
     }
 }
+

@@ -1,4 +1,4 @@
-using Car_Rental_System.Helpers;
+﻿using Car_Rental_System.Helpers;
 using Car_Rental_System.Models;
 using Car_Rental_System.Presenters;
 using Car_Rental_System.ViewModels;
@@ -21,23 +21,17 @@ namespace Car_Rental_System
 
         void ICarsView.BindCarTypes(List<CarTypeLookupItem> carTypes)
         {
-            carTypeComboBox.DisplayMember = "DisplayName";
+            carTypeComboBox.DisplayMember = "TypeName";
             carTypeComboBox.ValueMember = "CarTypeId";
             carTypeComboBox.DataSource = carTypes;
         }
 
-        void ICarsView.BindCars(List<Car> cars)
+        void ICarsView.BindCars(List<CarGridRow> cars)
         {
-            carsGrid.Columns.Clear();
             carsGrid.DataSource = cars;
 
             DataGridViewHelper.ApplyFriendlyHeaders(carsGrid);
             DataGridViewHelper.HideColumn(carsGrid, "CarId");
-            DataGridViewHelper.HideColumn(carsGrid, "CarTypeId");
-            DataGridViewHelper.HideColumn(carsGrid, "CarType");
-            DataGridViewHelper.HideColumn(carsGrid, "ImagePath");
-            DataGridViewHelper.HideColumn(carsGrid, "Rentals");
-            DataGridViewHelper.HideColumn(carsGrid, "Reservations");
             DataGridViewHelper.MoveColumnToEnd(carsGrid, "Status");
             DataGridViewHelper.ApplyStatusFormatting(carsGrid);
 
@@ -82,7 +76,7 @@ namespace Car_Rental_System
 
         private async void CarsGrid_SelectionChanged(object? sender, EventArgs e)
         {
-            if (carsGrid.CurrentRow?.DataBoundItem is not Car car || !carsGrid.CurrentRow.Selected)
+            if (carsGrid.CurrentRow?.DataBoundItem is not CarGridRow car || !carsGrid.CurrentRow.Selected)
             {
                 selectedCarId = null;
                 return;
@@ -96,18 +90,14 @@ namespace Car_Rental_System
             yearTextBox.Text = car.Year.ToString();
             colorTextBox.Text = car.Color;
             dailyRateTextBox.Text = car.DailyRate.ToString("0.##");
-            await LoadCarTypesAsync(car.CarTypeId);
+            await LoadCarTypesAsync();
 
             if (selectedCarId != carId)
             {
                 return;
             }
 
-            carTypeComboBox.SelectedValue = car.CarTypeId ?? -1;
-            if (car.CarTypeId == null)
-            {
-                dailyRateTextBox.Text = car.DailyRate.ToString("0.##");
-            }
+            SelectCarType(car.CarType);
 
             UpdateStatusOptions(car.Status);
         }
@@ -319,6 +309,19 @@ namespace Car_Rental_System
             return true;
         }
 
+        private void SelectCarType(string typeName)
+        {
+            foreach (object item in carTypeComboBox.Items)
+            {
+                if (item is CarTypeLookupItem carType &&
+                    string.Equals(carType.TypeName, typeName, StringComparison.OrdinalIgnoreCase))
+                {
+                    carTypeComboBox.SelectedItem = item;
+                    return;
+                }
+            }
+        }
+
         private async Task ClearFormAsync()
         {
             selectedCarId = null;
@@ -371,3 +374,4 @@ namespace Car_Rental_System
         }
     }
 }
+

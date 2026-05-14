@@ -31,14 +31,7 @@ namespace Car_Rental_System.Repositories
                 .Include(c => c.CarType)
                 .Where(c => c.Status != CarStatus.Rented);
 
-            if (!string.IsNullOrWhiteSpace(trimmed))
-            {
-                query = query.Where(c =>
-                    c.PlateNumber.Contains(trimmed) ||
-                    c.Brand.Contains(trimmed) ||
-                    c.Model.Contains(trimmed) ||
-                    (c.CarType != null && c.CarType.TypeName.Contains(trimmed)));
-            }
+            query = ApplyCarSearchFilter(query, trimmed);
 
             return query
                 .OrderByDescending(c => c.CarId)
@@ -53,14 +46,7 @@ namespace Car_Rental_System.Repositories
                 .Include(c => c.CarType)
                 .Where(c => c.Status == CarStatus.Available);
 
-            if (!string.IsNullOrWhiteSpace(trimmed))
-            {
-                query = query.Where(c =>
-                    c.PlateNumber.Contains(trimmed) ||
-                    c.Brand.Contains(trimmed) ||
-                    c.Model.Contains(trimmed) ||
-                    (c.CarType != null && c.CarType.TypeName.Contains(trimmed)));
-            }
+            query = ApplyCarSearchFilter(query, trimmed);
 
             return query
                 .OrderBy(c => c.Brand)
@@ -114,6 +100,20 @@ namespace Car_Rental_System.Repositories
         public Task SaveChangesAsync()
         {
             return db.SaveChangesAsync();
+        }
+
+        private static IQueryable<Car> ApplyCarSearchFilter(IQueryable<Car> query, string trimmed)
+        {
+            if (string.IsNullOrWhiteSpace(trimmed))
+            {
+                return query;
+            }
+
+            return query.Where(c =>
+                c.PlateNumber.Contains(trimmed) ||
+                c.Brand.Contains(trimmed) ||
+                c.Model.Contains(trimmed) ||
+                (c.CarType != null && c.CarType.TypeName.Contains(trimmed)));
         }
     }
 }

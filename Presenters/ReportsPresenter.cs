@@ -43,42 +43,9 @@ namespace Car_Rental_System.Presenters
             RentalRepository rentalRepository,
             DateOnly today)
         {
-            List<Rental> rentals = await rentalRepository.GetRentalHistoryAsync();
-            string search = view.SearchText;
-
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                string trimmedSearch = search.Trim();
-                List<RentalStatus> matchingStatuses = Enum.GetValues<RentalStatus>()
-                    .Where(status => status.ToString().Contains(trimmedSearch, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-                List<PaymentStatus> matchingPaymentStatuses = Enum.GetValues<PaymentStatus>()
-                    .Where(status => status.ToString().Contains(trimmedSearch, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-                List<PaymentMethod> matchingPaymentMethods = Enum.GetValues<PaymentMethod>()
-                    .Where(method => PaymentHelper.FormatPaymentMethod(method).Contains(trimmedSearch, StringComparison.OrdinalIgnoreCase) ||
-                        method.ToString().Contains(trimmedSearch, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-                bool matchesOverdueStatus = AppConstants.OverdueRentalStatus
-                    .Contains(trimmedSearch, StringComparison.OrdinalIgnoreCase);
-
-                rentals = rentals.Where(r =>
-                    r.Customer.FullName.Contains(trimmedSearch, StringComparison.OrdinalIgnoreCase) ||
-                    r.Car.PlateNumber.Contains(trimmedSearch, StringComparison.OrdinalIgnoreCase) ||
-                    r.Car.Brand.Contains(trimmedSearch, StringComparison.OrdinalIgnoreCase) ||
-                    r.Car.Model.Contains(trimmedSearch, StringComparison.OrdinalIgnoreCase) ||
-                    (r.Car.CarType != null && r.Car.CarType.TypeName.Contains(trimmedSearch, StringComparison.OrdinalIgnoreCase)) ||
-                    matchingStatuses.Contains(r.Status) ||
-                    matchingPaymentStatuses.Contains(r.PaymentStatus) ||
-                    matchingPaymentMethods.Contains(r.PaymentMethod) ||
-                    (matchesOverdueStatus &&
-                        r.Status == RentalStatus.Active &&
-                        r.ExpectedReturnDate < today))
-                    .ToList();
-            }
+            List<Rental> rentals = await rentalRepository.GetRentalHistoryAsync(view.SearchText, today);
 
             return rentals
-                .OrderByDescending(r => r.RentalId)
                 .Select(r => new ReportRentalHistoryRow
                 {
                     RentalId = r.RentalId,

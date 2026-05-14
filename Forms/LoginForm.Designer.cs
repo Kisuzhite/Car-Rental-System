@@ -1,3 +1,5 @@
+﻿using Guna.UI2.WinForms;
+
 namespace Car_Rental_System
 {
     partial class LoginForm
@@ -18,17 +20,31 @@ namespace Car_Rental_System
 
         private void InitializeComponent()
         {
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges3 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges4 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges1 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LoginForm));
-            brandPanel = new Panel();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges2 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges13 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges14 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges5 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges6 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges7 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges8 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges9 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges10 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges11 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges12 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            brandPanel = new Guna2Panel();
             brandSubtitleLabel = new Label();
-            brandLogoPictureBox = new PictureBox();
-            mainPanel = new Panel();
-            exitButton = new Button();
-            loginButton = new Button();
+            brandLogoPictureBox = new Guna2PictureBox();
+            mainPanel = new Guna2Panel();
+            exitButton = new Guna2Button();
+            loginButton = new Guna2Button();
             statusLabel = new Label();
-            passwordTextBox = new TextBox();
+            passwordTextBox = new Guna2TextBox();
             passwordLabel = new Label();
-            userNameTextBox = new TextBox();
+            userNameTextBox = new Guna2TextBox();
             userNameLabel = new Label();
             subtitleLabel = new Label();
             titleLabel = new Label();
@@ -42,9 +58,12 @@ namespace Car_Rental_System
             brandPanel.BackColor = Color.FromArgb(31, 41, 55);
             brandPanel.Controls.Add(brandSubtitleLabel);
             brandPanel.Controls.Add(brandLogoPictureBox);
+            brandPanel.CustomizableEdges = customizableEdges3;
             brandPanel.Dock = DockStyle.Left;
+            brandPanel.FillColor = Color.FromArgb(31, 41, 55);
             brandPanel.Location = new Point(0, 0);
             brandPanel.Name = "brandPanel";
+            brandPanel.ShadowDecoration.CustomizableEdges = customizableEdges4;
             brandPanel.Size = new Size(260, 488);
             brandPanel.TabIndex = 1;
             // 
@@ -60,9 +79,12 @@ namespace Car_Rental_System
             // 
             // brandLogoPictureBox
             // 
+            brandLogoPictureBox.CustomizableEdges = customizableEdges1;
             brandLogoPictureBox.Image = (Image)resources.GetObject("brandLogoPictureBox.Image");
+            brandLogoPictureBox.ImageRotate = 0F;
             brandLogoPictureBox.Location = new Point(30, 38);
             brandLogoPictureBox.Name = "brandLogoPictureBox";
+            brandLogoPictureBox.ShadowDecoration.CustomizableEdges = customizableEdges2;
             brandLogoPictureBox.Size = new Size(200, 125);
             brandLogoPictureBox.SizeMode = PictureBoxSizeMode.Zoom;
             brandLogoPictureBox.TabIndex = 4;
@@ -71,6 +93,9 @@ namespace Car_Rental_System
             // mainPanel
             // 
             mainPanel.BackColor = Color.White;
+            mainPanel.BorderColor = Color.FromArgb(229, 231, 235);
+            mainPanel.BorderRadius = 18;
+            mainPanel.BorderThickness = 1;
             mainPanel.Controls.Add(exitButton);
             mainPanel.Controls.Add(loginButton);
             mainPanel.Controls.Add(statusLabel);
@@ -80,46 +105,58 @@ namespace Car_Rental_System
             mainPanel.Controls.Add(userNameLabel);
             mainPanel.Controls.Add(subtitleLabel);
             mainPanel.Controls.Add(titleLabel);
+            mainPanel.CustomizableEdges = customizableEdges13;
+            mainPanel.FillColor = Color.White;
             mainPanel.Location = new Point(300, 42);
             mainPanel.Name = "mainPanel";
+            mainPanel.ShadowDecoration.CustomizableEdges = customizableEdges14;
             mainPanel.Size = new Size(380, 402);
             mainPanel.TabIndex = 0;
             // 
             // exitButton
             // 
             exitButton.BackColor = Color.White;
-            exitButton.FlatAppearance.BorderColor = Color.FromArgb(31, 41, 55);
-            exitButton.FlatStyle = FlatStyle.Flat;
+            exitButton.BorderColor = Color.FromArgb(31, 41, 55);
+            exitButton.BorderRadius = 9;
+            exitButton.BorderThickness = 1;
+            exitButton.CustomizableEdges = customizableEdges5;
+            exitButton.FillColor = Color.White;
             exitButton.Font = new Font("Inter SemiBold", 10F, FontStyle.Bold);
             exitButton.ForeColor = Color.FromArgb(31, 41, 55);
+            exitButton.HoverState.FillColor = Color.FromArgb(243, 244, 246);
             exitButton.Image = (Image)resources.GetObject("exitButton.Image");
-            exitButton.Location = new Point(209, 322);
+            exitButton.ImageAlign = HorizontalAlignment.Left;
+            exitButton.ImageOffset = new Point(20, 0);
+            exitButton.ImageSize = new Size(22, 22);
+            exitButton.Location = new Point(201, 322);
             exitButton.Name = "exitButton";
-            exitButton.Size = new Size(128, 45);
+            exitButton.ShadowDecoration.CustomizableEdges = customizableEdges6;
+            exitButton.Size = new Size(136, 45);
             exitButton.TabIndex = 8;
             exitButton.Text = "Exit";
-            exitButton.TextAlign = ContentAlignment.MiddleRight;
-            exitButton.TextImageRelation = TextImageRelation.ImageBeforeText;
-            exitButton.UseVisualStyleBackColor = false;
+            exitButton.TextOffset = new Point(1, 0);
             exitButton.Click += ExitButton_Click;
             // 
             // loginButton
             // 
-            loginButton.BackColor = Color.FromArgb(37, 99, 235);
-            loginButton.FlatAppearance.BorderSize = 0;
-            loginButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(29, 78, 216);
-            loginButton.FlatStyle = FlatStyle.Flat;
+            loginButton.BackColor = Color.White;
+            loginButton.BorderRadius = 9;
+            loginButton.CustomizableEdges = customizableEdges7;
+            loginButton.FillColor = Color.FromArgb(37, 99, 235);
             loginButton.Font = new Font("Inter SemiBold", 10F, FontStyle.Bold);
             loginButton.ForeColor = Color.White;
+            loginButton.HoverState.FillColor = Color.FromArgb(29, 78, 216);
             loginButton.Image = (Image)resources.GetObject("loginButton.Image");
+            loginButton.ImageAlign = HorizontalAlignment.Left;
+            loginButton.ImageOffset = new Point(20, 0);
+            loginButton.ImageSize = new Size(22, 22);
             loginButton.Location = new Point(33, 322);
             loginButton.Name = "loginButton";
-            loginButton.Size = new Size(156, 45);
+            loginButton.ShadowDecoration.CustomizableEdges = customizableEdges8;
+            loginButton.Size = new Size(136, 45);
             loginButton.TabIndex = 7;
             loginButton.Text = "Login";
-            loginButton.TextAlign = ContentAlignment.MiddleRight;
-            loginButton.TextImageRelation = TextImageRelation.ImageBeforeText;
-            loginButton.UseVisualStyleBackColor = false;
+            loginButton.TextOffset = new Point(10, 0);
             loginButton.Click += LoginButton_Click;
             // 
             // statusLabel
@@ -133,12 +170,23 @@ namespace Car_Rental_System
             // 
             // passwordTextBox
             // 
-            passwordTextBox.BorderStyle = BorderStyle.FixedSingle;
+            passwordTextBox.BorderColor = Color.FromArgb(209, 213, 219);
+            passwordTextBox.BorderRadius = 8;
+            passwordTextBox.Cursor = Cursors.IBeam;
+            passwordTextBox.CustomizableEdges = customizableEdges9;
+            passwordTextBox.DefaultText = "";
+            passwordTextBox.FocusedState.BorderColor = Color.FromArgb(37, 99, 235);
             passwordTextBox.Font = new Font("Inter", 10.2F);
-            passwordTextBox.Location = new Point(33, 221);
+            passwordTextBox.ForeColor = Color.FromArgb(17, 24, 39);
+            passwordTextBox.HoverState.BorderColor = Color.FromArgb(37, 99, 235);
+            passwordTextBox.Location = new Point(33, 218);
+            passwordTextBox.Margin = new Padding(3, 4, 3, 4);
             passwordTextBox.Name = "passwordTextBox";
+            passwordTextBox.PlaceholderForeColor = Color.FromArgb(107, 114, 128);
             passwordTextBox.PlaceholderText = "Owner password";
-            passwordTextBox.Size = new Size(304, 28);
+            passwordTextBox.SelectedText = "";
+            passwordTextBox.ShadowDecoration.CustomizableEdges = customizableEdges10;
+            passwordTextBox.Size = new Size(304, 42);
             passwordTextBox.TabIndex = 5;
             passwordTextBox.UseSystemPasswordChar = true;
             // 
@@ -155,12 +203,23 @@ namespace Car_Rental_System
             // 
             // userNameTextBox
             // 
-            userNameTextBox.BorderStyle = BorderStyle.FixedSingle;
+            userNameTextBox.BorderColor = Color.FromArgb(209, 213, 219);
+            userNameTextBox.BorderRadius = 8;
+            userNameTextBox.Cursor = Cursors.IBeam;
+            userNameTextBox.CustomizableEdges = customizableEdges11;
+            userNameTextBox.DefaultText = "";
+            userNameTextBox.FocusedState.BorderColor = Color.FromArgb(37, 99, 235);
             userNameTextBox.Font = new Font("Inter", 10.2F);
-            userNameTextBox.Location = new Point(33, 154);
+            userNameTextBox.ForeColor = Color.FromArgb(17, 24, 39);
+            userNameTextBox.HoverState.BorderColor = Color.FromArgb(37, 99, 235);
+            userNameTextBox.Location = new Point(33, 151);
+            userNameTextBox.Margin = new Padding(3, 4, 3, 4);
             userNameTextBox.Name = "userNameTextBox";
+            userNameTextBox.PlaceholderForeColor = Color.FromArgb(107, 114, 128);
             userNameTextBox.PlaceholderText = "Owner username";
-            userNameTextBox.Size = new Size(304, 28);
+            userNameTextBox.SelectedText = "";
+            userNameTextBox.ShadowDecoration.CustomizableEdges = customizableEdges12;
+            userNameTextBox.Size = new Size(304, 42);
             userNameTextBox.TabIndex = 3;
             // 
             // userNameLabel
@@ -220,18 +279,21 @@ namespace Car_Rental_System
 
         #endregion
 
-        private Panel brandPanel;
-        private PictureBox brandLogoPictureBox;
+        private Guna2Panel brandPanel;
+        private Guna2PictureBox brandLogoPictureBox;
         private Label brandSubtitleLabel;
-        private Panel mainPanel;
-        private Button exitButton;
-        private Button loginButton;
+        private Guna2Panel mainPanel;
+        private Guna2Button exitButton;
+        private Guna2Button loginButton;
         private Label statusLabel;
-        private TextBox passwordTextBox;
+        private Guna2TextBox passwordTextBox;
         private Label passwordLabel;
-        private TextBox userNameTextBox;
+        private Guna2TextBox userNameTextBox;
         private Label userNameLabel;
         private Label subtitleLabel;
         private Label titleLabel;
     }
 }
+
+
+

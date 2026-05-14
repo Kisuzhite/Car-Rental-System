@@ -294,11 +294,6 @@ namespace Car_Rental_System.Migrations
                     b.Property<DateOnly>("ReservationDate")
                         .HasColumnType("date");
 
-                    b.Property<string>("Source")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)

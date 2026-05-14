@@ -91,6 +91,26 @@ namespace Car_Rental_System.Helpers
             return true;
         }
 
+        public static bool TryValidateActiveRentalDates(
+            DateTime rentalDate,
+            DateTime expectedReturnDate,
+            DateTime today,
+            out string message)
+        {
+            if (!TryValidateRentalDates(rentalDate, expectedReturnDate, out message))
+            {
+                return false;
+            }
+
+            if (rentalDate.Date > today.Date)
+            {
+                message = "Active rentals cannot start in the future. Create a reservation instead.";
+                return false;
+            }
+
+            return true;
+        }
+
         public static string CollapseSpaces(string value)
         {
             return WhitespaceRegex().Replace(value.Trim(), " ");

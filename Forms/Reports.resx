@@ -118,7 +118,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="refreshButton.Image" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Assets\Icons\action-refresh-flaticon-white.png;System.Drawing.Bitmap, System.Drawing.Common</value>
+  <data name="refreshButton.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
+        wgAADsIBFShKgAAAAXBJREFUSEvtlT0vBFEUhn03yNIIuo2OWkGj9QPUPiIRhYhaImqJkj8gFCqV+Ado
+        NGIVKl8hFGpRPK8cubvOnMzObkJUnmSSyZznvHNn7tw7LS3//BRgEtgFLoCndNj5jtWi3zRAP3CgBiSn
+        HPsLAYaASgh6AU7T8RpqyzGjLpLagXPXfA/MSio5pyRpDngG9rIJDQDWXHjFniY6VYABoMvOJXVIaotO
+        BpOBuxT+DoxGpx7AiaTDeD0DMOFGfxDr9QC2Xd9GrNew91oVJc3EekRSK7Duer4AVqJrchnYctIiMGIh
+        0a0C9ACXtjZc3xtwFl2Tb2pD+JYfJXVH15OeYsH1LOUOStIU8BFuMB29PIB91zMe6zXsvTtxPtbzAMbs
+        i0s9t5I6o5NB0qbNRbyeBzAMXLtBrUanEKAXOLYJDyu5L63kBxd+artANqGAFO63jKK96AoYjBmFpN30
+        yAflYRNsbuxvmvQ/sL3/d/8H//wZnwvtghQApk7UAAAAAElFTkSuQmCC
+</value>
   </data>
 </root>

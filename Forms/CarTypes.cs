@@ -1,4 +1,4 @@
-using Car_Rental_System.Helpers;
+﻿using Car_Rental_System.Helpers;
 using Car_Rental_System.Presenters;
 using Car_Rental_System.ViewModels;
 using Car_Rental_System.Views;
@@ -21,7 +21,6 @@ namespace Car_Rental_System
 
         void ICarTypesView.BindCarTypes(List<CarTypeGridRow> carTypes)
         {
-            carTypesGrid.Columns.Clear();
             carTypesGrid.DataSource = carTypes;
 
             DataGridViewHelper.ApplyFriendlyHeaders(carTypesGrid);
@@ -201,12 +200,12 @@ namespace Car_Rental_System
             DataGridViewColumn? statusColumn = carTypesGrid.Columns["Status"];
             if (statusColumn != null)
             {
-                statusColumn.FillWeight = 12;
-                statusColumn.MinimumWidth = 90;
+                statusColumn.FillWeight = 16;
+                statusColumn.MinimumWidth = Math.Max(statusColumn.MinimumWidth, 116);
                 DataGridViewHelper.MoveColumnToEnd(carTypesGrid, "Status");
             }
 
-            carTypesGrid.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+            carTypesGrid.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
         }
 
         private bool ValidateInputs(out CarTypeFormInput input)
@@ -283,3 +282,4 @@ namespace Car_Rental_System
         }
     }
 }
+

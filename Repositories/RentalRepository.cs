@@ -1,4 +1,5 @@
 using Car_Rental_System.Data;
+using Car_Rental_System.Helpers;
 using Car_Rental_System.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -65,9 +66,18 @@ namespace Car_Rental_System.Repositories
                 .ToListAsync();
         }
 
-        public Task<List<Rental>> GetRentalHistoryAsync(string search = "")
+        public Task<List<Rental>> GetRentalHistoryAsync(string search = "", DateOnly? today = null)
         {
-            return BuildRentalSearchQuery(search)
+            IQueryable<Rental> query = db.Rentals
+                .Include(r => r.Customer)
+                .Include(r => r.Car).ThenInclude(c => c.CarType);
+
+            query = ApplyRentalHistorySearchFilter(
+                query,
+                search,
+                today ?? DateOnly.FromDateTime(DateTime.Today));
+
+            return query
                 .OrderByDescending(r => r.RentalId)
                 .ToListAsync();
         }
@@ -94,6 +104,29 @@ namespace Car_Rental_System.Repositories
             return db.Rentals.AnyAsync(r =>
                 r.CustomerId == customerId &&
                 r.Status == RentalStatus.Active);
+        }
+
+        public async Task<bool> HasCarScheduleConflictAsync(
+            int carId,
+            DateOnly rentalDate,
+            DateOnly expectedReturnDate)
+        {
+            bool hasActiveRentalConflict = await db.Rentals.AnyAsync(r =>
+                r.CarId == carId &&
+                r.Status == RentalStatus.Active &&
+                rentalDate <= r.ExpectedReturnDate &&
+                r.RentalDate <= expectedReturnDate);
+
+            if (hasActiveRentalConflict)
+            {
+                return true;
+            }
+
+            return await db.Reservations.AnyAsync(r =>
+                r.CarId == carId &&
+                (r.Status == ReservationStatus.Pending || r.Status == ReservationStatus.Confirmed) &&
+                rentalDate <= r.ExpectedReturnDate &&
+                r.PickupDate <= expectedReturnDate);
         }
 
         public void Add(Rental rental)
@@ -125,6 +158,45 @@ namespace Car_Rental_System.Repositories
             }
 
             return query;
+        }
+
+        private static IQueryable<Rental> ApplyRentalHistorySearchFilter(
+            IQueryable<Rental> query,
+            string search,
+            DateOnly today)
+        {
+            string trimmed = search.Trim();
+
+            if (string.IsNullOrWhiteSpace(trimmed))
+            {
+                return query;
+            }
+
+            List<RentalStatus> matchingStatuses = Enum.GetValues<RentalStatus>()
+                .Where(status => status.ToString().Contains(trimmed, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            List<PaymentStatus> matchingPaymentStatuses = Enum.GetValues<PaymentStatus>()
+                .Where(status => status.ToString().Contains(trimmed, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            List<PaymentMethod> matchingPaymentMethods = Enum.GetValues<PaymentMethod>()
+                .Where(method => PaymentHelper.FormatPaymentMethod(method).Contains(trimmed, StringComparison.OrdinalIgnoreCase) ||
+                    method.ToString().Contains(trimmed, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            bool matchesOverdueStatus = AppConstants.OverdueRentalStatus
+                .Contains(trimmed, StringComparison.OrdinalIgnoreCase);
+
+            return query.Where(r =>
+                r.Customer.FullName.Contains(trimmed) ||
+                r.Car.PlateNumber.Contains(trimmed) ||
+                r.Car.Brand.Contains(trimmed) ||
+                r.Car.Model.Contains(trimmed) ||
+                (r.Car.CarType != null && r.Car.CarType.TypeName.Contains(trimmed)) ||
+                matchingStatuses.Contains(r.Status) ||
+                matchingPaymentStatuses.Contains(r.PaymentStatus) ||
+                matchingPaymentMethods.Contains(r.PaymentMethod) ||
+                (matchesOverdueStatus &&
+                    r.Status == RentalStatus.Active &&
+                    r.ExpectedReturnDate < today));
         }
     }
 }

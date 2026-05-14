@@ -10,6 +10,7 @@ namespace Car_Rental_System.Helpers
         public const int MoneyScale = 2;
         public const decimal MinimumDailyRate = 100;
         public const decimal MaximumDailyRate = 100000;
+        public const decimal MinimumDepositRate = 0.20m;
 
         public const string CurrencyPrefix = "P ";
         public const string NotProvided = "Not provided";

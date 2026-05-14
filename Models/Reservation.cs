@@ -7,14 +7,13 @@ namespace Car_Rental_System.Models
         public int CarId { get; set; }
         public string CustomerName { get; set; } = "";
         public string ContactNumber { get; set; } = "";
-        public DateOnly ReservationDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+        public DateOnly ReservationDate { get; set; }
         public DateOnly PickupDate { get; set; }
         public DateOnly ExpectedReturnDate { get; set; }
         public decimal DepositAmount { get; set; }
         public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.Cash;
         public string PaymentReferenceNumber { get; set; } = "";
         public ReservationStatus Status { get; set; } = ReservationStatus.Confirmed;
-        public string Source { get; set; } = "Facebook";
 
         public Customer? Customer { get; set; }
         public Car Car { get; set; } = null!;

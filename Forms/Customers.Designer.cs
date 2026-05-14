@@ -1,3 +1,5 @@
+﻿using Guna.UI2.WinForms;
+
 namespace Car_Rental_System
 {
     partial class Customers
@@ -18,32 +20,58 @@ namespace Car_Rental_System
 
         private void InitializeComponent()
         {
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges1 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges2 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges19 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges20 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges3 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Customers));
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges4 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges5 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges6 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges7 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges8 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges9 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges10 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges11 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges12 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges13 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges14 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges15 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges16 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges17 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges18 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges25 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges26 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
-            headerPanel = new Panel();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges23 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges24 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges21 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges22 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            headerPanel = new Guna2Panel();
             helperLabel = new Label();
             titleLabel = new Label();
             bodyTable = new TableLayoutPanel();
-            detailsPanel = new Panel();
-            clearButton = new Button();
-            deleteButton = new Button();
-            updateButton = new Button();
-            addButton = new Button();
-            addressTextBox = new TextBox();
+            detailsPanel = new Guna2Panel();
+            clearButton = new Guna2Button();
+            deleteButton = new Guna2Button();
+            updateButton = new Guna2Button();
+            addButton = new Guna2Button();
+            addressTextBox = new Guna2TextBox();
             addressLabel = new Label();
-            licenseTextBox = new TextBox();
+            licenseTextBox = new Guna2TextBox();
             licenseLabel = new Label();
-            contactTextBox = new TextBox();
+            contactTextBox = new Guna2TextBox();
             contactLabel = new Label();
-            nameTextBox = new TextBox();
+            nameTextBox = new Guna2TextBox();
             nameLabel = new Label();
             sectionLabel = new Label();
-            listPanel = new Panel();
-            customersGrid = new DataGridView();
-            listHeaderPanel = new Panel();
-            searchTextBox = new TextBox();
+            listPanel = new Guna2Panel();
+            customersGrid = new Guna2DataGridView();
+            listHeaderPanel = new Guna2Panel();
+            searchTextBox = new Guna2TextBox();
             recordsLabel = new Label();
             headerPanel.SuspendLayout();
             bodyTable.SuspendLayout();
@@ -58,10 +86,13 @@ namespace Car_Rental_System
             headerPanel.BackColor = Color.White;
             headerPanel.Controls.Add(helperLabel);
             headerPanel.Controls.Add(titleLabel);
+            headerPanel.CustomizableEdges = customizableEdges1;
             headerPanel.Dock = DockStyle.Top;
+            headerPanel.FillColor = Color.White;
             headerPanel.Location = new Point(0, 0);
             headerPanel.Margin = new Padding(3, 4, 3, 4);
             headerPanel.Name = "headerPanel";
+            headerPanel.ShadowDecoration.CustomizableEdges = customizableEdges2;
             headerPanel.Size = new Size(1234, 139);
             headerPanel.TabIndex = 0;
             // 
@@ -108,7 +139,9 @@ namespace Car_Rental_System
             // detailsPanel
             // 
             detailsPanel.BackColor = Color.White;
-            detailsPanel.BorderStyle = BorderStyle.FixedSingle;
+            detailsPanel.BorderColor = Color.FromArgb(209, 213, 219);
+            detailsPanel.BorderRadius = 8;
+            detailsPanel.BorderThickness = 1;
             detailsPanel.Controls.Add(clearButton);
             detailsPanel.Controls.Add(deleteButton);
             detailsPanel.Controls.Add(updateButton);
@@ -122,102 +155,125 @@ namespace Car_Rental_System
             detailsPanel.Controls.Add(nameTextBox);
             detailsPanel.Controls.Add(nameLabel);
             detailsPanel.Controls.Add(sectionLabel);
+            detailsPanel.CustomizableEdges = customizableEdges19;
             detailsPanel.Dock = DockStyle.Fill;
+            detailsPanel.FillColor = Color.White;
             detailsPanel.Location = new Point(32, 37);
             detailsPanel.Margin = new Padding(0, 0, 21, 0);
             detailsPanel.Name = "detailsPanel";
+            detailsPanel.ShadowDecoration.CustomizableEdges = customizableEdges20;
             detailsPanel.Size = new Size(368, 694);
             detailsPanel.TabIndex = 0;
             // 
             // clearButton
             // 
             clearButton.BackColor = Color.White;
-            clearButton.FlatAppearance.BorderColor = Color.FromArgb(31, 41, 55);
-            clearButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(243, 244, 246);
-            clearButton.FlatStyle = FlatStyle.Flat;
+            clearButton.BorderColor = Color.FromArgb(31, 41, 55);
+            clearButton.BorderRadius = 8;
+            clearButton.BorderThickness = 1;
+            clearButton.CustomizableEdges = customizableEdges3;
+            clearButton.FillColor = Color.White;
             clearButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             clearButton.ForeColor = Color.FromArgb(31, 41, 55);
+            clearButton.HoverState.FillColor = Color.FromArgb(243, 244, 246);
             clearButton.Image = (Image)resources.GetObject("clearButton.Image");
+            clearButton.ImageAlign = HorizontalAlignment.Left;
+            clearButton.ImageOffset = new Point(25, 0);
+            clearButton.ImageSize = new Size(22, 22);
             clearButton.Location = new Point(194, 544);
             clearButton.Margin = new Padding(3, 4, 3, 4);
             clearButton.Name = "clearButton";
-            clearButton.Size = new Size(151, 45);
+            clearButton.ShadowDecoration.CustomizableEdges = customizableEdges4;
+            clearButton.Size = new Size(140, 45);
             clearButton.TabIndex = 12;
             clearButton.Text = "Clear";
-            clearButton.TextAlign = ContentAlignment.MiddleRight;
-            clearButton.TextImageRelation = TextImageRelation.ImageBeforeText;
-            clearButton.UseVisualStyleBackColor = false;
+            clearButton.TextOffset = new Point(10, 0);
             clearButton.Click += ClearButton_Click;
             // 
             // deleteButton
             // 
-            deleteButton.BackColor = Color.FromArgb(220, 38, 38);
-            deleteButton.FlatAppearance.BorderSize = 0;
-            deleteButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(185, 28, 28);
-            deleteButton.FlatStyle = FlatStyle.Flat;
+            deleteButton.BackColor = Color.White;
+            deleteButton.BorderRadius = 8;
+            deleteButton.CustomizableEdges = customizableEdges5;
+            deleteButton.FillColor = Color.FromArgb(220, 38, 38);
             deleteButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             deleteButton.ForeColor = Color.White;
+            deleteButton.HoverState.FillColor = Color.FromArgb(185, 28, 28);
             deleteButton.Image = (Image)resources.GetObject("deleteButton.Image");
-            deleteButton.Location = new Point(25, 597);
+            deleteButton.ImageSize = new Size(22, 22);
+            deleteButton.Location = new Point(34, 597);
             deleteButton.Margin = new Padding(3, 4, 3, 4);
             deleteButton.Name = "deleteButton";
-            deleteButton.Size = new Size(320, 45);
+            deleteButton.ShadowDecoration.CustomizableEdges = customizableEdges6;
+            deleteButton.Size = new Size(300, 45);
             deleteButton.TabIndex = 11;
             deleteButton.Text = "Delete";
-            deleteButton.TextAlign = ContentAlignment.MiddleRight;
-            deleteButton.TextImageRelation = TextImageRelation.ImageBeforeText;
-            deleteButton.UseVisualStyleBackColor = false;
+            deleteButton.TextOffset = new Point(1, 0);
             deleteButton.Click += DeleteButton_Click;
             // 
             // updateButton
             // 
-            updateButton.BackColor = Color.FromArgb(31, 41, 55);
-            updateButton.FlatAppearance.BorderSize = 0;
-            updateButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(31, 41, 55);
-            updateButton.FlatStyle = FlatStyle.Flat;
+            updateButton.BackColor = Color.White;
+            updateButton.BorderRadius = 8;
+            updateButton.CustomizableEdges = customizableEdges7;
+            updateButton.FillColor = Color.FromArgb(31, 41, 55);
             updateButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             updateButton.ForeColor = Color.White;
+            updateButton.HoverState.FillColor = Color.FromArgb(55, 65, 81);
             updateButton.Image = (Image)resources.GetObject("updateButton.Image");
-            updateButton.Location = new Point(25, 544);
+            updateButton.ImageAlign = HorizontalAlignment.Left;
+            updateButton.ImageOffset = new Point(15, 0);
+            updateButton.ImageSize = new Size(22, 22);
+            updateButton.Location = new Point(34, 544);
             updateButton.Margin = new Padding(3, 4, 3, 4);
             updateButton.Name = "updateButton";
-            updateButton.Size = new Size(151, 45);
+            updateButton.ShadowDecoration.CustomizableEdges = customizableEdges8;
+            updateButton.Size = new Size(142, 45);
             updateButton.TabIndex = 10;
             updateButton.Text = "Update";
-            updateButton.TextAlign = ContentAlignment.MiddleRight;
-            updateButton.TextImageRelation = TextImageRelation.ImageBeforeText;
-            updateButton.UseVisualStyleBackColor = false;
+            updateButton.TextOffset = new Point(10, 0);
             updateButton.Click += UpdateButton_Click;
             // 
             // addButton
             // 
-            addButton.BackColor = Color.FromArgb(37, 99, 235);
-            addButton.FlatAppearance.BorderSize = 0;
-            addButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(37, 99, 235);
-            addButton.FlatStyle = FlatStyle.Flat;
+            addButton.BackColor = Color.White;
+            addButton.BorderRadius = 8;
+            addButton.CustomizableEdges = customizableEdges9;
+            addButton.FillColor = Color.FromArgb(37, 99, 235);
             addButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             addButton.ForeColor = Color.White;
+            addButton.HoverState.FillColor = Color.FromArgb(29, 78, 216);
             addButton.Image = (Image)resources.GetObject("addButton.Image");
-            addButton.Location = new Point(25, 483);
+            addButton.ImageSize = new Size(22, 22);
+            addButton.Location = new Point(34, 491);
             addButton.Margin = new Padding(3, 4, 3, 4);
             addButton.Name = "addButton";
-            addButton.Size = new Size(320, 45);
+            addButton.ShadowDecoration.CustomizableEdges = customizableEdges10;
+            addButton.Size = new Size(300, 45);
             addButton.TabIndex = 9;
             addButton.Text = "Add Customer";
-            addButton.TextAlign = ContentAlignment.MiddleRight;
-            addButton.TextImageRelation = TextImageRelation.ImageBeforeText;
-            addButton.UseVisualStyleBackColor = false;
+            addButton.TextOffset = new Point(1, 0);
             addButton.Click += AddButton_Click;
             // 
             // addressTextBox
             // 
-            addressTextBox.BorderStyle = BorderStyle.FixedSingle;
+            addressTextBox.BorderColor = Color.FromArgb(209, 213, 219);
+            addressTextBox.BorderRadius = 6;
+            addressTextBox.Cursor = Cursors.IBeam;
+            addressTextBox.CustomizableEdges = customizableEdges11;
+            addressTextBox.DefaultText = "";
+            addressTextBox.FocusedState.BorderColor = Color.FromArgb(37, 99, 235);
             addressTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            addressTextBox.ForeColor = Color.FromArgb(17, 24, 39);
+            addressTextBox.HoverState.BorderColor = Color.FromArgb(37, 99, 235);
             addressTextBox.Location = new Point(25, 333);
             addressTextBox.Margin = new Padding(3, 4, 3, 4);
             addressTextBox.Multiline = true;
             addressTextBox.Name = "addressTextBox";
+            addressTextBox.PlaceholderForeColor = Color.FromArgb(107, 114, 128);
             addressTextBox.PlaceholderText = "Street, City, Province";
+            addressTextBox.SelectedText = "";
+            addressTextBox.ShadowDecoration.CustomizableEdges = customizableEdges12;
             addressTextBox.Size = new Size(320, 109);
             addressTextBox.TabIndex = 8;
             // 
@@ -234,12 +290,22 @@ namespace Car_Rental_System
             // 
             // licenseTextBox
             // 
-            licenseTextBox.BorderStyle = BorderStyle.FixedSingle;
+            licenseTextBox.BorderColor = Color.FromArgb(209, 213, 219);
+            licenseTextBox.BorderRadius = 6;
+            licenseTextBox.Cursor = Cursors.IBeam;
+            licenseTextBox.CustomizableEdges = customizableEdges13;
+            licenseTextBox.DefaultText = "";
+            licenseTextBox.FocusedState.BorderColor = Color.FromArgb(37, 99, 235);
             licenseTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            licenseTextBox.ForeColor = Color.FromArgb(17, 24, 39);
+            licenseTextBox.HoverState.BorderColor = Color.FromArgb(37, 99, 235);
             licenseTextBox.Location = new Point(25, 259);
             licenseTextBox.Margin = new Padding(3, 4, 3, 4);
             licenseTextBox.Name = "licenseTextBox";
+            licenseTextBox.PlaceholderForeColor = Color.FromArgb(107, 114, 128);
             licenseTextBox.PlaceholderText = "N01-23-456789";
+            licenseTextBox.SelectedText = "";
+            licenseTextBox.ShadowDecoration.CustomizableEdges = customizableEdges14;
             licenseTextBox.Size = new Size(320, 28);
             licenseTextBox.TabIndex = 6;
             // 
@@ -256,12 +322,22 @@ namespace Car_Rental_System
             // 
             // contactTextBox
             // 
-            contactTextBox.BorderStyle = BorderStyle.FixedSingle;
+            contactTextBox.BorderColor = Color.FromArgb(209, 213, 219);
+            contactTextBox.BorderRadius = 6;
+            contactTextBox.Cursor = Cursors.IBeam;
+            contactTextBox.CustomizableEdges = customizableEdges15;
+            contactTextBox.DefaultText = "";
+            contactTextBox.FocusedState.BorderColor = Color.FromArgb(37, 99, 235);
             contactTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            contactTextBox.ForeColor = Color.FromArgb(17, 24, 39);
+            contactTextBox.HoverState.BorderColor = Color.FromArgb(37, 99, 235);
             contactTextBox.Location = new Point(25, 184);
             contactTextBox.Margin = new Padding(3, 4, 3, 4);
             contactTextBox.Name = "contactTextBox";
+            contactTextBox.PlaceholderForeColor = Color.FromArgb(107, 114, 128);
             contactTextBox.PlaceholderText = "09XX XXX XXXX";
+            contactTextBox.SelectedText = "";
+            contactTextBox.ShadowDecoration.CustomizableEdges = customizableEdges16;
             contactTextBox.Size = new Size(320, 28);
             contactTextBox.TabIndex = 4;
             // 
@@ -278,12 +354,22 @@ namespace Car_Rental_System
             // 
             // nameTextBox
             // 
-            nameTextBox.BorderStyle = BorderStyle.FixedSingle;
+            nameTextBox.BorderColor = Color.FromArgb(209, 213, 219);
+            nameTextBox.BorderRadius = 6;
+            nameTextBox.Cursor = Cursors.IBeam;
+            nameTextBox.CustomizableEdges = customizableEdges17;
+            nameTextBox.DefaultText = "";
+            nameTextBox.FocusedState.BorderColor = Color.FromArgb(37, 99, 235);
             nameTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            nameTextBox.ForeColor = Color.FromArgb(17, 24, 39);
+            nameTextBox.HoverState.BorderColor = Color.FromArgb(37, 99, 235);
             nameTextBox.Location = new Point(25, 109);
             nameTextBox.Margin = new Padding(3, 4, 3, 4);
             nameTextBox.Name = "nameTextBox";
+            nameTextBox.PlaceholderForeColor = Color.FromArgb(107, 114, 128);
             nameTextBox.PlaceholderText = "Customer full name";
+            nameTextBox.SelectedText = "";
+            nameTextBox.ShadowDecoration.CustomizableEdges = customizableEdges18;
             nameTextBox.Size = new Size(320, 28);
             nameTextBox.TabIndex = 2;
             // 
@@ -312,12 +398,18 @@ namespace Car_Rental_System
             // listPanel
             // 
             listPanel.BackColor = Color.White;
+            listPanel.BorderColor = Color.FromArgb(209, 213, 219);
+            listPanel.BorderRadius = 8;
+            listPanel.BorderThickness = 1;
             listPanel.Controls.Add(customersGrid);
             listPanel.Controls.Add(listHeaderPanel);
+            listPanel.CustomizableEdges = customizableEdges25;
             listPanel.Dock = DockStyle.Fill;
+            listPanel.FillColor = Color.White;
             listPanel.Location = new Point(421, 37);
             listPanel.Margin = new Padding(0);
             listPanel.Name = "listPanel";
+            listPanel.ShadowDecoration.CustomizableEdges = customizableEdges26;
             listPanel.Size = new Size(781, 694);
             listPanel.TabIndex = 1;
             // 
@@ -327,10 +419,11 @@ namespace Car_Rental_System
             customersGrid.AllowUserToDeleteRows = false;
             dataGridViewCellStyle1.BackColor = Color.FromArgb(249, 250, 251);
             customersGrid.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            customersGrid.CellBorderStyle = DataGridViewCellBorderStyle.None;
+            customersGrid.AutoGenerateColumns = true;
             customersGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            customersGrid.BackgroundColor = Color.White;
-            customersGrid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-            customersGrid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            customersGrid.ColumnHeadersVisible = true;
+            customersGrid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = Color.FromArgb(31, 41, 55);
             dataGridViewCellStyle2.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
@@ -349,8 +442,7 @@ namespace Car_Rental_System
             dataGridViewCellStyle3.WrapMode = DataGridViewTriState.False;
             customersGrid.DefaultCellStyle = dataGridViewCellStyle3;
             customersGrid.Dock = DockStyle.Fill;
-            customersGrid.EnableHeadersVisualStyles = false;
-            customersGrid.GridColor = Color.FromArgb(229, 231, 235);
+            customersGrid.GridColor = Color.White;
             customersGrid.Location = new Point(0, 77);
             customersGrid.Margin = new Padding(3, 4, 3, 4);
             customersGrid.Name = "customersGrid";
@@ -358,32 +450,66 @@ namespace Car_Rental_System
             customersGrid.RowHeadersVisible = false;
             customersGrid.RowHeadersWidth = 51;
             customersGrid.RowTemplate.Height = 42;
-            customersGrid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             customersGrid.Size = new Size(781, 617);
             customersGrid.TabIndex = 1;
+            customersGrid.ThemeStyle.AlternatingRowsStyle.BackColor = Color.White;
+            customersGrid.ThemeStyle.AlternatingRowsStyle.Font = null;
+            customersGrid.ThemeStyle.AlternatingRowsStyle.ForeColor = Color.Empty;
+            customersGrid.ThemeStyle.AlternatingRowsStyle.SelectionBackColor = Color.Empty;
+            customersGrid.ThemeStyle.AlternatingRowsStyle.SelectionForeColor = Color.Empty;
+            customersGrid.ThemeStyle.BackColor = Color.White;
+            customersGrid.ThemeStyle.GridColor = Color.White;
+            customersGrid.ThemeStyle.HeaderStyle.BackColor = Color.FromArgb(100, 88, 255);
+            customersGrid.ThemeStyle.HeaderStyle.BorderStyle = DataGridViewHeaderBorderStyle.None;
+            customersGrid.ThemeStyle.HeaderStyle.Font = new Font("Segoe UI", 9F);
+            customersGrid.ThemeStyle.HeaderStyle.ForeColor = Color.White;
+            customersGrid.ThemeStyle.HeaderStyle.HeaightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            customersGrid.ThemeStyle.HeaderStyle.Height = 56;
+            customersGrid.ThemeStyle.ReadOnly = true;
+            customersGrid.ThemeStyle.RowsStyle.BackColor = Color.White;
+            customersGrid.ThemeStyle.RowsStyle.BorderStyle = DataGridViewCellBorderStyle.None;
+            customersGrid.ThemeStyle.RowsStyle.Font = new Font("Segoe UI", 9F);
+            customersGrid.ThemeStyle.RowsStyle.ForeColor = Color.FromArgb(71, 69, 94);
+            customersGrid.ThemeStyle.RowsStyle.Height = 42;
+            customersGrid.ThemeStyle.RowsStyle.SelectionBackColor = Color.FromArgb(231, 229, 255);
+            customersGrid.ThemeStyle.RowsStyle.SelectionForeColor = Color.FromArgb(71, 69, 94);
             customersGrid.SelectionChanged += CustomersGrid_SelectionChanged;
             // 
             // listHeaderPanel
             // 
-            listHeaderPanel.BorderStyle = BorderStyle.FixedSingle;
+            listHeaderPanel.BorderColor = Color.FromArgb(209, 213, 219);
+            listHeaderPanel.BorderRadius = 8;
+            listHeaderPanel.BorderThickness = 1;
             listHeaderPanel.Controls.Add(searchTextBox);
             listHeaderPanel.Controls.Add(recordsLabel);
+            listHeaderPanel.CustomizableEdges = customizableEdges23;
             listHeaderPanel.Dock = DockStyle.Top;
             listHeaderPanel.Location = new Point(0, 0);
             listHeaderPanel.Margin = new Padding(3, 4, 3, 4);
             listHeaderPanel.Name = "listHeaderPanel";
+            listHeaderPanel.ShadowDecoration.CustomizableEdges = customizableEdges24;
             listHeaderPanel.Size = new Size(781, 77);
             listHeaderPanel.TabIndex = 0;
             // 
             // searchTextBox
             // 
             searchTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            searchTextBox.BorderStyle = BorderStyle.FixedSingle;
+            searchTextBox.BorderColor = Color.FromArgb(209, 213, 219);
+            searchTextBox.BorderRadius = 6;
+            searchTextBox.Cursor = Cursors.IBeam;
+            searchTextBox.CustomizableEdges = customizableEdges21;
+            searchTextBox.DefaultText = "";
+            searchTextBox.FocusedState.BorderColor = Color.FromArgb(37, 99, 235);
             searchTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            searchTextBox.ForeColor = Color.FromArgb(17, 24, 39);
+            searchTextBox.HoverState.BorderColor = Color.FromArgb(37, 99, 235);
             searchTextBox.Location = new Point(480, 24);
             searchTextBox.Margin = new Padding(3, 4, 3, 4);
             searchTextBox.Name = "searchTextBox";
+            searchTextBox.PlaceholderForeColor = Color.FromArgb(107, 114, 128);
             searchTextBox.PlaceholderText = "Search name or license";
+            searchTextBox.SelectedText = "";
+            searchTextBox.ShadowDecoration.CustomizableEdges = customizableEdges22;
             searchTextBox.Size = new Size(274, 28);
             searchTextBox.TabIndex = 1;
             searchTextBox.TextChanged += SearchTextBox_TextChanged;
@@ -393,7 +519,7 @@ namespace Car_Rental_System
             recordsLabel.AutoSize = true;
             recordsLabel.Font = new Font("Inter SemiBold", 13.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
             recordsLabel.ForeColor = Color.FromArgb(31, 41, 55);
-            recordsLabel.Location = new Point(0, 21);
+            recordsLabel.Location = new Point(16, 24);
             recordsLabel.Name = "recordsLabel";
             recordsLabel.Size = new Size(222, 32);
             recordsLabel.TabIndex = 0;
@@ -428,28 +554,32 @@ namespace Car_Rental_System
 
         #endregion
 
-        private Panel headerPanel;
+        private Guna2Panel headerPanel;
         private Label helperLabel;
         private Label titleLabel;
         private TableLayoutPanel bodyTable;
-        private Panel detailsPanel;
-        private Button clearButton;
-        private Button deleteButton;
-        private Button updateButton;
-        private Button addButton;
-        private TextBox addressTextBox;
+        private Guna2Panel detailsPanel;
+        private Guna2Button clearButton;
+        private Guna2Button deleteButton;
+        private Guna2Button updateButton;
+        private Guna2Button addButton;
+        private Guna2TextBox addressTextBox;
         private Label addressLabel;
-        private TextBox licenseTextBox;
+        private Guna2TextBox licenseTextBox;
         private Label licenseLabel;
-        private TextBox contactTextBox;
+        private Guna2TextBox contactTextBox;
         private Label contactLabel;
-        private TextBox nameTextBox;
+        private Guna2TextBox nameTextBox;
         private Label nameLabel;
         private Label sectionLabel;
-        private Panel listPanel;
-        private DataGridView customersGrid;
-        private Panel listHeaderPanel;
-        private TextBox searchTextBox;
+        private Guna2Panel listPanel;
+        private Guna2DataGridView customersGrid;
+        private Guna2Panel listHeaderPanel;
+        private Guna2TextBox searchTextBox;
         private Label recordsLabel;
     }
 }
+
+
+
+

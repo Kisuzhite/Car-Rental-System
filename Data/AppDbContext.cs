@@ -106,7 +106,6 @@ namespace Car_Rental_System.Data
                     .HasConversion<string>()
                     .HasMaxLength(20)
                     .IsRequired();
-                e.Property(r => r.Source).HasMaxLength(50).IsRequired();
                 e.HasOne(r => r.Customer)
                     .WithMany(c => c.Reservations)
                     .HasForeignKey(r => r.CustomerId)

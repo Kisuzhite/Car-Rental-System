@@ -1,3 +1,5 @@
+﻿using Guna.UI2.WinForms;
+
 namespace Car_Rental_System
 {
     partial class CarTypes
@@ -18,31 +20,55 @@ namespace Car_Rental_System
 
         private void InitializeComponent()
         {
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges1 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges2 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges17 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges18 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges3 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CarTypes));
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges4 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges5 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges6 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges7 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges8 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges9 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges10 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges11 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges12 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges13 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges14 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges15 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges16 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges23 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges24 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
-            headerPanel = new Panel();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges21 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges22 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges19 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges20 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            headerPanel = new Guna2Panel();
             helperLabel = new Label();
             titleLabel = new Label();
             bodyTable = new TableLayoutPanel();
-            detailsPanel = new Panel();
-            isActiveCheckBox = new CheckBox();
-            clearButton = new Button();
-            deleteButton = new Button();
-            updateButton = new Button();
-            addButton = new Button();
-            descriptionTextBox = new TextBox();
+            detailsPanel = new Guna2Panel();
+            isActiveCheckBox = new Guna2CheckBox();
+            clearButton = new Guna2Button();
+            deleteButton = new Guna2Button();
+            updateButton = new Guna2Button();
+            addButton = new Guna2Button();
+            descriptionTextBox = new Guna2TextBox();
             descriptionLabel = new Label();
-            dailyRateTextBox = new TextBox();
+            dailyRateTextBox = new Guna2TextBox();
             dailyRateLabel = new Label();
-            typeNameTextBox = new TextBox();
+            typeNameTextBox = new Guna2TextBox();
             typeNameLabel = new Label();
             sectionLabel = new Label();
-            listPanel = new Panel();
-            carTypesGrid = new DataGridView();
-            listHeaderPanel = new Panel();
-            searchTextBox = new TextBox();
+            listPanel = new Guna2Panel();
+            carTypesGrid = new Guna2DataGridView();
+            listHeaderPanel = new Guna2Panel();
+            searchTextBox = new Guna2TextBox();
             recordsLabel = new Label();
             headerPanel.SuspendLayout();
             bodyTable.SuspendLayout();
@@ -57,10 +83,13 @@ namespace Car_Rental_System
             headerPanel.BackColor = Color.White;
             headerPanel.Controls.Add(helperLabel);
             headerPanel.Controls.Add(titleLabel);
+            headerPanel.CustomizableEdges = customizableEdges1;
             headerPanel.Dock = DockStyle.Top;
+            headerPanel.FillColor = Color.White;
             headerPanel.Location = new Point(0, 0);
             headerPanel.Margin = new Padding(3, 4, 3, 4);
             headerPanel.Name = "headerPanel";
+            headerPanel.ShadowDecoration.CustomizableEdges = customizableEdges2;
             headerPanel.Size = new Size(1234, 139);
             headerPanel.TabIndex = 0;
             // 
@@ -107,7 +136,9 @@ namespace Car_Rental_System
             // detailsPanel
             // 
             detailsPanel.BackColor = Color.White;
-            detailsPanel.BorderStyle = BorderStyle.FixedSingle;
+            detailsPanel.BorderColor = Color.FromArgb(209, 213, 219);
+            detailsPanel.BorderRadius = 8;
+            detailsPanel.BorderThickness = 1;
             detailsPanel.Controls.Add(isActiveCheckBox);
             detailsPanel.Controls.Add(clearButton);
             detailsPanel.Controls.Add(deleteButton);
@@ -120,10 +151,13 @@ namespace Car_Rental_System
             detailsPanel.Controls.Add(typeNameTextBox);
             detailsPanel.Controls.Add(typeNameLabel);
             detailsPanel.Controls.Add(sectionLabel);
+            detailsPanel.CustomizableEdges = customizableEdges17;
             detailsPanel.Dock = DockStyle.Fill;
+            detailsPanel.FillColor = Color.White;
             detailsPanel.Location = new Point(32, 37);
             detailsPanel.Margin = new Padding(0, 0, 21, 0);
             detailsPanel.Name = "detailsPanel";
+            detailsPanel.ShadowDecoration.CustomizableEdges = customizableEdges18;
             detailsPanel.Size = new Size(368, 694);
             detailsPanel.TabIndex = 0;
             // 
@@ -131,6 +165,10 @@ namespace Car_Rental_System
             // 
             isActiveCheckBox.AutoSize = true;
             isActiveCheckBox.Checked = true;
+            isActiveCheckBox.CheckedState.BorderColor = Color.FromArgb(37, 99, 235);
+            isActiveCheckBox.CheckedState.BorderRadius = 0;
+            isActiveCheckBox.CheckedState.BorderThickness = 0;
+            isActiveCheckBox.CheckedState.FillColor = Color.FromArgb(37, 99, 235);
             isActiveCheckBox.CheckState = CheckState.Checked;
             isActiveCheckBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
             isActiveCheckBox.ForeColor = Color.FromArgb(31, 41, 55);
@@ -140,97 +178,123 @@ namespace Car_Rental_System
             isActiveCheckBox.Size = new Size(171, 28);
             isActiveCheckBox.TabIndex = 8;
             isActiveCheckBox.Text = "Active for rentals";
-            isActiveCheckBox.UseVisualStyleBackColor = true;
+            isActiveCheckBox.UncheckedState.BorderColor = Color.FromArgb(209, 213, 219);
+            isActiveCheckBox.UncheckedState.BorderRadius = 0;
+            isActiveCheckBox.UncheckedState.BorderThickness = 0;
             // 
             // clearButton
             // 
             clearButton.BackColor = Color.White;
-            clearButton.FlatAppearance.BorderColor = Color.FromArgb(31, 41, 55);
-            clearButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(243, 244, 246);
-            clearButton.FlatStyle = FlatStyle.Flat;
+            clearButton.BorderColor = Color.FromArgb(31, 41, 55);
+            clearButton.BorderRadius = 8;
+            clearButton.BorderThickness = 1;
+            clearButton.CustomizableEdges = customizableEdges3;
+            clearButton.FillColor = Color.White;
             clearButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             clearButton.ForeColor = Color.FromArgb(31, 41, 55);
+            clearButton.HoverState.FillColor = Color.FromArgb(243, 244, 246);
             clearButton.Image = (Image)resources.GetObject("clearButton.Image");
+            clearButton.ImageAlign = HorizontalAlignment.Left;
+            clearButton.ImageOffset = new Point(25, 0);
+            clearButton.ImageSize = new Size(22, 22);
             clearButton.Location = new Point(194, 501);
             clearButton.Margin = new Padding(3, 4, 3, 4);
             clearButton.Name = "clearButton";
+            clearButton.ShadowDecoration.CustomizableEdges = customizableEdges4;
             clearButton.Size = new Size(151, 45);
             clearButton.TabIndex = 12;
             clearButton.Text = "Clear";
-            clearButton.TextAlign = ContentAlignment.MiddleRight;
-            clearButton.TextImageRelation = TextImageRelation.ImageBeforeText;
-            clearButton.UseVisualStyleBackColor = false;
+            clearButton.TextOffset = new Point(8, 0);
             clearButton.Click += ClearButton_Click;
             // 
             // deleteButton
             // 
-            deleteButton.BackColor = Color.FromArgb(220, 38, 38);
-            deleteButton.FlatAppearance.BorderSize = 0;
-            deleteButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(185, 28, 28);
-            deleteButton.FlatStyle = FlatStyle.Flat;
+            deleteButton.BackColor = Color.White;
+            deleteButton.BorderRadius = 8;
+            deleteButton.CustomizableEdges = customizableEdges5;
+            deleteButton.FillColor = Color.FromArgb(220, 38, 38);
             deleteButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             deleteButton.ForeColor = Color.White;
+            deleteButton.HoverState.FillColor = Color.FromArgb(185, 28, 28);
             deleteButton.Image = (Image)resources.GetObject("deleteButton.Image");
+            deleteButton.ImageAlign = HorizontalAlignment.Left;
+            deleteButton.ImageOffset = new Point(20, 0);
+            deleteButton.ImageSize = new Size(22, 22);
             deleteButton.Location = new Point(25, 501);
             deleteButton.Margin = new Padding(3, 4, 3, 4);
             deleteButton.Name = "deleteButton";
+            deleteButton.ShadowDecoration.CustomizableEdges = customizableEdges6;
             deleteButton.Size = new Size(151, 45);
             deleteButton.TabIndex = 11;
             deleteButton.Text = "Delete";
-            deleteButton.TextAlign = ContentAlignment.MiddleRight;
-            deleteButton.TextImageRelation = TextImageRelation.ImageBeforeText;
-            deleteButton.UseVisualStyleBackColor = false;
+            deleteButton.TextOffset = new Point(8, 0);
             deleteButton.Click += DeleteButton_Click;
             // 
             // updateButton
             // 
-            updateButton.BackColor = Color.FromArgb(31, 41, 55);
-            updateButton.FlatAppearance.BorderSize = 0;
-            updateButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(31, 41, 55);
-            updateButton.FlatStyle = FlatStyle.Flat;
+            updateButton.BackColor = Color.White;
+            updateButton.BorderRadius = 8;
+            updateButton.CustomizableEdges = customizableEdges7;
+            updateButton.FillColor = Color.FromArgb(31, 41, 55);
             updateButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             updateButton.ForeColor = Color.White;
+            updateButton.HoverState.FillColor = Color.FromArgb(55, 65, 81);
             updateButton.Image = (Image)resources.GetObject("updateButton.Image");
+            updateButton.ImageAlign = HorizontalAlignment.Left;
+            updateButton.ImageOffset = new Point(15, 0);
+            updateButton.ImageSize = new Size(22, 22);
             updateButton.Location = new Point(194, 438);
             updateButton.Margin = new Padding(3, 4, 3, 4);
             updateButton.Name = "updateButton";
+            updateButton.ShadowDecoration.CustomizableEdges = customizableEdges8;
             updateButton.Size = new Size(151, 45);
             updateButton.TabIndex = 10;
             updateButton.Text = "Update";
-            updateButton.TextAlign = ContentAlignment.MiddleRight;
-            updateButton.TextImageRelation = TextImageRelation.ImageBeforeText;
-            updateButton.UseVisualStyleBackColor = false;
+            updateButton.TextOffset = new Point(8, 0);
             updateButton.Click += UpdateButton_Click;
             // 
             // addButton
             // 
-            addButton.BackColor = Color.FromArgb(37, 99, 235);
-            addButton.FlatAppearance.BorderSize = 0;
-            addButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(37, 99, 235);
-            addButton.FlatStyle = FlatStyle.Flat;
+            addButton.BackColor = Color.White;
+            addButton.BorderRadius = 8;
+            addButton.CustomizableEdges = customizableEdges9;
+            addButton.FillColor = Color.FromArgb(37, 99, 235);
             addButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
             addButton.ForeColor = Color.White;
+            addButton.HoverState.FillColor = Color.FromArgb(29, 78, 216);
             addButton.Image = (Image)resources.GetObject("addButton.Image");
+            addButton.ImageAlign = HorizontalAlignment.Left;
+            addButton.ImageOffset = new Point(5, 0);
+            addButton.ImageSize = new Size(22, 22);
             addButton.Location = new Point(23, 438);
             addButton.Margin = new Padding(3, 4, 3, 4);
             addButton.Name = "addButton";
+            addButton.ShadowDecoration.CustomizableEdges = customizableEdges10;
             addButton.Size = new Size(151, 45);
             addButton.TabIndex = 9;
             addButton.Text = "Add Type";
-            addButton.TextAlign = ContentAlignment.MiddleRight;
-            addButton.TextImageRelation = TextImageRelation.ImageBeforeText;
-            addButton.UseVisualStyleBackColor = false;
+            addButton.TextOffset = new Point(8, 0);
             addButton.Click += AddButton_Click;
             // 
             // descriptionTextBox
             // 
-            descriptionTextBox.BorderStyle = BorderStyle.FixedSingle;
+            descriptionTextBox.BorderColor = Color.FromArgb(209, 213, 219);
+            descriptionTextBox.BorderRadius = 6;
+            descriptionTextBox.Cursor = Cursors.IBeam;
+            descriptionTextBox.CustomizableEdges = customizableEdges11;
+            descriptionTextBox.DefaultText = "";
+            descriptionTextBox.FocusedState.BorderColor = Color.FromArgb(37, 99, 235);
             descriptionTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            descriptionTextBox.ForeColor = Color.FromArgb(17, 24, 39);
+            descriptionTextBox.HoverState.BorderColor = Color.FromArgb(37, 99, 235);
             descriptionTextBox.Location = new Point(25, 259);
             descriptionTextBox.Margin = new Padding(3, 4, 3, 4);
             descriptionTextBox.Multiline = true;
             descriptionTextBox.Name = "descriptionTextBox";
+            descriptionTextBox.PlaceholderForeColor = Color.FromArgb(107, 114, 128);
             descriptionTextBox.PlaceholderText = "Optional notes about this car type";
+            descriptionTextBox.SelectedText = "";
+            descriptionTextBox.ShadowDecoration.CustomizableEdges = customizableEdges12;
             descriptionTextBox.Size = new Size(320, 109);
             descriptionTextBox.TabIndex = 6;
             // 
@@ -247,12 +311,22 @@ namespace Car_Rental_System
             // 
             // dailyRateTextBox
             // 
-            dailyRateTextBox.BorderStyle = BorderStyle.FixedSingle;
+            dailyRateTextBox.BorderColor = Color.FromArgb(209, 213, 219);
+            dailyRateTextBox.BorderRadius = 6;
+            dailyRateTextBox.Cursor = Cursors.IBeam;
+            dailyRateTextBox.CustomizableEdges = customizableEdges13;
+            dailyRateTextBox.DefaultText = "";
+            dailyRateTextBox.FocusedState.BorderColor = Color.FromArgb(37, 99, 235);
             dailyRateTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            dailyRateTextBox.ForeColor = Color.FromArgb(17, 24, 39);
+            dailyRateTextBox.HoverState.BorderColor = Color.FromArgb(37, 99, 235);
             dailyRateTextBox.Location = new Point(25, 184);
             dailyRateTextBox.Margin = new Padding(3, 4, 3, 4);
             dailyRateTextBox.Name = "dailyRateTextBox";
+            dailyRateTextBox.PlaceholderForeColor = Color.FromArgb(107, 114, 128);
             dailyRateTextBox.PlaceholderText = "2500";
+            dailyRateTextBox.SelectedText = "";
+            dailyRateTextBox.ShadowDecoration.CustomizableEdges = customizableEdges14;
             dailyRateTextBox.Size = new Size(320, 28);
             dailyRateTextBox.TabIndex = 4;
             // 
@@ -269,12 +343,22 @@ namespace Car_Rental_System
             // 
             // typeNameTextBox
             // 
-            typeNameTextBox.BorderStyle = BorderStyle.FixedSingle;
+            typeNameTextBox.BorderColor = Color.FromArgb(209, 213, 219);
+            typeNameTextBox.BorderRadius = 6;
+            typeNameTextBox.Cursor = Cursors.IBeam;
+            typeNameTextBox.CustomizableEdges = customizableEdges15;
+            typeNameTextBox.DefaultText = "";
+            typeNameTextBox.FocusedState.BorderColor = Color.FromArgb(37, 99, 235);
             typeNameTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            typeNameTextBox.ForeColor = Color.FromArgb(17, 24, 39);
+            typeNameTextBox.HoverState.BorderColor = Color.FromArgb(37, 99, 235);
             typeNameTextBox.Location = new Point(25, 109);
             typeNameTextBox.Margin = new Padding(3, 4, 3, 4);
             typeNameTextBox.Name = "typeNameTextBox";
+            typeNameTextBox.PlaceholderForeColor = Color.FromArgb(107, 114, 128);
             typeNameTextBox.PlaceholderText = "Economy";
+            typeNameTextBox.SelectedText = "";
+            typeNameTextBox.ShadowDecoration.CustomizableEdges = customizableEdges16;
             typeNameTextBox.Size = new Size(320, 28);
             typeNameTextBox.TabIndex = 2;
             // 
@@ -303,12 +387,18 @@ namespace Car_Rental_System
             // listPanel
             // 
             listPanel.BackColor = Color.White;
+            listPanel.BorderColor = Color.FromArgb(209, 213, 219);
+            listPanel.BorderRadius = 8;
+            listPanel.BorderThickness = 1;
             listPanel.Controls.Add(carTypesGrid);
             listPanel.Controls.Add(listHeaderPanel);
+            listPanel.CustomizableEdges = customizableEdges23;
             listPanel.Dock = DockStyle.Fill;
+            listPanel.FillColor = Color.White;
             listPanel.Location = new Point(421, 37);
             listPanel.Margin = new Padding(0);
             listPanel.Name = "listPanel";
+            listPanel.ShadowDecoration.CustomizableEdges = customizableEdges24;
             listPanel.Size = new Size(781, 694);
             listPanel.TabIndex = 1;
             // 
@@ -318,10 +408,11 @@ namespace Car_Rental_System
             carTypesGrid.AllowUserToDeleteRows = false;
             dataGridViewCellStyle1.BackColor = Color.FromArgb(249, 250, 251);
             carTypesGrid.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            carTypesGrid.CellBorderStyle = DataGridViewCellBorderStyle.None;
+            carTypesGrid.AutoGenerateColumns = true;
             carTypesGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            carTypesGrid.BackgroundColor = Color.White;
-            carTypesGrid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-            carTypesGrid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            carTypesGrid.ColumnHeadersVisible = true;
+            carTypesGrid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = Color.FromArgb(31, 41, 55);
             dataGridViewCellStyle2.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
@@ -340,8 +431,7 @@ namespace Car_Rental_System
             dataGridViewCellStyle3.WrapMode = DataGridViewTriState.False;
             carTypesGrid.DefaultCellStyle = dataGridViewCellStyle3;
             carTypesGrid.Dock = DockStyle.Fill;
-            carTypesGrid.EnableHeadersVisualStyles = false;
-            carTypesGrid.GridColor = Color.FromArgb(229, 231, 235);
+            carTypesGrid.GridColor = Color.White;
             carTypesGrid.Location = new Point(0, 77);
             carTypesGrid.Margin = new Padding(3, 4, 3, 4);
             carTypesGrid.Name = "carTypesGrid";
@@ -349,32 +439,66 @@ namespace Car_Rental_System
             carTypesGrid.RowHeadersVisible = false;
             carTypesGrid.RowHeadersWidth = 51;
             carTypesGrid.RowTemplate.Height = 42;
-            carTypesGrid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             carTypesGrid.Size = new Size(781, 617);
             carTypesGrid.TabIndex = 1;
+            carTypesGrid.ThemeStyle.AlternatingRowsStyle.BackColor = Color.White;
+            carTypesGrid.ThemeStyle.AlternatingRowsStyle.Font = null;
+            carTypesGrid.ThemeStyle.AlternatingRowsStyle.ForeColor = Color.Empty;
+            carTypesGrid.ThemeStyle.AlternatingRowsStyle.SelectionBackColor = Color.Empty;
+            carTypesGrid.ThemeStyle.AlternatingRowsStyle.SelectionForeColor = Color.Empty;
+            carTypesGrid.ThemeStyle.BackColor = Color.White;
+            carTypesGrid.ThemeStyle.GridColor = Color.White;
+            carTypesGrid.ThemeStyle.HeaderStyle.BackColor = Color.FromArgb(100, 88, 255);
+            carTypesGrid.ThemeStyle.HeaderStyle.BorderStyle = DataGridViewHeaderBorderStyle.None;
+            carTypesGrid.ThemeStyle.HeaderStyle.Font = new Font("Segoe UI", 9F);
+            carTypesGrid.ThemeStyle.HeaderStyle.ForeColor = Color.White;
+            carTypesGrid.ThemeStyle.HeaderStyle.HeaightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            carTypesGrid.ThemeStyle.HeaderStyle.Height = 56;
+            carTypesGrid.ThemeStyle.ReadOnly = true;
+            carTypesGrid.ThemeStyle.RowsStyle.BackColor = Color.White;
+            carTypesGrid.ThemeStyle.RowsStyle.BorderStyle = DataGridViewCellBorderStyle.None;
+            carTypesGrid.ThemeStyle.RowsStyle.Font = new Font("Segoe UI", 9F);
+            carTypesGrid.ThemeStyle.RowsStyle.ForeColor = Color.FromArgb(71, 69, 94);
+            carTypesGrid.ThemeStyle.RowsStyle.Height = 42;
+            carTypesGrid.ThemeStyle.RowsStyle.SelectionBackColor = Color.FromArgb(231, 229, 255);
+            carTypesGrid.ThemeStyle.RowsStyle.SelectionForeColor = Color.FromArgb(71, 69, 94);
             carTypesGrid.SelectionChanged += CarTypesGrid_SelectionChanged;
             // 
             // listHeaderPanel
             // 
-            listHeaderPanel.BorderStyle = BorderStyle.FixedSingle;
+            listHeaderPanel.BorderColor = Color.FromArgb(209, 213, 219);
+            listHeaderPanel.BorderRadius = 8;
+            listHeaderPanel.BorderThickness = 1;
             listHeaderPanel.Controls.Add(searchTextBox);
             listHeaderPanel.Controls.Add(recordsLabel);
+            listHeaderPanel.CustomizableEdges = customizableEdges21;
             listHeaderPanel.Dock = DockStyle.Top;
             listHeaderPanel.Location = new Point(0, 0);
             listHeaderPanel.Margin = new Padding(3, 4, 3, 4);
             listHeaderPanel.Name = "listHeaderPanel";
+            listHeaderPanel.ShadowDecoration.CustomizableEdges = customizableEdges22;
             listHeaderPanel.Size = new Size(781, 77);
             listHeaderPanel.TabIndex = 0;
             // 
             // searchTextBox
             // 
             searchTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            searchTextBox.BorderStyle = BorderStyle.FixedSingle;
+            searchTextBox.BorderColor = Color.FromArgb(209, 213, 219);
+            searchTextBox.BorderRadius = 6;
+            searchTextBox.Cursor = Cursors.IBeam;
+            searchTextBox.CustomizableEdges = customizableEdges19;
+            searchTextBox.DefaultText = "";
+            searchTextBox.FocusedState.BorderColor = Color.FromArgb(37, 99, 235);
             searchTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            searchTextBox.ForeColor = Color.FromArgb(17, 24, 39);
+            searchTextBox.HoverState.BorderColor = Color.FromArgb(37, 99, 235);
             searchTextBox.Location = new Point(480, 24);
             searchTextBox.Margin = new Padding(3, 4, 3, 4);
             searchTextBox.Name = "searchTextBox";
+            searchTextBox.PlaceholderForeColor = Color.FromArgb(107, 114, 128);
             searchTextBox.PlaceholderText = "Search type or description";
+            searchTextBox.SelectedText = "";
+            searchTextBox.ShadowDecoration.CustomizableEdges = customizableEdges20;
             searchTextBox.Size = new Size(274, 28);
             searchTextBox.TabIndex = 1;
             searchTextBox.TextChanged += SearchTextBox_TextChanged;
@@ -384,7 +508,7 @@ namespace Car_Rental_System
             recordsLabel.AutoSize = true;
             recordsLabel.Font = new Font("Inter SemiBold", 13.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
             recordsLabel.ForeColor = Color.FromArgb(31, 41, 55);
-            recordsLabel.Location = new Point(0, 21);
+            recordsLabel.Location = new Point(14, 24);
             recordsLabel.Name = "recordsLabel";
             recordsLabel.Size = new Size(162, 32);
             recordsLabel.TabIndex = 0;
@@ -419,27 +543,31 @@ namespace Car_Rental_System
 
         #endregion
 
-        private Panel headerPanel;
+        private Guna2Panel headerPanel;
         private Label helperLabel;
         private Label titleLabel;
         private TableLayoutPanel bodyTable;
-        private Panel detailsPanel;
-        private CheckBox isActiveCheckBox;
-        private Button clearButton;
-        private Button deleteButton;
-        private Button updateButton;
-        private Button addButton;
-        private TextBox descriptionTextBox;
+        private Guna2Panel detailsPanel;
+        private Guna2CheckBox isActiveCheckBox;
+        private Guna2Button clearButton;
+        private Guna2Button deleteButton;
+        private Guna2Button updateButton;
+        private Guna2Button addButton;
+        private Guna2TextBox descriptionTextBox;
         private Label descriptionLabel;
-        private TextBox dailyRateTextBox;
+        private Guna2TextBox dailyRateTextBox;
         private Label dailyRateLabel;
-        private TextBox typeNameTextBox;
+        private Guna2TextBox typeNameTextBox;
         private Label typeNameLabel;
         private Label sectionLabel;
-        private Panel listPanel;
-        private DataGridView carTypesGrid;
-        private Panel listHeaderPanel;
-        private TextBox searchTextBox;
+        private Guna2Panel listPanel;
+        private Guna2DataGridView carTypesGrid;
+        private Guna2Panel listHeaderPanel;
+        private Guna2TextBox searchTextBox;
         private Label recordsLabel;
     }
 }
+
+
+
+

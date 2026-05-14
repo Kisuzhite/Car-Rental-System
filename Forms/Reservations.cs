@@ -1,9 +1,10 @@
-using Car_Rental_System.Helpers;
+﻿using Car_Rental_System.Helpers;
 using Car_Rental_System.Models;
 using Car_Rental_System.Presenters;
 using Car_Rental_System.Services;
 using Car_Rental_System.ViewModels;
 using Car_Rental_System.Views;
+using Guna.UI2.WinForms;
 
 namespace Car_Rental_System
 {
@@ -38,7 +39,6 @@ namespace Car_Rental_System
 
         void IReservationsView.BindReservations(List<ReservationGridRow> reservations)
         {
-            reservationsGrid.Columns.Clear();
             reservationsGrid.DataSource = reservations;
 
             DataGridViewHelper.ApplyFriendlyHeaders(reservationsGrid);
@@ -62,6 +62,7 @@ namespace Car_Rental_System
             returnDatePicker.Value = DateTime.Today.AddDays(2);
 
             paymentMethodComboBox.Format += PaymentMethodComboBox_Format;
+            paymentMethodComboBox.DropDownWidth = 190;
             paymentMethodComboBox.DataSource = PaymentHelper.GetSelectablePaymentMethods();
             paymentMethodComboBox.SelectedItem = PaymentMethod.GCash;
 
@@ -339,9 +340,14 @@ namespace Car_Rental_System
             decimal estimatedTotal = CalculateEstimatedTotal();
             decimal depositAmount = ParseOptionalPaymentAmount(depositTextBox.Text);
 
-            if (!PaymentHelper.IsValidPaymentAmount(depositAmount, estimatedTotal))
+            if (!PaymentHelper.IsValidInitialPaymentAmount(depositAmount, estimatedTotal))
             {
-                MessageBox.Show("Deposit cannot be negative or greater than the estimated total.", "Invalid Deposit", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                decimal minimumDeposit = PaymentHelper.GetMinimumDepositAmount(estimatedTotal);
+                MessageBox.Show(
+                    $"Deposit must be at least the minimum deposit of {RentalCalculator.FormatCurrency(minimumDeposit)} and cannot be greater than the estimated total.",
+                    "Invalid Deposit",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
                 return false;
             }
 
@@ -481,11 +487,11 @@ namespace Car_Rental_System
             SetActionButtonStyle(convertButton);
         }
 
-        private static void SetActionButtonStyle(Button button)
+        private static void SetActionButtonStyle(Guna2Button button)
         {
             button.Enabled = true;
             button.ForeColor = Color.White;
-            button.UseVisualStyleBackColor = false;
         }
     }
 }
+

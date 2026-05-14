@@ -4,6 +4,7 @@ using Car_Rental_System.Presenters;
 using Car_Rental_System.Services;
 using Car_Rental_System.ViewModels;
 using Car_Rental_System.Views;
+using Guna.UI2.WinForms;
 
 namespace Car_Rental_System
 {
@@ -37,18 +38,16 @@ namespace Car_Rental_System
             rentedCarsValueLabel.Text = dashboardData.OverdueRentals.ToString();
             incomeValueLabel.Text = RentalCalculator.FormatCurrency(dashboardData.MonthlyCollected);
 
-            carsGrid.Columns.Clear();
             carsGrid.DataSource = dashboardData.AvailableCarsGrid;
             DataGridViewHelper.ApplyFriendlyHeaders(carsGrid);
             DataGridViewHelper.HideColumn(carsGrid, "CarId");
             DataGridViewHelper.ApplyStatusFormatting(carsGrid);
             carsGrid.ClearSelection();
 
-            recentRentalsGrid.Columns.Clear();
             recentRentalsGrid.DataSource = dashboardData.RecentRentals;
             DataGridViewHelper.ApplyFriendlyHeaders(recentRentalsGrid);
             DataGridViewHelper.ApplyStatusFormatting(recentRentalsGrid);
-            recentRentalsGrid.ClearSelection();
+            DataGridViewHelper.ClearSelectionWhenReady(recentRentalsGrid);
         }
 
         void IMainFormView.RefreshAvailableCarSelection(List<CarLookupItem> availableCars)
@@ -103,8 +102,10 @@ namespace Car_Rental_System
         private void PrepareDashboardForm()
         {
             paymentMethodComboBox.Format += PaymentMethodComboBox_Format;
+            paymentMethodComboBox.DropDownWidth = 190;
             paymentMethodComboBox.DataSource = PaymentHelper.GetSelectablePaymentMethods();
             paymentMethodComboBox.SelectedItem = PaymentMethod.Cash;
+            rentalDatePicker.MaxDate = DateTime.Today;
             rentalDatePicker.Value = DateTime.Today;
             returnDatePicker.Value = DateTime.Today.AddDays(1);
             CalculateQuickRentalTotal();
@@ -124,7 +125,7 @@ namespace Car_Rental_System
 
         private async void NavigationButton_Click(object? sender, EventArgs e)
         {
-            if (sender is not Button selectedButton) return;
+            if (sender is not Guna2Button selectedButton) return;
 
             ResetNavigationButtons();
             SetActiveNavigationButton(selectedButton);
@@ -153,23 +154,23 @@ namespace Car_Rental_System
 
         private void ResetNavigationButtons()
         {
-            Button[] buttons = { dashboardButton, carsButton, ratesButton, customersButton, rentalsButton, reservationsButton, returnsButton, reportsButton };
+            Guna2Button[] buttons = { dashboardButton, carsButton, ratesButton, customersButton, rentalsButton, reservationsButton, returnsButton, reportsButton };
 
-            foreach (Button button in buttons)
+            foreach (Guna2Button button in buttons)
             {
                 button.BackColor = Color.FromArgb(31, 41, 55);
+                button.FillColor = Color.FromArgb(31, 41, 55);
                 button.ForeColor = Color.White;
-                button.FlatAppearance.BorderSize = 0;
-                button.FlatAppearance.MouseOverBackColor = Color.FromArgb(37, 99, 235);
+                button.HoverState.FillColor = Color.FromArgb(37, 99, 235);
             }
         }
 
-        private static void SetActiveNavigationButton(Button button)
+        private static void SetActiveNavigationButton(Guna2Button button)
         {
-            button.BackColor = Color.FromArgb(37, 99, 235);
+            button.BackColor = Color.FromArgb(31, 41, 55);
+            button.FillColor = Color.FromArgb(37, 99, 235);
             button.ForeColor = Color.White;
-            button.FlatAppearance.BorderSize = 0;
-            button.FlatAppearance.MouseOverBackColor = Color.FromArgb(37, 99, 235);
+            button.HoverState.FillColor = Color.FromArgb(29, 78, 216);
         }
 
         private void ShowDashboard()
@@ -270,7 +271,11 @@ namespace Car_Rental_System
                 return false;
             }
 
-            if (!ValidationHelper.TryValidateRentalDates(rentalDatePicker.Value, returnDatePicker.Value, out string dateError))
+            if (!ValidationHelper.TryValidateActiveRentalDates(
+                    rentalDatePicker.Value,
+                    returnDatePicker.Value,
+                    DateTime.Today,
+                    out string dateError))
             {
                 MessageBox.Show(dateError, "Invalid Dates", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
@@ -295,9 +300,14 @@ namespace Car_Rental_System
             decimal totalAmount = CalculateQuickRentalTotal();
             decimal amountPaid = ParseOptionalPaymentAmount(paymentAmountTextBox.Text);
 
-            if (!PaymentHelper.IsValidPaymentAmount(amountPaid, totalAmount))
+            if (!PaymentHelper.IsValidInitialPaymentAmount(amountPaid, totalAmount))
             {
-                MessageBox.Show("Amount paid cannot be negative or greater than the total amount.", "Invalid Payment", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                decimal minimumDeposit = PaymentHelper.GetMinimumDepositAmount(totalAmount);
+                MessageBox.Show(
+                    $"Amount paid must be at least the minimum deposit of {RentalCalculator.FormatCurrency(minimumDeposit)} and cannot be greater than the total amount.",
+                    "Invalid Payment",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
                 return false;
             }
 
@@ -451,6 +461,11 @@ namespace Car_Rental_System
             if (result != DialogResult.Yes) return;
 
             Close();
+        }
+
+        private void carsGrid_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
         }
     }
 }

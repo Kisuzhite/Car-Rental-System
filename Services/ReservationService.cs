@@ -12,7 +12,7 @@ namespace Car_Rental_System.Services
         public async Task<ReservationOperationResult> ConvertToRentalAsync(int reservationId)
         {
             using var db = new AppDbContext();
-            using var transaction = db.Database.BeginTransaction(IsolationLevel.Serializable);
+            await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
             var reservationRepository = new ReservationRepository(db);
             var customerRepository = new CustomerRepository(db);
             var rentalRepository = new RentalRepository(db);
@@ -21,6 +21,7 @@ namespace Car_Rental_System.Services
 
             if (reservation == null)
             {
+                await transaction.RollbackAsync();
                 return ReservationOperationResult.Fail(
                     ReservationOperationError.ReservationNotFound,
                     "Reservation Not Found",
@@ -29,6 +30,7 @@ namespace Car_Rental_System.Services
 
             if (reservation.Status is ReservationStatus.Cancelled or ReservationStatus.Converted)
             {
+                await transaction.RollbackAsync();
                 return ReservationOperationResult.Fail(
                     ReservationOperationError.ReservationCannotConvert,
                     "Cannot Convert",
@@ -38,6 +40,7 @@ namespace Car_Rental_System.Services
             DateOnly today = RentalCalculator.ToDateOnly(DateTime.Today);
             if (reservation.PickupDate > today)
             {
+                await transaction.RollbackAsync();
                 return ReservationOperationResult.Fail(
                     ReservationOperationError.PickupDateNotReached,
                     "Pickup Date Not Reached",
@@ -50,6 +53,7 @@ namespace Car_Rental_System.Services
                     reservation.ExpectedReturnDate,
                     reservation.ReservationId))
             {
+                await transaction.RollbackAsync();
                 return ReservationOperationResult.Fail(
                     ReservationOperationError.ScheduleConflict,
                     "Schedule Conflict",
@@ -64,6 +68,7 @@ namespace Car_Rental_System.Services
 
             if (hasActiveRental)
             {
+                await transaction.RollbackAsync();
                 return ReservationOperationResult.Fail(
                     ReservationOperationError.CustomerHasActiveRental,
                     "Customer Has Active Rental",
@@ -72,6 +77,7 @@ namespace Car_Rental_System.Services
 
             if (reservation.Car.Status != CarStatus.Available)
             {
+                await transaction.RollbackAsync();
                 return ReservationOperationResult.Fail(
                     ReservationOperationError.CarNotAvailable,
                     "Car Not Available",
@@ -83,12 +89,14 @@ namespace Car_Rental_System.Services
             DateTime expectedReturnDate = reservation.ExpectedReturnDate.ToDateTime(TimeOnly.MinValue);
             decimal totalAmount = RentalCalculator.CalculateBaseAmount(pickupDate, expectedReturnDate, dailyRate);
 
-            if (!PaymentHelper.IsValidPaymentAmount(reservation.DepositAmount, totalAmount))
+            if (!PaymentHelper.IsValidInitialPaymentAmount(reservation.DepositAmount, totalAmount))
             {
+                decimal minimumDeposit = PaymentHelper.GetMinimumDepositAmount(totalAmount);
+                await transaction.RollbackAsync();
                 return ReservationOperationResult.Fail(
                     ReservationOperationError.InvalidPaymentAmount,
                     "Invalid Deposit",
-                    "The reservation deposit cannot be greater than the rental total.");
+                    $"The reservation deposit must be at least the minimum deposit of {RentalCalculator.FormatCurrency(minimumDeposit)} and cannot be greater than the rental total.");
             }
 
             reservation.CustomerId = customerId;
@@ -120,13 +128,5 @@ namespace Car_Rental_System.Services
                 rental.RentalId);
         }
 
-        public static bool DateRangesOverlap(
-            DateOnly start,
-            DateOnly end,
-            DateOnly existingStart,
-            DateOnly existingEnd)
-        {
-            return start <= existingEnd && existingStart <= end;
-        }
     }
 }

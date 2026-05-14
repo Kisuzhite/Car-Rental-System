@@ -7,7 +7,6 @@ namespace Car_Rental_System.ViewModels
         public int CarTypeId { get; set; }
         public string TypeName { get; set; } = "";
         public decimal DailyRate { get; set; }
-        public string DisplayName => TypeName;
     }
 
     internal sealed class CarLookupItem
@@ -44,6 +43,19 @@ namespace Car_Rental_System.ViewModels
         public decimal DailyRate { get; set; }
         public string Description { get; set; } = "";
         public string Status { get; set; } = "";
+    }
+
+    internal sealed class CarGridRow
+    {
+        public int CarId { get; set; }
+        public string PlateNumber { get; set; } = "";
+        public string Brand { get; set; } = "";
+        public string Model { get; set; } = "";
+        public int Year { get; set; }
+        public string Color { get; set; } = "";
+        public decimal DailyRate { get; set; }
+        public string CarType { get; set; } = "";
+        public CarStatus Status { get; set; }
     }
 
     internal sealed class CustomerGridRow
@@ -119,7 +131,7 @@ namespace Car_Rental_System.ViewModels
 
     internal sealed class RecentRentalGridRow
     {
-        public int RentalID { get; set; }
+        public int RentalId { get; set; }
         public string Customer { get; set; } = "";
         public string Car { get; set; } = "";
         public DateOnly ReturnDate { get; set; }

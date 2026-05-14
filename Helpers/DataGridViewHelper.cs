@@ -5,6 +5,8 @@ namespace Car_Rental_System.Helpers
 {
     internal static class DataGridViewHelper
     {
+        private const int DefaultRowHeight = 46;
+
         private static readonly Dictionary<string, string> FriendlyHeaders = new(StringComparer.OrdinalIgnoreCase)
         {
             ["ActiveRentals"] = "Active Rentals",
@@ -46,7 +48,6 @@ namespace Car_Rental_System.Helpers
             ["ReservationId"] = "Reservation ID",
             ["RentalDate"] = "Rental Date",
             ["RentalId"] = "Rental ID",
-            ["RentalID"] = "Rental ID",
             ["ReturnDate"] = "Return Date",
             ["Status"] = "Status",
             ["TotalAmount"] = "Total Amount",
@@ -86,15 +87,29 @@ namespace Car_Rental_System.Helpers
             grid.EnableHeadersVisualStyles = false;
             grid.BackgroundColor = Color.White;
             grid.BorderStyle = BorderStyle.FixedSingle;
-            grid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            grid.CellBorderStyle = DataGridViewCellBorderStyle.None;
+            grid.AdvancedCellBorderStyle.Left = DataGridViewAdvancedCellBorderStyle.None;
+            grid.AdvancedCellBorderStyle.Right = DataGridViewAdvancedCellBorderStyle.None;
+            grid.AdvancedCellBorderStyle.Top = DataGridViewAdvancedCellBorderStyle.None;
+            grid.AdvancedCellBorderStyle.Bottom = DataGridViewAdvancedCellBorderStyle.None;
             grid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
-            grid.GridColor = Color.FromArgb(229, 231, 235);
+            grid.RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            grid.AdvancedColumnHeadersBorderStyle.Left = DataGridViewAdvancedCellBorderStyle.None;
+            grid.AdvancedColumnHeadersBorderStyle.Right = DataGridViewAdvancedCellBorderStyle.None;
+            grid.AdvancedColumnHeadersBorderStyle.Top = DataGridViewAdvancedCellBorderStyle.None;
+            grid.AdvancedColumnHeadersBorderStyle.Bottom = DataGridViewAdvancedCellBorderStyle.None;
+            grid.AdvancedRowHeadersBorderStyle.Left = DataGridViewAdvancedCellBorderStyle.None;
+            grid.AdvancedRowHeadersBorderStyle.Right = DataGridViewAdvancedCellBorderStyle.None;
+            grid.AdvancedRowHeadersBorderStyle.Top = DataGridViewAdvancedCellBorderStyle.None;
+            grid.AdvancedRowHeadersBorderStyle.Bottom = DataGridViewAdvancedCellBorderStyle.None;
+            grid.GridColor = Color.White;
             grid.MultiSelect = false;
             grid.RowHeadersVisible = false;
             grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            grid.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
             grid.ColumnHeadersHeight = 56;
-            grid.RowTemplate.Height = 46;
+            grid.RowTemplate.Height = DefaultRowHeight;
 
             grid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(17, 24, 39);
             grid.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
@@ -117,6 +132,24 @@ namespace Car_Rental_System.Helpers
             grid.AlternatingRowsDefaultCellStyle.SelectionBackColor = Color.FromArgb(239, 246, 255);
             grid.AlternatingRowsDefaultCellStyle.SelectionForeColor = Color.FromArgb(17, 24, 39);
             grid.AlternatingRowsDefaultCellStyle.Padding = new Padding(12, 0, 8, 0);
+
+            grid.RowPrePaint -= RemoveCurrentCellFocusBorder;
+            grid.RowPrePaint += RemoveCurrentCellFocusBorder;
+            grid.CellPainting -= PaintBorderlessCell;
+            grid.CellPainting += PaintBorderlessCell;
+            grid.RowPostPaint -= CoverGridLinePixels;
+            grid.RowPostPaint += CoverGridLinePixels;
+
+            ApplyRowHeights(grid);
+            grid.Invalidate();
+        }
+
+        private static void ApplyRowHeights(DataGridView grid)
+        {
+            foreach (DataGridViewRow row in grid.Rows)
+            {
+                row.Height = DefaultRowHeight;
+            }
         }
 
         private static void ApplyColumnSizing(DataGridViewColumn column)
@@ -146,7 +179,7 @@ namespace Car_Rental_System.Helpers
             return columnName switch
             {
                 "Status" => 116,
-                "RentalId" or "RentalID" or "ReservationId" or "CarId" or "CustomerId" or "CarTypeId" => 82,
+                "RentalId" or "ReservationId" or "CarId" or "CustomerId" or "CarTypeId" => 82,
                 "RentalDate" or "ReturnDate" or "ExpectedReturn" or "ExpectedReturnDate" or "ActualReturn" or "ReservationDate" or "PickupDate" => 120,
                 "DailyRate" or "RatePerDay" or "BaseAmount" or "TotalAmount" or "AmountPaid" or "DepositAmount" or "Balance" or "Penalty" or "Amount" => 125,
                 "LateDays" => 92,
@@ -165,7 +198,7 @@ namespace Car_Rental_System.Helpers
             return columnName switch
             {
                 "Status" => 78,
-                "RentalId" or "RentalID" or "ReservationId" or "CarId" or "CustomerId" or "CarTypeId" => 55,
+                "RentalId" or "ReservationId" or "CarId" or "CustomerId" or "CarTypeId" => 55,
                 "LateDays" => 62,
                 "PaymentMethod" or "PaymentStatus" => 90,
                 "RentalDate" or "ReturnDate" or "ExpectedReturn" or "ExpectedReturnDate" or "ActualReturn" or "ReservationDate" or "PickupDate" => 85,
@@ -190,6 +223,170 @@ namespace Car_Rental_System.Helpers
             }
         }
 
+        private static void RemoveCurrentCellFocusBorder(object? sender, DataGridViewRowPrePaintEventArgs e)
+        {
+            e.PaintParts &= ~DataGridViewPaintParts.Focus;
+        }
+
+        private static void PaintBorderlessCell(object? sender, DataGridViewCellPaintingEventArgs e)
+        {
+            if (sender is not DataGridView grid ||
+                e.RowIndex < 0 ||
+                e.ColumnIndex < 0 ||
+                e.CellStyle == null ||
+                e.Graphics == null ||
+                e.AdvancedBorderStyle == null)
+            {
+                return;
+            }
+
+            DataGridViewCellStyle cellStyle = e.CellStyle;
+            Graphics graphics = e.Graphics;
+            DataGridViewAdvancedBorderStyle borderStyle = e.AdvancedBorderStyle;
+
+            borderStyle.Left = DataGridViewAdvancedCellBorderStyle.None;
+            borderStyle.Right = DataGridViewAdvancedCellBorderStyle.None;
+            borderStyle.Top = DataGridViewAdvancedCellBorderStyle.None;
+            borderStyle.Bottom = DataGridViewAdvancedCellBorderStyle.None;
+
+            DataGridViewColumn? column = grid.Columns[e.ColumnIndex];
+            if (column != null && IsStatusColumn(column.Name))
+            {
+                PaintCellBackground(e, graphics, cellStyle);
+                PaintStatusChip(
+                    graphics,
+                    e.CellBounds,
+                    e.FormattedValue?.ToString() ?? string.Empty,
+                    cellStyle.Font ?? grid.Font);
+                e.Handled = true;
+                return;
+            }
+
+            PaintTextCell(e, graphics, cellStyle);
+            e.Handled = true;
+        }
+
+        private static void PaintTextCell(
+            DataGridViewCellPaintingEventArgs e,
+            Graphics graphics,
+            DataGridViewCellStyle cellStyle)
+        {
+            PaintCellBackground(e, graphics, cellStyle);
+
+            string text = e.FormattedValue?.ToString() ?? string.Empty;
+            if (string.IsNullOrEmpty(text))
+            {
+                return;
+            }
+
+            Rectangle textBounds = Rectangle.Inflate(e.CellBounds, -12, 0);
+            TextRenderer.DrawText(
+                graphics,
+                text,
+                cellStyle.Font ?? Control.DefaultFont,
+                textBounds,
+                cellStyle.ForeColor,
+                GetTextFormatFlags(cellStyle.Alignment));
+        }
+
+        private static TextFormatFlags GetTextFormatFlags(DataGridViewContentAlignment alignment)
+        {
+            TextFormatFlags flags = TextFormatFlags.EndEllipsis |
+                TextFormatFlags.NoPrefix |
+                TextFormatFlags.VerticalCenter;
+
+            flags |= alignment switch
+            {
+                DataGridViewContentAlignment.MiddleCenter or
+                    DataGridViewContentAlignment.TopCenter or
+                    DataGridViewContentAlignment.BottomCenter => TextFormatFlags.HorizontalCenter,
+                DataGridViewContentAlignment.MiddleRight or
+                    DataGridViewContentAlignment.TopRight or
+                    DataGridViewContentAlignment.BottomRight => TextFormatFlags.Right,
+                _ => TextFormatFlags.Left
+            };
+
+            return flags;
+        }
+
+        private static void PaintCellBackground(
+            DataGridViewCellPaintingEventArgs e,
+            Graphics graphics,
+            DataGridViewCellStyle cellStyle)
+        {
+            bool isSelected = (e.State & DataGridViewElementStates.Selected) == DataGridViewElementStates.Selected;
+            Color backColor = isSelected ? cellStyle.SelectionBackColor : cellStyle.BackColor;
+            if (backColor == Color.Empty)
+            {
+                backColor = Color.White;
+            }
+
+            using var backgroundBrush = new SolidBrush(backColor);
+            Rectangle bounds = new(e.CellBounds.Left - 1, e.CellBounds.Top - 1, e.CellBounds.Width + 2, e.CellBounds.Height + 2);
+            graphics.FillRectangle(backgroundBrush, bounds);
+        }
+
+        private static void CoverGridLinePixels(object? sender, DataGridViewRowPostPaintEventArgs e)
+        {
+            if (sender is not DataGridView grid || e.RowIndex < 0)
+            {
+                return;
+            }
+
+            Color rowBackColor = GetRowBackColor(grid, e.RowIndex, e.State);
+            using var rowBrush = new SolidBrush(rowBackColor);
+
+            int left = grid.RowHeadersVisible ? grid.RowHeadersWidth : 0;
+            int right = grid.DisplayRectangle.Right;
+            if (right <= left)
+            {
+                return;
+            }
+
+            int bottom = e.RowBounds.Bottom - 2;
+            if (bottom >= e.RowBounds.Top)
+            {
+                e.Graphics.FillRectangle(rowBrush, new Rectangle(left, bottom, right - left, 2));
+            }
+
+            foreach (DataGridViewColumn column in grid.Columns.Cast<DataGridViewColumn>().Where(c => c.Visible))
+            {
+                Rectangle cellBounds = grid.GetCellDisplayRectangle(column.Index, e.RowIndex, false);
+                if (cellBounds.Width <= 0 || cellBounds.Height <= 0)
+                {
+                    continue;
+                }
+
+                e.Graphics.FillRectangle(
+                    rowBrush,
+                    new Rectangle(cellBounds.Right - 2, cellBounds.Top, 2, cellBounds.Height));
+            }
+        }
+
+        private static Color GetRowBackColor(DataGridView grid, int rowIndex, DataGridViewElementStates state)
+        {
+            bool isSelected = (state & DataGridViewElementStates.Selected) == DataGridViewElementStates.Selected;
+            if (isSelected)
+            {
+                Color selectedBackColor = grid.DefaultCellStyle.SelectionBackColor;
+                return selectedBackColor == Color.Empty ? Color.FromArgb(239, 246, 255) : selectedBackColor;
+            }
+
+            DataGridViewRow row = grid.Rows[rowIndex];
+            if (row.DefaultCellStyle.BackColor != Color.Empty)
+            {
+                return row.DefaultCellStyle.BackColor;
+            }
+
+            if (rowIndex % 2 == 1 && grid.AlternatingRowsDefaultCellStyle.BackColor != Color.Empty)
+            {
+                return grid.AlternatingRowsDefaultCellStyle.BackColor;
+            }
+
+            Color defaultBackColor = grid.DefaultCellStyle.BackColor;
+            return defaultBackColor == Color.Empty ? Color.White : defaultBackColor;
+        }
+
         public static void MoveColumnToEnd(DataGridView grid, string columnName)
         {
             DataGridViewColumn? column = grid.Columns[columnName];
@@ -212,18 +409,51 @@ namespace Car_Rental_System.Helpers
         {
             if (!grid.IsHandleCreated)
             {
-                grid.ClearSelection();
+                ClearSelectionAndCurrentCell(grid);
                 return;
             }
 
-            grid.BeginInvoke(new Action(grid.ClearSelection));
+            grid.BeginInvoke(new Action(() => ClearSelectionAndCurrentCell(grid)));
+        }
+
+        public static void KeepDisplayOnly(DataGridView grid)
+        {
+            grid.TabStop = false;
+            grid.SelectionChanged -= ClearDisplayGridSelection;
+            grid.SelectionChanged += ClearDisplayGridSelection;
+            ClearSelectionWhenReady(grid);
+        }
+
+        private static void ClearDisplayGridSelection(object? sender, EventArgs e)
+        {
+            if (sender is not DataGridView grid)
+            {
+                return;
+            }
+
+            if (!grid.IsHandleCreated)
+            {
+                ClearSelectionAndCurrentCell(grid);
+                return;
+            }
+
+            grid.BeginInvoke(new Action(() => ClearSelectionAndCurrentCell(grid)));
+        }
+
+        private static void ClearSelectionAndCurrentCell(DataGridView grid)
+        {
+            if (grid.IsDisposed ||
+                (grid.SelectedCells.Count == 0 && grid.SelectedRows.Count == 0 && grid.CurrentCell == null))
+            {
+                return;
+            }
+
+            grid.ClearSelection();
+            grid.CurrentCell = null;
         }
 
         public static void ApplyStatusFormatting(DataGridView grid)
         {
-            grid.CellPainting -= StatusCellPainting;
-            grid.CellPainting += StatusCellPainting;
-
             DataGridViewColumn? statusColumn = grid.Columns["Status"];
             if (statusColumn != null)
             {
@@ -239,30 +469,24 @@ namespace Car_Rental_System.Helpers
             }
         }
 
-        private static void StatusCellPainting(object? sender, DataGridViewCellPaintingEventArgs e)
+        private static void PaintStatusChip(Graphics graphics, Rectangle cellBounds, string status, Font chipFont)
         {
-            if (sender is not DataGridView grid ||
-                e.RowIndex < 0 ||
-                e.ColumnIndex < 0 ||
-                !IsStatusColumn(grid.Columns[e.ColumnIndex].Name))
+            if (string.IsNullOrWhiteSpace(status))
             {
                 return;
             }
 
-            e.Paint(e.CellBounds, DataGridViewPaintParts.Background | DataGridViewPaintParts.Border);
-
-            string status = e.FormattedValue?.ToString() ?? "";
             (Color backColor, Color borderColor, Color foreColor) = GetStatusChipColors(status);
-            Font chipFont = e.CellStyle?.Font ?? Control.DefaultFont;
-            Graphics? graphics = e.Graphics;
-            if (graphics == null)
-                return;
-
             Size textSize = TextRenderer.MeasureText(status, chipFont);
-            int chipWidth = Math.Min(Math.Max(textSize.Width + 28, 78), e.CellBounds.Width - 24);
-            int chipHeight = Math.Min(26, e.CellBounds.Height - 12);
-            int chipX = e.CellBounds.Left + 12;
-            int chipY = e.CellBounds.Top + (e.CellBounds.Height - chipHeight) / 2;
+            int chipWidth = Math.Min(Math.Max(textSize.Width + 28, 78), Math.Max(0, cellBounds.Width - 24));
+            int chipHeight = Math.Min(26, Math.Max(0, cellBounds.Height - 12));
+            if (chipWidth == 0 || chipHeight == 0)
+            {
+                return;
+            }
+
+            int chipX = cellBounds.Left + 12;
+            int chipY = cellBounds.Top + (cellBounds.Height - chipHeight) / 2;
             Rectangle chipBounds = new(chipX, chipY, chipWidth, chipHeight);
 
             using GraphicsPath chipPath = CreateRoundedRectanglePath(chipBounds, 13);
@@ -279,8 +503,6 @@ namespace Car_Rental_System.Helpers
                 chipBounds,
                 foreColor,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
-
-            e.Handled = true;
         }
 
         private static bool IsStatusColumn(string columnName)

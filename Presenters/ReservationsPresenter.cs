@@ -66,10 +66,25 @@ namespace Car_Rental_System.Presenters
         {
             using var db = new AppDbContext();
             var reservationRepository = new ReservationRepository(db);
+            var carRepository = new CarRepository(db);
 
             if (await reservationRepository.HasCarScheduleConflictAsync(input.CarId, input.PickupDate, input.ExpectedReturnDate))
             {
                 return ScheduleConflictResult();
+            }
+
+            Car? car = await carRepository.GetAvailableByIdWithTypeAsync(input.CarId);
+            if (car == null)
+            {
+                return PresenterResult.Info(
+                    "Car Not Available",
+                    "The selected car is no longer available. Please choose another car.");
+            }
+
+            PresenterResult? depositValidation = ValidateReservationDeposit(input, car);
+            if (depositValidation != null)
+            {
+                return depositValidation;
             }
 
             reservationRepository.Add(new Reservation
@@ -83,7 +98,6 @@ namespace Car_Rental_System.Presenters
                 DepositAmount = input.DepositAmount,
                 PaymentMethod = input.PaymentMethod,
                 PaymentReferenceNumber = input.PaymentReferenceNumber,
-                Source = "Facebook",
                 Status = ReservationStatus.Confirmed
             });
 
@@ -95,6 +109,7 @@ namespace Car_Rental_System.Presenters
         {
             using var db = new AppDbContext();
             var reservationRepository = new ReservationRepository(db);
+            var carRepository = new CarRepository(db);
             Reservation? reservation = await reservationRepository.GetByIdAsync(reservationId);
 
             if (reservation == null)
@@ -115,6 +130,20 @@ namespace Car_Rental_System.Presenters
             if (await reservationRepository.HasCarScheduleConflictAsync(input.CarId, input.PickupDate, input.ExpectedReturnDate, reservationId))
             {
                 return ScheduleConflictResult();
+            }
+
+            Car? car = await carRepository.GetAvailableByIdWithTypeAsync(input.CarId);
+            if (car == null)
+            {
+                return PresenterResult.Info(
+                    "Car Not Available",
+                    "The selected car is no longer available. Please choose another car.");
+            }
+
+            PresenterResult? depositValidation = ValidateReservationDeposit(input, car);
+            if (depositValidation != null)
+            {
+                return depositValidation;
             }
 
             reservation.CarId = input.CarId;
@@ -162,6 +191,25 @@ namespace Car_Rental_System.Presenters
             return PresenterResult.Info(
                 "Schedule Conflict",
                 "This car already has an active rental or reservation for those dates.");
+        }
+
+        private static PresenterResult? ValidateReservationDeposit(ReservationFormInput input, Car car)
+        {
+            decimal dailyRate = car.CarType?.DailyRate ?? car.DailyRate;
+            decimal estimatedTotal = RentalCalculator.CalculateBaseAmount(
+                input.PickupDate.ToDateTime(TimeOnly.MinValue),
+                input.ExpectedReturnDate.ToDateTime(TimeOnly.MinValue),
+                dailyRate);
+
+            if (PaymentHelper.IsValidInitialPaymentAmount(input.DepositAmount, estimatedTotal))
+            {
+                return null;
+            }
+
+            decimal minimumDeposit = PaymentHelper.GetMinimumDepositAmount(estimatedTotal);
+            return PresenterResult.Warning(
+                "Invalid Deposit",
+                $"Deposit must be at least the minimum deposit of {RentalCalculator.FormatCurrency(minimumDeposit)} and cannot be greater than the estimated total.");
         }
     }
 }

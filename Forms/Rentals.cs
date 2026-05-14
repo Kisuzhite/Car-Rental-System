@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Car_Rental_System.Helpers;
 using Car_Rental_System.Models;
 using Car_Rental_System.Presenters;
@@ -44,7 +44,6 @@ namespace Car_Rental_System
 
         void IRentalsView.BindRentals(List<RentalGridRow> rentals)
         {
-            rentalsGrid.Columns.Clear();
             rentalsGrid.DataSource = rentals;
 
             DataGridViewHelper.ApplyFriendlyHeaders(rentalsGrid);
@@ -63,8 +62,11 @@ namespace Car_Rental_System
         private void PrepareForm()
         {
             paymentMethodComboBox.Format += PaymentMethodComboBox_Format;
+            paymentMethodComboBox.DropDownWidth = 190;
             paymentMethodComboBox.DataSource = PaymentHelper.GetSelectablePaymentMethods();
             paymentMethodComboBox.SelectedItem = PaymentMethod.Cash;
+            rentalDatePicker.MaxDate = DateTime.Today;
+            rentalDatePicker.Value = DateTime.Today;
             returnDatePicker.Value = DateTime.Today.AddDays(1);
             CalculateTotal();
         }
@@ -181,7 +183,11 @@ namespace Car_Rental_System
                 return false;
             }
 
-            if (!ValidationHelper.TryValidateRentalDates(rentalDatePicker.Value, returnDatePicker.Value, out string dateError))
+            if (!ValidationHelper.TryValidateActiveRentalDates(
+                    rentalDatePicker.Value,
+                    returnDatePicker.Value,
+                    DateTime.Today,
+                    out string dateError))
             {
                 MessageBox.Show(dateError, "Invalid Dates", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
@@ -206,9 +212,14 @@ namespace Car_Rental_System
             decimal totalAmount = CalculateTotal();
             decimal amountPaid = ParseOptionalPaymentAmount(paymentAmountTextBox.Text);
 
-            if (!PaymentHelper.IsValidPaymentAmount(amountPaid, totalAmount))
+            if (!PaymentHelper.IsValidInitialPaymentAmount(amountPaid, totalAmount))
             {
-                MessageBox.Show("Amount paid cannot be negative or greater than the total amount.", "Invalid Payment", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                decimal minimumDeposit = PaymentHelper.GetMinimumDepositAmount(totalAmount);
+                MessageBox.Show(
+                    $"Amount paid must be at least the minimum deposit of {RentalCalculator.FormatCurrency(minimumDeposit)} and cannot be greater than the total amount.",
+                    "Invalid Payment",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
                 return false;
             }
 
@@ -302,3 +313,4 @@ namespace Car_Rental_System
         }
     }
 }
+

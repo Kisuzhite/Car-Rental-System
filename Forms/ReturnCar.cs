@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using Car_Rental_System.Helpers;
 using Car_Rental_System.Models;
 using Car_Rental_System.Presenters;
@@ -29,7 +29,6 @@ namespace Car_Rental_System
 
         void IReturnCarView.BindActiveRentals(List<ActiveRentalGridRow> rentals)
         {
-            activeRentalsGrid.Columns.Clear();
             activeRentalsGrid.DataSource = rentals;
 
             DataGridViewHelper.ApplyFriendlyHeaders(activeRentalsGrid);
@@ -44,6 +43,7 @@ namespace Car_Rental_System
         private async void ReturnCar_Load(object? sender, EventArgs e)
         {
             paymentMethodComboBox.Format += PaymentMethodComboBox_Format;
+            paymentMethodComboBox.DropDownWidth = 190;
             paymentMethodComboBox.DataSource = PaymentHelper.GetSelectablePaymentMethods();
             paymentMethodComboBox.SelectedItem = PaymentMethod.Cash;
             actualReturnDatePicker.Value = DateTime.Today;
@@ -263,3 +263,4 @@ namespace Car_Rental_System
         }
     }
 }
+

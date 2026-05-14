@@ -7,7 +7,7 @@ namespace Car_Rental_System.Views
     {
         string SearchText { get; }
         void BindCarTypes(List<CarTypeLookupItem> carTypes);
-        void BindCars(List<Car> cars);
+        void BindCars(List<CarGridRow> cars);
     }
 
     internal interface ICarTypesView

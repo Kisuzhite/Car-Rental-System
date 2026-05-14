@@ -18,7 +18,7 @@ namespace Car_Rental_System.Services
             PaymentMethod paymentMethod = PaymentMethod.Cash)
         {
             using var db = new AppDbContext();
-            using var transaction = db.Database.BeginTransaction(IsolationLevel.Serializable);
+            await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
 
             var customerRepository = new CustomerRepository(db);
             int customerId = await customerRepository.GetOrCreateByNameAsync(customerName);
@@ -35,6 +35,10 @@ namespace Car_Rental_System.Services
             {
                 await transaction.CommitAsync();
             }
+            else
+            {
+                await transaction.RollbackAsync();
+            }
 
             return result;
         }
@@ -48,7 +52,7 @@ namespace Car_Rental_System.Services
             PaymentMethod paymentMethod = PaymentMethod.Cash)
         {
             using var db = new AppDbContext();
-            using var transaction = db.Database.BeginTransaction(IsolationLevel.Serializable);
+            await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
 
             RentalOperationResult result = await CreateRentalAsync(
                 db,
@@ -63,6 +67,10 @@ namespace Car_Rental_System.Services
             {
                 await transaction.CommitAsync();
             }
+            else
+            {
+                await transaction.RollbackAsync();
+            }
 
             return result;
         }
@@ -74,13 +82,14 @@ namespace Car_Rental_System.Services
             PaymentMethod paymentMethod = PaymentMethod.Cash)
         {
             using var db = new AppDbContext();
-            using var transaction = db.Database.BeginTransaction(IsolationLevel.Serializable);
+            await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
             var rentalRepository = new RentalRepository(db);
 
             Rental? rental = await rentalRepository.GetActiveByIdWithCarAsync(rentalId);
 
             if (rental == null)
             {
+                await transaction.RollbackAsync();
                 return RentalOperationResult.Fail(
                     RentalOperationError.RentalAlreadyClosed,
                     "Rental Already Closed",
@@ -91,6 +100,7 @@ namespace Car_Rental_System.Services
 
             if (actualReturn < rental.RentalDate)
             {
+                await transaction.RollbackAsync();
                 return RentalOperationResult.Fail(
                     RentalOperationError.InvalidReturnDate,
                     "Invalid Return Date",
@@ -107,6 +117,7 @@ namespace Car_Rental_System.Services
 
             if (!PaymentHelper.IsValidPaymentAmount(newAmountPaid, finalAmount))
             {
+                await transaction.RollbackAsync();
                 return RentalOperationResult.Fail(
                     RentalOperationError.InvalidPaymentAmount,
                     "Invalid Payment",
@@ -149,7 +160,21 @@ namespace Car_Rental_System.Services
         {
             var rentalRepository = new RentalRepository(db);
             var carRepository = new CarRepository(db);
-            var reservationRepository = new ReservationRepository(db);
+
+            DateOnly rentalStart = RentalCalculator.ToDateOnly(rentalDate);
+            DateOnly rentalEnd = RentalCalculator.ToDateOnly(expectedReturnDate);
+
+            if (!ValidationHelper.TryValidateActiveRentalDates(
+                    rentalDate,
+                    expectedReturnDate,
+                    DateTime.Today,
+                    out string dateError))
+            {
+                return RentalOperationResult.Fail(
+                    RentalOperationError.InvalidRentalDate,
+                    dateError.Contains("future", StringComparison.OrdinalIgnoreCase) ? "Use Reservation" : "Invalid Dates",
+                    dateError);
+            }
 
             bool hasActiveRental = await rentalRepository.CustomerHasActiveRentalAsync(customerId);
 
@@ -161,15 +186,12 @@ namespace Car_Rental_System.Services
                     "This customer already has an active rental.\nProcess the return first before renting another car.");
             }
 
-            DateOnly rentalStart = RentalCalculator.ToDateOnly(rentalDate);
-            DateOnly rentalEnd = RentalCalculator.ToDateOnly(expectedReturnDate);
-
-            if (await reservationRepository.HasCarScheduleConflictAsync(carId, rentalStart, rentalEnd))
+            if (await rentalRepository.HasCarScheduleConflictAsync(carId, rentalStart, rentalEnd))
             {
                 return RentalOperationResult.Fail(
                     RentalOperationError.ScheduleConflict,
-                    "Schedule Conflict",
-                    "This car already has an active rental or reservation for those dates. Choose another car or adjust the dates.");
+                    "Reservation Conflict",
+                    "This car has an active rental or confirmed reservation that overlaps those dates. Choose another car or adjust the rental dates.");
             }
 
             Car? car = await carRepository.GetAvailableByIdWithTypeAsync(carId);
@@ -188,12 +210,13 @@ namespace Car_Rental_System.Services
                 expectedReturnDate,
                 dailyRate);
 
-            if (!PaymentHelper.IsValidPaymentAmount(amountPaid, totalAmount))
+            if (!PaymentHelper.IsValidInitialPaymentAmount(amountPaid, totalAmount))
             {
+                decimal minimumDeposit = PaymentHelper.GetMinimumDepositAmount(totalAmount);
                 return RentalOperationResult.Fail(
                     RentalOperationError.InvalidPaymentAmount,
                     "Invalid Payment",
-                    "Payment cannot be negative or greater than the total amount.");
+                    $"Amount paid must be at least the minimum deposit of {RentalCalculator.FormatCurrency(minimumDeposit)} and cannot be greater than the total amount.");
             }
 
             car.Status = CarStatus.Rented;

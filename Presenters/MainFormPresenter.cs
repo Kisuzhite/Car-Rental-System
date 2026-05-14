@@ -46,7 +46,9 @@ namespace Car_Rental_System.Presenters
             DateOnly firstOfNextMonth = firstOfMonth.AddMonths(1);
             decimal income = await rentalRepository.GetMonthlyCollectedAsync(firstOfMonth, firstOfNextMonth);
 
-            List<DashboardCarGridRow> carRows = (await carRepository.GetAvailableCarsAsync(view.DashboardSearchText))
+            List<Car> availableCarsForDashboard = await carRepository.GetAvailableCarsAsync(view.DashboardSearchText);
+
+            List<DashboardCarGridRow> carRows = availableCarsForDashboard
                 .Select(c => new DashboardCarGridRow
                 {
                     CarId = c.CarId,
@@ -62,7 +64,7 @@ namespace Car_Rental_System.Presenters
             List<RecentRentalGridRow> recentRentals = (await rentalRepository.GetRecentRentalsAsync(10))
                 .Select(r => new RecentRentalGridRow
                 {
-                    RentalID = r.RentalId,
+                    RentalId = r.RentalId,
                     Customer = r.Customer.FullName,
                     Car = r.Car.PlateNumber + " - " + r.Car.Brand + " " + r.Car.Model +
                         (r.Car.CarType != null ? " (" + r.Car.CarType.TypeName + ")" : ""),
@@ -75,7 +77,7 @@ namespace Car_Rental_System.Presenters
                 })
                 .ToList();
 
-            List<CarLookupItem> lookup = (await carRepository.GetAvailableCarsAsync())
+            List<CarLookupItem> lookup = availableCarsForDashboard
                 .Select(c => new CarLookupItem
                 {
                     CarId = c.CarId,

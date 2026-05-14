@@ -33,8 +33,8 @@ namespace Car_Rental_System.Repositories
             }
 
             return query
-                .OrderBy(r => r.Status == ReservationStatus.Converted)
-                .ThenBy(r => r.Status == ReservationStatus.Cancelled)
+                .OrderBy(r => r.Status == ReservationStatus.Converted ? 2 :
+                    r.Status == ReservationStatus.Cancelled ? 1 : 0)
                 .ThenBy(r => r.PickupDate)
                 .ToListAsync();
         }

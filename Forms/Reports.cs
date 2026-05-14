@@ -1,4 +1,4 @@
-using Car_Rental_System.Helpers;
+﻿using Car_Rental_System.Helpers;
 using Car_Rental_System.Presenters;
 using Car_Rental_System.ViewModels;
 using Car_Rental_System.Views;
@@ -24,7 +24,6 @@ namespace Car_Rental_System
             activeRentalsValueLabel.Text = $"{reports.ActiveRentals} / {reports.OverdueRentals}";
             incomeValueLabel.Text = RentalCalculator.FormatCurrency(reports.TotalCollected);
 
-            reportGrid.Columns.Clear();
             reportGrid.DataSource = reports.RentalHistory;
 
             DataGridViewHelper.ApplyFriendlyHeaders(reportGrid);
@@ -61,3 +60,4 @@ namespace Car_Rental_System
         }
     }
 }
+

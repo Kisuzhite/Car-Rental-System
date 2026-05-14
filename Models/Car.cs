@@ -18,6 +18,7 @@ namespace Car_Rental_System.Models
         public CarType? CarType { get; set; }
 
         [NotMapped]
+        // Requires CarType to be loaded with Include before this value can show a car type name.
         public string CarTypeName => CarType?.TypeName ?? "";
 
         public ICollection<Rental> Rentals { get; set; } = [];

@@ -18,7 +18,7 @@ namespace Car_Rental_System.Presenters
 
         public async Task LoadCarTypesAsync(int? includeCarTypeId = null)
         {
-            using AppDbContext db = new();
+            using var db = new AppDbContext();
             var carTypeRepository = new CarTypeRepository(db);
 
             List<CarTypeLookupItem> carTypes = (await carTypeRepository.GetActiveCarTypesAsync(includeCarTypeId))
@@ -35,14 +35,30 @@ namespace Car_Rental_System.Presenters
 
         public async Task LoadCarsAsync()
         {
-            using AppDbContext db = new();
+            using var db = new AppDbContext();
             var carRepository = new CarRepository(db);
-            view.BindCars(await carRepository.GetManageableCarsAsync(view.SearchText));
+
+            List<CarGridRow> cars = (await carRepository.GetManageableCarsAsync(view.SearchText))
+                .Select(c => new CarGridRow
+                {
+                    CarId = c.CarId,
+                    PlateNumber = c.PlateNumber,
+                    Brand = c.Brand,
+                    Model = c.Model,
+                    Year = c.Year,
+                    Color = c.Color,
+                    DailyRate = c.CarType != null ? c.CarType.DailyRate : c.DailyRate,
+                    CarType = c.CarType?.TypeName ?? AppConstants.NotProvided,
+                    Status = c.Status
+                })
+                .ToList();
+
+            view.BindCars(cars);
         }
 
         public async Task<PresenterResult> AddCarAsync(CarFormInput input)
         {
-            using AppDbContext db = new();
+            using var db = new AppDbContext();
             var carRepository = new CarRepository(db);
             string plateNumber = ValidationHelper.NormalizePlateNumber(input.PlateNumber);
 
@@ -70,7 +86,7 @@ namespace Car_Rental_System.Presenters
 
         public async Task<PresenterResult> UpdateCarAsync(int carId, CarFormInput input)
         {
-            using AppDbContext db = new();
+            using var db = new AppDbContext();
             var carRepository = new CarRepository(db);
 
             Car? car = await carRepository.GetByIdAsync(carId);
@@ -101,7 +117,7 @@ namespace Car_Rental_System.Presenters
 
         public async Task<PresenterResult> CanDeleteCarAsync(int carId)
         {
-            using AppDbContext db = new();
+            using var db = new AppDbContext();
             var carRepository = new CarRepository(db);
 
             if (await carRepository.HasActiveRentalAsync(carId))
@@ -123,7 +139,7 @@ namespace Car_Rental_System.Presenters
 
         public async Task<PresenterResult> DeleteCarAsync(int carId)
         {
-            using AppDbContext db = new();
+            using var db = new AppDbContext();
             var carRepository = new CarRepository(db);
             Car? car = await carRepository.GetByIdAsync(carId);
 
