@@ -32,7 +32,7 @@ namespace Car_Rental_System.Helpers
 
             string documentName = documentKind == RentalDocumentKind.RentalAgreement
                 ? "rental agreement"
-                : "final receipt";
+                : "payment receipt";
 
             DialogResult result = MessageBox.Show(
                 $"Preview and print the {documentName} now?",
@@ -74,7 +74,7 @@ namespace Car_Rental_System.Helpers
             using var document = new PrintDocument();
             document.DocumentName = documentKind == RentalDocumentKind.RentalAgreement
                 ? $"Rental Agreement {rental.RentalId:D6}"
-                : $"Final Receipt {rental.RentalId:D6}";
+                : $"Payment Receipt {rental.RentalId:D6}";
             document.DefaultPageSettings.Margins = new Margins(50, 50, 50, 50);
             document.PrintPage += (_, e) =>
             {
@@ -109,6 +109,9 @@ namespace Car_Rental_System.Helpers
             }
 
             DocumentPainter painter = new(e.Graphics, e.MarginBounds, AppConfiguration.GetBusinessProfile());
+            List<RentalPayment> payments = GetPrintablePayments(rental);
+            RentalPayment? initialPayment = payments.FirstOrDefault(p => p.PaymentType == RentalPaymentType.Initial);
+
             painter.DrawHeader("RENTAL AGREEMENT", $"Agreement No. RA-{rental.RentalId:D6}");
 
             painter.DrawSectionTitle("Customer Details");
@@ -123,14 +126,15 @@ namespace Car_Rental_System.Helpers
             painter.DrawLabelValue("Car Type", rental.Car.CarType?.TypeName ?? AppConstants.NotProvided);
             painter.DrawLabelValue("Color", rental.Car.Color);
 
-            painter.DrawSectionTitle("Rental Terms");
+            painter.DrawSectionTitle("Contract Details");
             painter.DrawLabelValue("Rental Date", FormatDate(rental.RentalDate));
             painter.DrawLabelValue("Expected Return", FormatDate(rental.ExpectedReturnDate));
             painter.DrawLabelValue("Daily Rate", RentalCalculator.FormatCurrency(rental.DailyRate));
             painter.DrawLabelValue("Estimated Total", RentalCalculator.FormatCurrency(rental.TotalAmount));
-            painter.DrawLabelValue("Amount Paid", RentalCalculator.FormatCurrency(rental.AmountPaid));
+            painter.DrawLabelValue("Initial Payment", RentalCalculator.FormatCurrency(initialPayment?.Amount ?? rental.AmountPaid));
             painter.DrawLabelValue("Balance", RentalCalculator.FormatCurrency(rental.Balance));
-            painter.DrawLabelValue("Payment Method", PaymentHelper.FormatPaymentMethod(rental.PaymentMethod));
+            painter.DrawLabelValue("Payment Method", initialPayment == null ? PaymentHelper.FormatPaymentMethod(rental.PaymentMethod) : PaymentHelper.FormatPaymentMethod(initialPayment.PaymentMethod));
+            painter.DrawLabelValue("Payment Reference", FormatPaymentReference(initialPayment?.PaymentReferenceNumber));
             painter.DrawLabelValue("Payment Status", rental.PaymentStatus.ToString());
 
             painter.DrawSectionTitle("Agreement Notes");
@@ -150,7 +154,10 @@ namespace Car_Rental_System.Helpers
             }
 
             DocumentPainter painter = new(e.Graphics, e.MarginBounds, AppConfiguration.GetBusinessProfile());
-            painter.DrawHeader("FINAL RECEIPT", $"Receipt No. FR-{rental.RentalId:D6}");
+            List<RentalPayment> payments = GetPrintablePayments(rental);
+            RentalPayment? returnPayment = payments.LastOrDefault(p => p.PaymentType == RentalPaymentType.Return);
+
+            painter.DrawHeader("PAYMENT RECEIPT", $"Receipt No. PR-{rental.RentalId:D6}");
 
             DateOnly today = RentalCalculator.ToDateOnly(DateTime.Today);
             decimal baseAmount = RentalCalculator.CalculateBaseAmount(
@@ -164,12 +171,11 @@ namespace Car_Rental_System.Helpers
 
             painter.DrawSectionTitle("Receipt Details");
             painter.DrawLabelValue("Date Issued", FormatDate(today));
+            painter.DrawLabelValue("Rental No.", $"RA-{rental.RentalId:D6}");
             painter.DrawLabelValue("Customer", rental.Customer.FullName);
             painter.DrawLabelValue("Contact Number", rental.Customer.ContactNumber);
-            painter.DrawLabelValue("License Number", rental.Customer.LicenseNumber);
             painter.DrawLabelValue("Plate Number", rental.Car.PlateNumber);
             painter.DrawLabelValue("Vehicle", $"{rental.Car.Brand} {rental.Car.Model}");
-            painter.DrawLabelValue("Car Type", rental.Car.CarType?.TypeName ?? AppConstants.NotProvided);
             painter.DrawLabelValue("Rental Date", FormatDate(rental.RentalDate));
             painter.DrawLabelValue("Expected Return", FormatDate(rental.ExpectedReturnDate));
             painter.DrawLabelValue("Actual Return", rental.ActualReturnDate.HasValue ? FormatDate(rental.ActualReturnDate.Value) : AppConstants.NotProvided);
@@ -182,10 +188,22 @@ namespace Car_Rental_System.Helpers
             painter.DrawDivider();
             painter.DrawLabelValue("Final Amount", RentalCalculator.FormatCurrency(rental.TotalAmount), emphasize: true);
 
-            painter.DrawSectionTitle("Payment");
-            painter.DrawLabelValue("Amount Paid", RentalCalculator.FormatCurrency(rental.AmountPaid));
+            painter.DrawSectionTitle("Payment Received");
+            painter.DrawLabelValue("Received Now", RentalCalculator.FormatCurrency(returnPayment?.Amount ?? 0));
+            painter.DrawLabelValue("Method", returnPayment == null ? AppConstants.NotProvided : PaymentHelper.FormatPaymentMethod(returnPayment.PaymentMethod));
+            painter.DrawLabelValue("Reference", FormatPaymentReference(returnPayment?.PaymentReferenceNumber));
+
+            painter.DrawSectionTitle("Payment History");
+            foreach (RentalPayment payment in payments)
+            {
+                painter.DrawLabelValue(
+                    $"{FormatDate(payment.PaymentDate)} - {FormatPaymentType(payment.PaymentType)}",
+                    $"{RentalCalculator.FormatCurrency(payment.Amount)} / {PaymentHelper.FormatPaymentMethod(payment.PaymentMethod)} / Ref: {FormatPaymentReference(payment.PaymentReferenceNumber)}");
+            }
+
+            painter.DrawDivider();
+            painter.DrawLabelValue("Total Paid", RentalCalculator.FormatCurrency(rental.AmountPaid), emphasize: true);
             painter.DrawLabelValue("Balance", RentalCalculator.FormatCurrency(rental.Balance), emphasize: rental.Balance > 0);
-            painter.DrawLabelValue("Payment Method", PaymentHelper.FormatPaymentMethod(rental.PaymentMethod));
             painter.DrawLabelValue("Payment Status", rental.PaymentStatus.ToString());
 
             painter.DrawParagraph("Thank you for choosing Auto Avenue Car Rental.");
@@ -195,6 +213,42 @@ namespace Car_Rental_System.Helpers
         private static string FormatDate(DateOnly date)
         {
             return date.ToString("MMMM d, yyyy");
+        }
+
+        private static List<RentalPayment> GetPrintablePayments(Rental rental)
+        {
+            List<RentalPayment> payments = rental.Payments
+                .OrderBy(p => p.PaymentDate)
+                .ThenBy(p => p.RentalPaymentId)
+                .ToList();
+
+            if (payments.Count == 0 && rental.AmountPaid > 0)
+            {
+                payments.Add(new RentalPayment
+                {
+                    PaymentDate = rental.ActualReturnDate ?? rental.RentalDate,
+                    Amount = rental.AmountPaid,
+                    PaymentMethod = rental.PaymentMethod,
+                    PaymentReferenceNumber = AppConstants.NotProvided,
+                    PaymentType = RentalPaymentType.Initial
+                });
+            }
+
+            return payments;
+        }
+
+        private static string FormatPaymentReference(string? paymentReferenceNumber)
+        {
+            return string.IsNullOrWhiteSpace(paymentReferenceNumber)
+                ? AppConstants.NotProvided
+                : paymentReferenceNumber;
+        }
+
+        private static string FormatPaymentType(RentalPaymentType paymentType)
+        {
+            return paymentType == RentalPaymentType.Return
+                ? "Return Payment"
+                : "Initial Payment";
         }
 
         private sealed class DocumentPainter

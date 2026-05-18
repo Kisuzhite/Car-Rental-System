@@ -99,7 +99,10 @@ namespace Car_Rental_System
             // 
             // headerPanel
             // 
-            headerPanel.BackColor = Color.White;
+            headerPanel.BackColor = Color.Transparent;
+            headerPanel.BorderColor = Color.FromArgb(226, 232, 240);
+            headerPanel.BorderRadius = 18;
+            headerPanel.BorderThickness = 1;
             headerPanel.Controls.Add(helperLabel);
             headerPanel.Controls.Add(titleLabel);
             headerPanel.CustomizableEdges = customizableEdges1;
@@ -109,7 +112,11 @@ namespace Car_Rental_System
             headerPanel.Margin = new Padding(3, 4, 3, 4);
             headerPanel.Name = "headerPanel";
             headerPanel.Padding = new Padding(32, 24, 32, 0);
+            headerPanel.ShadowDecoration.BorderRadius = 18;
+            headerPanel.ShadowDecoration.Color = Color.FromArgb(203, 213, 225);
             headerPanel.ShadowDecoration.CustomizableEdges = customizableEdges2;
+            headerPanel.ShadowDecoration.Depth = 4;
+            headerPanel.ShadowDecoration.Enabled = true;
             headerPanel.Size = new Size(1353, 115);
             headerPanel.TabIndex = 0;
             // 
@@ -205,7 +212,7 @@ namespace Car_Rental_System
             clearButton.ImageAlign = HorizontalAlignment.Left;
             clearButton.ImageOffset = new Point(30, 0);
             clearButton.ImageSize = new Size(22, 22);
-            clearButton.Location = new Point(214, 523);
+            clearButton.Location = new Point(214, 462);
             clearButton.Margin = new Padding(3, 4, 3, 4);
             clearButton.Name = "clearButton";
             clearButton.ShadowDecoration.CustomizableEdges = customizableEdges4;
@@ -228,7 +235,7 @@ namespace Car_Rental_System
             deleteButton.ImageAlign = HorizontalAlignment.Left;
             deleteButton.ImageOffset = new Point(25, 0);
             deleteButton.ImageSize = new Size(22, 22);
-            deleteButton.Location = new Point(28, 523);
+            deleteButton.Location = new Point(28, 462);
             deleteButton.Margin = new Padding(3, 4, 3, 4);
             deleteButton.Name = "deleteButton";
             deleteButton.ShadowDecoration.CustomizableEdges = customizableEdges6;
@@ -251,7 +258,7 @@ namespace Car_Rental_System
             updateButton.ImageAlign = HorizontalAlignment.Left;
             updateButton.ImageOffset = new Point(20, 0);
             updateButton.ImageSize = new Size(22, 22);
-            updateButton.Location = new Point(214, 459);
+            updateButton.Location = new Point(214, 398);
             updateButton.Margin = new Padding(3, 4, 3, 4);
             updateButton.Name = "updateButton";
             updateButton.ShadowDecoration.CustomizableEdges = customizableEdges8;
@@ -274,7 +281,7 @@ namespace Car_Rental_System
             addButton.ImageAlign = HorizontalAlignment.Left;
             addButton.ImageOffset = new Point(15, 0);
             addButton.ImageSize = new Size(22, 22);
-            addButton.Location = new Point(28, 459);
+            addButton.Location = new Point(28, 398);
             addButton.Margin = new Padding(3, 4, 3, 4);
             addButton.Name = "addButton";
             addButton.ShadowDecoration.CustomizableEdges = customizableEdges10;

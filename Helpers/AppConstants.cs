@@ -12,7 +12,7 @@ namespace Car_Rental_System.Helpers
         public const decimal MaximumDailyRate = 100000;
         public const decimal MinimumDepositRate = 0.20m;
 
-        public const string CurrencyPrefix = "P ";
+        public const string CurrencyPrefix = "₱";
         public const string NotProvided = "Not provided";
         public const string OwnerRole = "Owner";
         public const string DefaultBusinessName = "Auto Avenue Car Rental";

@@ -58,5 +58,10 @@ namespace Car_Rental_System.Helpers
                 ? "Bank Transfer"
                 : paymentMethod.ToString();
         }
+
+        public static bool RequiresReferenceNumber(PaymentMethod paymentMethod)
+        {
+            return paymentMethod is PaymentMethod.GCash or PaymentMethod.BankTransfer;
+        }
     }
 }

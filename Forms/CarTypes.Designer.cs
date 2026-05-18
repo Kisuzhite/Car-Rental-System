@@ -46,8 +46,6 @@ namespace Car_Rental_System
             DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges21 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges22 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges19 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges20 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             headerPanel = new Guna2Panel();
             helperLabel = new Label();
             titleLabel = new Label();
@@ -68,7 +66,6 @@ namespace Car_Rental_System
             listPanel = new Guna2Panel();
             carTypesGrid = new Guna2DataGridView();
             listHeaderPanel = new Guna2Panel();
-            searchTextBox = new Guna2TextBox();
             recordsLabel = new Label();
             headerPanel.SuspendLayout();
             bodyTable.SuspendLayout();
@@ -80,7 +77,10 @@ namespace Car_Rental_System
             // 
             // headerPanel
             // 
-            headerPanel.BackColor = Color.White;
+            headerPanel.BackColor = Color.Transparent;
+            headerPanel.BorderColor = Color.FromArgb(226, 232, 240);
+            headerPanel.BorderRadius = 18;
+            headerPanel.BorderThickness = 1;
             headerPanel.Controls.Add(helperLabel);
             headerPanel.Controls.Add(titleLabel);
             headerPanel.CustomizableEdges = customizableEdges1;
@@ -89,7 +89,11 @@ namespace Car_Rental_System
             headerPanel.Location = new Point(0, 0);
             headerPanel.Margin = new Padding(3, 4, 3, 4);
             headerPanel.Name = "headerPanel";
+            headerPanel.ShadowDecoration.BorderRadius = 18;
+            headerPanel.ShadowDecoration.Color = Color.FromArgb(203, 213, 225);
             headerPanel.ShadowDecoration.CustomizableEdges = customizableEdges2;
+            headerPanel.ShadowDecoration.Depth = 4;
+            headerPanel.ShadowDecoration.Enabled = true;
             headerPanel.Size = new Size(1234, 139);
             headerPanel.TabIndex = 0;
             // 
@@ -114,6 +118,7 @@ namespace Car_Rental_System
             titleLabel.Size = new Size(326, 53);
             titleLabel.TabIndex = 0;
             titleLabel.Text = "Car Types & Rates";
+            titleLabel.UseMnemonic = false;
             // 
             // bodyTable
             // 
@@ -264,7 +269,7 @@ namespace Car_Rental_System
             addButton.HoverState.FillColor = Color.FromArgb(29, 78, 216);
             addButton.Image = (Image)resources.GetObject("addButton.Image");
             addButton.ImageAlign = HorizontalAlignment.Left;
-            addButton.ImageOffset = new Point(5, 0);
+            addButton.ImageOffset = new Point(25, 0);
             addButton.ImageSize = new Size(22, 22);
             addButton.Location = new Point(23, 438);
             addButton.Margin = new Padding(3, 4, 3, 4);
@@ -272,7 +277,7 @@ namespace Car_Rental_System
             addButton.ShadowDecoration.CustomizableEdges = customizableEdges10;
             addButton.Size = new Size(151, 45);
             addButton.TabIndex = 9;
-            addButton.Text = "Add Type";
+            addButton.Text = "Add";
             addButton.TextOffset = new Point(8, 0);
             addButton.Click += AddButton_Click;
             // 
@@ -409,10 +414,6 @@ namespace Car_Rental_System
             dataGridViewCellStyle1.BackColor = Color.FromArgb(249, 250, 251);
             carTypesGrid.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
             carTypesGrid.CellBorderStyle = DataGridViewCellBorderStyle.None;
-            carTypesGrid.AutoGenerateColumns = true;
-            carTypesGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            carTypesGrid.ColumnHeadersVisible = true;
-            carTypesGrid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = Color.FromArgb(31, 41, 55);
             dataGridViewCellStyle2.Font = new Font("Inter", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
@@ -469,7 +470,6 @@ namespace Car_Rental_System
             listHeaderPanel.BorderColor = Color.FromArgb(209, 213, 219);
             listHeaderPanel.BorderRadius = 8;
             listHeaderPanel.BorderThickness = 1;
-            listHeaderPanel.Controls.Add(searchTextBox);
             listHeaderPanel.Controls.Add(recordsLabel);
             listHeaderPanel.CustomizableEdges = customizableEdges21;
             listHeaderPanel.Dock = DockStyle.Top;
@@ -479,29 +479,6 @@ namespace Car_Rental_System
             listHeaderPanel.ShadowDecoration.CustomizableEdges = customizableEdges22;
             listHeaderPanel.Size = new Size(781, 77);
             listHeaderPanel.TabIndex = 0;
-            // 
-            // searchTextBox
-            // 
-            searchTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            searchTextBox.BorderColor = Color.FromArgb(209, 213, 219);
-            searchTextBox.BorderRadius = 6;
-            searchTextBox.Cursor = Cursors.IBeam;
-            searchTextBox.CustomizableEdges = customizableEdges19;
-            searchTextBox.DefaultText = "";
-            searchTextBox.FocusedState.BorderColor = Color.FromArgb(37, 99, 235);
-            searchTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            searchTextBox.ForeColor = Color.FromArgb(17, 24, 39);
-            searchTextBox.HoverState.BorderColor = Color.FromArgb(37, 99, 235);
-            searchTextBox.Location = new Point(480, 24);
-            searchTextBox.Margin = new Padding(3, 4, 3, 4);
-            searchTextBox.Name = "searchTextBox";
-            searchTextBox.PlaceholderForeColor = Color.FromArgb(107, 114, 128);
-            searchTextBox.PlaceholderText = "Search type or description";
-            searchTextBox.SelectedText = "";
-            searchTextBox.ShadowDecoration.CustomizableEdges = customizableEdges20;
-            searchTextBox.Size = new Size(274, 28);
-            searchTextBox.TabIndex = 1;
-            searchTextBox.TextChanged += SearchTextBox_TextChanged;
             // 
             // recordsLabel
             // 
@@ -563,7 +540,6 @@ namespace Car_Rental_System
         private Guna2Panel listPanel;
         private Guna2DataGridView carTypesGrid;
         private Guna2Panel listHeaderPanel;
-        private Guna2TextBox searchTextBox;
         private Label recordsLabel;
     }
 }

@@ -31,8 +31,6 @@ namespace Car_Rental_System
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges6 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges7 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges8 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges9 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges10 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges11 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges12 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges13 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
@@ -58,7 +56,6 @@ namespace Car_Rental_System
             clearButton = new Guna2Button();
             deleteButton = new Guna2Button();
             updateButton = new Guna2Button();
-            addButton = new Guna2Button();
             addressTextBox = new Guna2TextBox();
             addressLabel = new Label();
             licenseTextBox = new Guna2TextBox();
@@ -83,7 +80,10 @@ namespace Car_Rental_System
             // 
             // headerPanel
             // 
-            headerPanel.BackColor = Color.White;
+            headerPanel.BackColor = Color.FromArgb(243, 244, 246);
+            headerPanel.BorderColor = Color.FromArgb(226, 232, 240);
+            headerPanel.BorderRadius = 18;
+            headerPanel.BorderThickness = 1;
             headerPanel.Controls.Add(helperLabel);
             headerPanel.Controls.Add(titleLabel);
             headerPanel.CustomizableEdges = customizableEdges1;
@@ -92,7 +92,11 @@ namespace Car_Rental_System
             headerPanel.Location = new Point(0, 0);
             headerPanel.Margin = new Padding(3, 4, 3, 4);
             headerPanel.Name = "headerPanel";
+            headerPanel.ShadowDecoration.BorderRadius = 18;
+            headerPanel.ShadowDecoration.Color = Color.FromArgb(203, 213, 225);
             headerPanel.ShadowDecoration.CustomizableEdges = customizableEdges2;
+            headerPanel.ShadowDecoration.Depth = 4;
+            headerPanel.ShadowDecoration.Enabled = true;
             headerPanel.Size = new Size(1234, 139);
             headerPanel.TabIndex = 0;
             // 
@@ -103,9 +107,9 @@ namespace Car_Rental_System
             helperLabel.ForeColor = Color.FromArgb(31, 41, 55);
             helperLabel.Location = new Point(35, 85);
             helperLabel.Name = "helperLabel";
-            helperLabel.Size = new Size(450, 24);
+            helperLabel.Size = new Size(615, 24);
             helperLabel.TabIndex = 1;
-            helperLabel.Text = "Keep customer contact and license records organized.";
+            helperLabel.Text = "Customer records are created from Bookings. Update or archive them here.";
             // 
             // titleLabel
             // 
@@ -145,7 +149,6 @@ namespace Car_Rental_System
             detailsPanel.Controls.Add(clearButton);
             detailsPanel.Controls.Add(deleteButton);
             detailsPanel.Controls.Add(updateButton);
-            detailsPanel.Controls.Add(addButton);
             detailsPanel.Controls.Add(addressTextBox);
             detailsPanel.Controls.Add(addressLabel);
             detailsPanel.Controls.Add(licenseTextBox);
@@ -177,17 +180,15 @@ namespace Car_Rental_System
             clearButton.ForeColor = Color.FromArgb(31, 41, 55);
             clearButton.HoverState.FillColor = Color.FromArgb(243, 244, 246);
             clearButton.Image = (Image)resources.GetObject("clearButton.Image");
-            clearButton.ImageAlign = HorizontalAlignment.Left;
-            clearButton.ImageOffset = new Point(25, 0);
             clearButton.ImageSize = new Size(22, 22);
-            clearButton.Location = new Point(194, 544);
+            clearButton.Location = new Point(34, 544);
             clearButton.Margin = new Padding(3, 4, 3, 4);
             clearButton.Name = "clearButton";
             clearButton.ShadowDecoration.CustomizableEdges = customizableEdges4;
-            clearButton.Size = new Size(140, 45);
+            clearButton.Size = new Size(142, 45);
             clearButton.TabIndex = 12;
             clearButton.Text = "Clear";
-            clearButton.TextOffset = new Point(10, 0);
+            clearButton.TextOffset = new Point(1, 0);
             clearButton.Click += ClearButton_Click;
             // 
             // deleteButton
@@ -201,11 +202,11 @@ namespace Car_Rental_System
             deleteButton.HoverState.FillColor = Color.FromArgb(185, 28, 28);
             deleteButton.Image = (Image)resources.GetObject("deleteButton.Image");
             deleteButton.ImageSize = new Size(22, 22);
-            deleteButton.Location = new Point(34, 597);
+            deleteButton.Location = new Point(194, 544);
             deleteButton.Margin = new Padding(3, 4, 3, 4);
             deleteButton.Name = "deleteButton";
             deleteButton.ShadowDecoration.CustomizableEdges = customizableEdges6;
-            deleteButton.Size = new Size(300, 45);
+            deleteButton.Size = new Size(140, 45);
             deleteButton.TabIndex = 11;
             deleteButton.Text = "Delete";
             deleteButton.TextOffset = new Point(1, 0);
@@ -221,39 +222,16 @@ namespace Car_Rental_System
             updateButton.ForeColor = Color.White;
             updateButton.HoverState.FillColor = Color.FromArgb(55, 65, 81);
             updateButton.Image = (Image)resources.GetObject("updateButton.Image");
-            updateButton.ImageAlign = HorizontalAlignment.Left;
-            updateButton.ImageOffset = new Point(15, 0);
             updateButton.ImageSize = new Size(22, 22);
-            updateButton.Location = new Point(34, 544);
+            updateButton.Location = new Point(34, 491);
             updateButton.Margin = new Padding(3, 4, 3, 4);
             updateButton.Name = "updateButton";
             updateButton.ShadowDecoration.CustomizableEdges = customizableEdges8;
-            updateButton.Size = new Size(142, 45);
+            updateButton.Size = new Size(300, 45);
             updateButton.TabIndex = 10;
-            updateButton.Text = "Update";
-            updateButton.TextOffset = new Point(10, 0);
+            updateButton.Text = "Update Customer";
+            updateButton.TextOffset = new Point(1, 0);
             updateButton.Click += UpdateButton_Click;
-            // 
-            // addButton
-            // 
-            addButton.BackColor = Color.White;
-            addButton.BorderRadius = 8;
-            addButton.CustomizableEdges = customizableEdges9;
-            addButton.FillColor = Color.FromArgb(37, 99, 235);
-            addButton.Font = new Font("Inter Medium", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            addButton.ForeColor = Color.White;
-            addButton.HoverState.FillColor = Color.FromArgb(29, 78, 216);
-            addButton.Image = (Image)resources.GetObject("addButton.Image");
-            addButton.ImageSize = new Size(22, 22);
-            addButton.Location = new Point(34, 491);
-            addButton.Margin = new Padding(3, 4, 3, 4);
-            addButton.Name = "addButton";
-            addButton.ShadowDecoration.CustomizableEdges = customizableEdges10;
-            addButton.Size = new Size(300, 45);
-            addButton.TabIndex = 9;
-            addButton.Text = "Add Customer";
-            addButton.TextOffset = new Point(1, 0);
-            addButton.Click += AddButton_Click;
             // 
             // addressTextBox
             // 
@@ -391,9 +369,9 @@ namespace Car_Rental_System
             sectionLabel.ForeColor = Color.FromArgb(31, 41, 55);
             sectionLabel.Location = new Point(23, 24);
             sectionLabel.Name = "sectionLabel";
-            sectionLabel.Size = new Size(207, 32);
+            sectionLabel.Size = new Size(225, 32);
             sectionLabel.TabIndex = 0;
-            sectionLabel.Text = "Customer Details";
+            sectionLabel.Text = "Selected Customer";
             // 
             // listPanel
             // 
@@ -562,7 +540,6 @@ namespace Car_Rental_System
         private Guna2Button clearButton;
         private Guna2Button deleteButton;
         private Guna2Button updateButton;
-        private Guna2Button addButton;
         private Guna2TextBox addressTextBox;
         private Label addressLabel;
         private Guna2TextBox licenseTextBox;

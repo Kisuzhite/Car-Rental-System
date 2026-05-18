@@ -20,6 +20,7 @@ namespace Car_Rental_System.Models
 
         public Customer Customer { get; set; } = null!;
         public Car Car { get; set; } = null!;
+        public ICollection<RentalPayment> Payments { get; set; } = new List<RentalPayment>();
 
         [NotMapped]
         public decimal Balance => PaymentHelper.GetBalance(TotalAmount, AmountPaid);

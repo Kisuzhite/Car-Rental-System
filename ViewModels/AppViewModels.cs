@@ -20,6 +20,9 @@ namespace Car_Rental_System.ViewModels
     {
         public int CustomerId { get; set; }
         public string FullName { get; set; } = "";
+        public string ContactNumber { get; set; } = "";
+        public string LicenseNumber { get; set; } = "";
+        public string Address { get; set; } = "";
     }
 
     internal sealed class RentalCarLookupItem
@@ -48,6 +51,7 @@ namespace Car_Rental_System.ViewModels
     internal sealed class CarGridRow
     {
         public int CarId { get; set; }
+        public int? CarTypeId { get; set; }
         public string PlateNumber { get; set; } = "";
         public string Brand { get; set; } = "";
         public string Model { get; set; } = "";
@@ -74,10 +78,12 @@ namespace Car_Rental_System.ViewModels
         public string CustomerName { get; set; } = "";
         public string ContactNumber { get; set; } = "";
         public string Car { get; set; } = "";
+        public decimal DailyRate { get; set; }
         public DateOnly ReservationDate { get; set; }
         public DateOnly PickupDate { get; set; }
         public DateOnly ExpectedReturnDate { get; set; }
         public decimal DepositAmount { get; set; }
+        public PaymentMethod PaymentMethodValue { get; set; }
         public string PaymentMethod { get; set; } = "";
         public string PaymentReferenceNumber { get; set; } = "";
         public ReservationStatus Status { get; set; }
@@ -97,8 +103,6 @@ namespace Car_Rental_System.ViewModels
         public decimal Balance { get; set; }
         public PaymentStatus PaymentStatus { get; set; }
         public string PaymentMethod { get; set; } = "";
-        public int LateDays { get; set; }
-        public decimal Penalty { get; set; }
         public string Status { get; set; } = "";
     }
 
@@ -115,30 +119,6 @@ namespace Car_Rental_System.ViewModels
         public PaymentStatus PaymentStatus { get; set; }
         public string PaymentMethod { get; set; } = "";
         public int LateDays { get; set; }
-        public string Status { get; set; } = "";
-    }
-
-    internal sealed class DashboardCarGridRow
-    {
-        public int CarId { get; set; }
-        public string PlateNo { get; set; } = "";
-        public string Type { get; set; } = "";
-        public string Brand { get; set; } = "";
-        public string Model { get; set; } = "";
-        public decimal RatePerDay { get; set; }
-        public CarStatus Status { get; set; }
-    }
-
-    internal sealed class RecentRentalGridRow
-    {
-        public int RentalId { get; set; }
-        public string Customer { get; set; } = "";
-        public string Car { get; set; } = "";
-        public DateOnly ReturnDate { get; set; }
-        public decimal Amount { get; set; }
-        public decimal AmountPaid { get; set; }
-        public decimal Balance { get; set; }
-        public PaymentStatus PaymentStatus { get; set; }
         public string Status { get; set; } = "";
     }
 
@@ -162,21 +142,39 @@ namespace Car_Rental_System.ViewModels
         public string Status { get; set; } = "";
     }
 
+    internal sealed record DashboardRevenuePoint(
+        string Month,
+        decimal Amount);
+
+    internal sealed record DashboardPaymentStatusPoint(
+        string Status,
+        int Count);
+
+    internal sealed record DashboardScheduleDay(
+        DateOnly Date,
+        int PickupCount,
+        int ReturnCount);
+
     internal sealed record DashboardData(
-        int TotalCars,
+        decimal TotalRevenue,
+        int ActiveBookings,
+        int RentedCars,
         int AvailableCars,
         int OverdueRentals,
-        decimal MonthlyCollected,
-        List<DashboardCarGridRow> AvailableCarsGrid,
-        List<RecentRentalGridRow> RecentRentals,
-        List<CarLookupItem> AvailableCarLookup);
+        List<DashboardScheduleDay> WeeklySchedule,
+        List<DashboardRevenuePoint> MonthlyRevenue,
+        List<DashboardPaymentStatusPoint> PaymentStatus);
 
     internal sealed record ReportsData(
-        int TotalCars,
-        int AvailableCars,
-        int ActiveRentals,
+        int TotalBookings,
+        int CompletedRentals,
         int OverdueRentals,
         decimal TotalCollected,
+        string TotalBookingsTrend,
+        string CompletedRentalsTrend,
+        string OverdueRentalsTrend,
+        string TotalCollectedTrend,
+        List<DashboardRevenuePoint> MonthlyRevenue,
         List<ReportRentalHistoryRow> RentalHistory);
 
     internal sealed record CarFormInput(
@@ -211,25 +209,22 @@ namespace Car_Rental_System.ViewModels
         PaymentMethod PaymentMethod,
         string PaymentReferenceNumber);
 
-    internal sealed record QuickRentalFormInput(
+    internal sealed record BookingFormInput(
         string CustomerName,
+        string ContactNumber,
+        string LicenseNumber,
+        string Address,
         int CarId,
-        DateTime RentalDate,
+        DateTime PickupDate,
         DateTime ExpectedReturnDate,
         decimal AmountPaid,
-        PaymentMethod PaymentMethod);
-
-    internal sealed record RentalFormInput(
-        int CustomerId,
-        int CarId,
-        DateTime RentalDate,
-        DateTime ExpectedReturnDate,
-        decimal AmountPaid,
-        PaymentMethod PaymentMethod);
+        PaymentMethod PaymentMethod,
+        string PaymentReferenceNumber);
 
     internal sealed record ReturnFormInput(
         int RentalId,
         DateTime ActualReturnDate,
         decimal AdditionalPayment,
-        PaymentMethod PaymentMethod);
+        PaymentMethod PaymentMethod,
+        string PaymentReferenceNumber);
 }

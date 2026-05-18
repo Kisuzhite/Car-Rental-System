@@ -19,14 +19,34 @@ namespace Car_Rental_System.Presenters
 
         public async Task LoadLookupsAsync()
         {
+            DateOnly pickupDate = RentalCalculator.ToDateOnly(DateTime.Today.AddDays(1));
+            await LoadLookupsAsync(pickupDate, pickupDate.AddDays(1));
+        }
+
+        public async Task LoadLookupsAsync(
+            DateOnly pickupDate,
+            DateOnly expectedReturnDate,
+            int? excludedReservationId = null)
+        {
+            await LoadAvailableCarsAsync(pickupDate, expectedReturnDate, excludedReservationId);
+        }
+
+        public async Task LoadAvailableCarsAsync(
+            DateOnly pickupDate,
+            DateOnly expectedReturnDate,
+            int? excludedReservationId = null)
+        {
             using var db = new AppDbContext();
             var carRepository = new CarRepository(db);
 
-            List<ReservationCarLookupItem> cars = (await carRepository.GetAvailableCarsAsync())
+            List<ReservationCarLookupItem> cars = (await carRepository.GetAvailableForScheduleAsync(
+                    pickupDate,
+                    expectedReturnDate,
+                    excludedReservationId: excludedReservationId))
                 .Select(c => new ReservationCarLookupItem
                 {
                     CarId = c.CarId,
-                    CarName = c.PlateNumber + " - " + c.Brand + " " + c.Model +
+                    CarName = c.Brand + " " + c.Model +
                         (c.CarType != null ? " (" + c.CarType.TypeName + ")" : ""),
                     DailyRate = c.CarType != null ? c.CarType.DailyRate : c.DailyRate
                 })
@@ -45,14 +65,16 @@ namespace Car_Rental_System.Presenters
                 {
                     ReservationId = r.ReservationId,
                     CarId = r.CarId,
-                    CustomerName = r.CustomerName,
-                    ContactNumber = r.ContactNumber,
+                    CustomerName = r.Customer?.FullName ?? r.CustomerName,
+                    ContactNumber = GetReservationContactNumber(r),
                     Car = r.Car.PlateNumber + " - " + r.Car.Brand + " " + r.Car.Model +
                         (r.Car.CarType != null ? " (" + r.Car.CarType.TypeName + ")" : ""),
+                    DailyRate = r.Car.CarType != null ? r.Car.CarType.DailyRate : r.Car.DailyRate,
                     ReservationDate = r.ReservationDate,
                     PickupDate = r.PickupDate,
                     ExpectedReturnDate = r.ExpectedReturnDate,
                     DepositAmount = r.DepositAmount,
+                    PaymentMethodValue = r.PaymentMethod,
                     PaymentMethod = PaymentHelper.FormatPaymentMethod(r.PaymentMethod),
                     PaymentReferenceNumber = r.PaymentReferenceNumber,
                     Status = r.Status
@@ -62,54 +84,12 @@ namespace Car_Rental_System.Presenters
             view.BindReservations(reservations);
         }
 
-        public async Task<PresenterResult> AddReservationAsync(ReservationFormInput input)
-        {
-            using var db = new AppDbContext();
-            var reservationRepository = new ReservationRepository(db);
-            var carRepository = new CarRepository(db);
-
-            if (await reservationRepository.HasCarScheduleConflictAsync(input.CarId, input.PickupDate, input.ExpectedReturnDate))
-            {
-                return ScheduleConflictResult();
-            }
-
-            Car? car = await carRepository.GetAvailableByIdWithTypeAsync(input.CarId);
-            if (car == null)
-            {
-                return PresenterResult.Info(
-                    "Car Not Available",
-                    "The selected car is no longer available. Please choose another car.");
-            }
-
-            PresenterResult? depositValidation = ValidateReservationDeposit(input, car);
-            if (depositValidation != null)
-            {
-                return depositValidation;
-            }
-
-            reservationRepository.Add(new Reservation
-            {
-                CarId = input.CarId,
-                CustomerName = input.CustomerName,
-                ContactNumber = input.ContactNumber,
-                ReservationDate = RentalCalculator.ToDateOnly(DateTime.Today),
-                PickupDate = input.PickupDate,
-                ExpectedReturnDate = input.ExpectedReturnDate,
-                DepositAmount = input.DepositAmount,
-                PaymentMethod = input.PaymentMethod,
-                PaymentReferenceNumber = input.PaymentReferenceNumber,
-                Status = ReservationStatus.Confirmed
-            });
-
-            await reservationRepository.SaveChangesAsync();
-            return PresenterResult.Ok("Saved", "Reservation saved successfully.");
-        }
-
         public async Task<PresenterResult> UpdateReservationAsync(int reservationId, ReservationFormInput input)
         {
             using var db = new AppDbContext();
             var reservationRepository = new ReservationRepository(db);
             var carRepository = new CarRepository(db);
+            var customerRepository = new CustomerRepository(db);
             Reservation? reservation = await reservationRepository.GetByIdAsync(reservationId);
 
             if (reservation == null)
@@ -132,7 +112,34 @@ namespace Car_Rental_System.Presenters
                 return ScheduleConflictResult();
             }
 
-            Car? car = await carRepository.GetAvailableByIdWithTypeAsync(input.CarId);
+            Customer? reservationCustomer = reservation.CustomerId.HasValue
+                ? await customerRepository.GetByIdAsync(reservation.CustomerId.Value)
+                : null;
+            string lockedCustomerName = reservationCustomer is { IsArchived: false }
+                ? reservationCustomer.FullName
+                : ValidationHelper.CollapseSpaces(reservation.CustomerName);
+
+            if (string.IsNullOrWhiteSpace(lockedCustomerName))
+            {
+                lockedCustomerName = input.CustomerName;
+            }
+
+            Customer? matchingCustomer = reservationCustomer is { IsArchived: false }
+                ? reservationCustomer
+                : await customerRepository.GetActiveByNameAsync(lockedCustomerName);
+            int? customerIdForConflictCheck = matchingCustomer?.CustomerId ?? reservation.CustomerId;
+
+            if (await reservationRepository.HasCustomerScheduleConflictAsync(
+                    customerIdForConflictCheck,
+                    lockedCustomerName,
+                    input.PickupDate,
+                    input.ExpectedReturnDate,
+                    reservationId))
+            {
+                return CustomerScheduleConflictResult();
+            }
+
+            Car? car = await carRepository.GetBookableByIdWithTypeAsync(input.CarId);
             if (car == null)
             {
                 return PresenterResult.Info(
@@ -146,9 +153,14 @@ namespace Car_Rental_System.Presenters
                 return depositValidation;
             }
 
+            Customer customer = await customerRepository.GetOrCreateCustomerByNameAndContactAsync(
+                lockedCustomerName,
+                input.ContactNumber);
+
+            reservation.CustomerId = customer.CustomerId;
             reservation.CarId = input.CarId;
-            reservation.CustomerName = input.CustomerName;
-            reservation.ContactNumber = input.ContactNumber;
+            reservation.CustomerName = customer.FullName;
+            reservation.ContactNumber = customer.ContactNumber;
             reservation.PickupDate = input.PickupDate;
             reservation.ExpectedReturnDate = input.ExpectedReturnDate;
             reservation.DepositAmount = input.DepositAmount;
@@ -191,6 +203,25 @@ namespace Car_Rental_System.Presenters
             return PresenterResult.Info(
                 "Schedule Conflict",
                 "This car already has an active rental or reservation for those dates.");
+        }
+
+        private static PresenterResult CustomerScheduleConflictResult()
+        {
+            return PresenterResult.Info(
+                "Customer Schedule Conflict",
+                "This customer already has an active rental or confirmed reservation that overlaps those dates. Return, cancel, or adjust the existing booking first.");
+        }
+
+        private static string GetReservationContactNumber(Reservation reservation)
+        {
+            string? customerContact = reservation.Customer?.ContactNumber;
+            if (!string.IsNullOrWhiteSpace(customerContact) &&
+                !string.Equals(customerContact, AppConstants.NotProvided, StringComparison.OrdinalIgnoreCase))
+            {
+                return customerContact;
+            }
+
+            return reservation.ContactNumber;
         }
 
         private static PresenterResult? ValidateReservationDeposit(ReservationFormInput input, Car car)

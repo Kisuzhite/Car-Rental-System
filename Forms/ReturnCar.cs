@@ -18,10 +18,16 @@ namespace Car_Rental_System
         private decimal _selectedBaseAmount;
         private decimal _selectedAmountPaid;
         private DateOnly _selectedRentalDate;
+        private readonly int? initialRentalId;
 
-        public ReturnCar()
+        public ReturnCar() : this(null)
+        {
+        }
+
+        public ReturnCar(int? rentalIdToSelect)
         {
             InitializeComponent();
+            initialRentalId = rentalIdToSelect;
             presenter = new ReturnCarPresenter(this);
         }
 
@@ -35,17 +41,25 @@ namespace Car_Rental_System
             DataGridViewHelper.HideColumn(activeRentalsGrid, "RentalId");
             DataGridViewHelper.HideColumn(activeRentalsGrid, "CarId");
             DataGridViewHelper.ApplyStatusFormatting(activeRentalsGrid);
+            DataGridViewHelper.ApplyFullTextColumn(activeRentalsGrid, "Car", 340);
             activeRentalsGrid.ClearSelection();
             ClearDetails();
+
+            if (initialRentalId.HasValue && TrySelectRental(initialRentalId.Value))
+            {
+                return;
+            }
+
             DataGridViewHelper.ClearSelectionWhenReady(activeRentalsGrid);
         }
 
         private async void ReturnCar_Load(object? sender, EventArgs e)
         {
             paymentMethodComboBox.Format += PaymentMethodComboBox_Format;
-            paymentMethodComboBox.DropDownWidth = 190;
+            paymentMethodComboBox.SelectedIndexChanged += PaymentMethodComboBox_SelectedIndexChanged;
             paymentMethodComboBox.DataSource = PaymentHelper.GetSelectablePaymentMethods();
             paymentMethodComboBox.SelectedItem = PaymentMethod.Cash;
+            UpdateReturnPaymentFields();
             actualReturnDatePicker.Value = DateTime.Today;
             await LoadActiveRentalsAsync();
         }
@@ -91,11 +105,14 @@ namespace Car_Rental_System
             customerTextBox.Text = row.Customer;
             carTextBox.Text = row.Car;
             expectedReturnTextBox.Text = _selectedExpectedReturn.ToString("d", CultureInfo.CurrentCulture);
-            dailyRateTextBox.Text = _selectedDailyRate.ToString("N2");
-            baseAmountTextBox.Text = _selectedBaseAmount.ToString("N2");
-            amountPaidTextBox.Text = _selectedAmountPaid.ToString("N2");
+            dailyRateTextBox.Text = RentalCalculator.FormatCurrency(_selectedDailyRate);
+            baseAmountTextBox.Text = RentalCalculator.FormatCurrency(_selectedBaseAmount);
+            amountPaidTextBox.Text = RentalCalculator.FormatCurrency(_selectedAmountPaid);
+            actualReturnDatePicker.Value = DateTime.Today;
             additionalPaymentTextBox.Clear();
+            paymentReferenceTextBox.Clear();
             paymentMethodComboBox.SelectedItem = PaymentMethod.Cash;
+            UpdateReturnPaymentFields();
 
             CalculateFinalAmount();
         }
@@ -105,7 +122,13 @@ namespace Car_Rental_System
             if (selectedRentalId != null)
             {
                 CalculateFinalAmount();
+                UpdateReturnPaymentFields();
             }
+        }
+
+        private void PaymentMethodComboBox_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            UpdateReturnPaymentFields();
         }
 
         private void AdditionalPaymentTextBox_TextChanged(object? sender, EventArgs e)
@@ -127,8 +150,8 @@ namespace Car_Rental_System
                 _selectedBaseAmount);
 
             lateDaysTextBox.Text = lateDays.ToString();
-            penaltyTextBox.Text = penalty.ToString("N2");
-            finalAmountTextBox.Text = finalAmount.ToString("N2");
+            penaltyTextBox.Text = RentalCalculator.FormatCurrency(penalty);
+            finalAmountTextBox.Text = RentalCalculator.FormatCurrency(finalAmount);
 
             decimal additionalPayment = ParseOptionalPaymentAmount(additionalPaymentTextBox.Text);
             if (additionalPayment < 0)
@@ -137,7 +160,7 @@ namespace Car_Rental_System
             }
 
             decimal balance = PaymentHelper.GetBalance(finalAmount, _selectedAmountPaid + additionalPayment);
-            balanceTextBox.Text = balance.ToString("N2");
+            balanceTextBox.Text = RentalCalculator.FormatCurrency(balance);
             return finalAmount;
         }
 
@@ -181,6 +204,36 @@ namespace Car_Rental_System
             PaymentMethod paymentMethod = paymentMethodComboBox.SelectedItem is PaymentMethod selectedMethod
                 ? selectedMethod
                 : PaymentMethod.Cash;
+            string paymentReferenceNumber = ValidationHelper.CollapseSpaces(paymentReferenceTextBox.Text);
+
+            if (additionalPayment <= 0)
+            {
+                paymentMethod = PaymentMethod.Cash;
+                paymentReferenceNumber = AppConstants.NotProvided;
+            }
+            else
+            {
+                bool requiresReference = PaymentHelper.RequiresReferenceNumber(paymentMethod);
+                if (requiresReference && string.IsNullOrWhiteSpace(paymentReferenceNumber))
+                {
+                    MessageBox.Show(
+                        $"Please enter the payment reference for {PaymentHelper.FormatPaymentMethod(paymentMethod)}.",
+                        "Missing Payment Reference",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+                }
+
+                paymentReferenceNumber = requiresReference
+                    ? paymentReferenceNumber
+                    : AppConstants.NotProvided;
+            }
+
+            if (paymentReferenceNumber.Length > 80)
+            {
+                MessageBox.Show("Payment reference number cannot be longer than 80 characters.", "Invalid Reference", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
             try
             {
@@ -188,7 +241,8 @@ namespace Car_Rental_System
                     selectedRentalId.Value,
                     actualReturnDatePicker.Value,
                     additionalPayment,
-                    paymentMethod));
+                    paymentMethod,
+                    paymentReferenceNumber));
 
                 if (!result.Success)
                 {
@@ -248,18 +302,69 @@ namespace Car_Rental_System
             baseAmountTextBox.Clear();
             amountPaidTextBox.Clear();
             additionalPaymentTextBox.Clear();
+            paymentReferenceTextBox.Clear();
             balanceTextBox.Clear();
             lateDaysTextBox.Clear();
             penaltyTextBox.Clear();
             finalAmountTextBox.Clear();
             paymentMethodComboBox.SelectedItem = PaymentMethod.Cash;
+            UpdateReturnPaymentFields();
         }
 
         private static decimal ParseOptionalPaymentAmount(string value)
         {
             return string.IsNullOrWhiteSpace(value)
                 ? 0
-                : decimal.TryParse(value, out decimal amount) ? amount : -1;
+                : RentalCalculator.TryParseCurrency(value, out decimal amount) ? amount : -1;
+        }
+
+        private bool TrySelectRental(int rentalId)
+        {
+            foreach (DataGridViewRow row in activeRentalsGrid.Rows)
+            {
+                if (row.DataBoundItem is ActiveRentalGridRow rental &&
+                    rental.RentalId == rentalId)
+                {
+                    row.Selected = true;
+                    activeRentalsGrid.CurrentCell = row.Cells.Cast<DataGridViewCell>().FirstOrDefault(c => c.Visible);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void UpdateReturnPaymentFields()
+        {
+            decimal additionalPayment = ParseOptionalPaymentAmount(additionalPaymentTextBox.Text);
+            bool hasPaymentNow = additionalPayment > 0;
+            PaymentMethod paymentMethod = paymentMethodComboBox.SelectedItem is PaymentMethod selectedMethod
+                ? selectedMethod
+                : PaymentMethod.Cash;
+            bool requiresReference = hasPaymentNow && PaymentHelper.RequiresReferenceNumber(paymentMethod);
+
+            paymentMethodLabel.Enabled = hasPaymentNow;
+            paymentMethodComboBox.Enabled = hasPaymentNow;
+            paymentReferenceLabel.Visible = true;
+            paymentReferenceTextBox.Visible = true;
+            paymentReferenceTextBox.Enabled = true;
+            paymentReferenceTextBox.ReadOnly = !requiresReference;
+            paymentReferenceTextBox.FillColor = requiresReference
+                ? Color.White
+                : Color.FromArgb(243, 244, 246);
+            paymentReferenceTextBox.PlaceholderText = requiresReference
+                ? "Receipt or transaction reference"
+                : hasPaymentNow ? "Not needed for cash" : "No payment now";
+
+            if (!hasPaymentNow && paymentMethodComboBox.SelectedItem is not PaymentMethod.Cash)
+            {
+                paymentMethodComboBox.SelectedItem = PaymentMethod.Cash;
+            }
+
+            if (!requiresReference)
+            {
+                paymentReferenceTextBox.Clear();
+            }
         }
     }
 }

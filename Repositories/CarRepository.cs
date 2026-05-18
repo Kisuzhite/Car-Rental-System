@@ -28,8 +28,7 @@ namespace Car_Rental_System.Repositories
             string trimmed = search.Trim();
 
             IQueryable<Car> query = db.Cars
-                .Include(c => c.CarType)
-                .Where(c => c.Status != CarStatus.Rented);
+                .Include(c => c.CarType);
 
             query = ApplyCarSearchFilter(query, trimmed);
 
@@ -54,9 +53,57 @@ namespace Car_Rental_System.Repositories
                 .ToListAsync();
         }
 
+        public Task<List<Car>> GetAvailableForScheduleAsync(
+            DateOnly pickupDate,
+            DateOnly expectedReturnDate,
+            string search = "",
+            int? excludedReservationId = null)
+        {
+            string trimmed = search.Trim();
+            DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+
+            IQueryable<Car> query = db.Cars
+                .Include(c => c.CarType)
+                .Where(c => c.Status != CarStatus.Maintenance);
+
+            if (pickupDate <= today)
+            {
+                query = query.Where(c => c.Status == CarStatus.Available);
+            }
+
+            query = query.Where(c =>
+                !db.Rentals.Any(r =>
+                    r.CarId == c.CarId &&
+                    r.Status == RentalStatus.Active &&
+                    pickupDate <= r.ExpectedReturnDate &&
+                    r.RentalDate <= expectedReturnDate) &&
+                !db.Reservations.Any(r =>
+                    r.CarId == c.CarId &&
+                    (r.Status == ReservationStatus.Pending || r.Status == ReservationStatus.Confirmed) &&
+                    (!excludedReservationId.HasValue || r.ReservationId != excludedReservationId.Value) &&
+                    pickupDate <= r.ExpectedReturnDate &&
+                    r.PickupDate <= expectedReturnDate));
+
+            query = ApplyCarSearchFilter(query, trimmed);
+
+            return query
+                .OrderBy(c => c.Brand)
+                .ThenBy(c => c.Model)
+                .ToListAsync();
+        }
+
         public Task<Car?> GetByIdAsync(int carId)
         {
             return db.Cars.FirstOrDefaultAsync(c => c.CarId == carId);
+        }
+
+        public Task<Car?> GetBookableByIdWithTypeAsync(int carId)
+        {
+            return db.Cars
+                .Include(c => c.CarType)
+                .FirstOrDefaultAsync(c =>
+                    c.CarId == carId &&
+                    c.Status != CarStatus.Maintenance);
         }
 
         public Task<Car?> GetAvailableByIdWithTypeAsync(int carId)

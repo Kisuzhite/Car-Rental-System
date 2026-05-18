@@ -3,6 +3,7 @@ using Car_Rental_System.Models;
 using Car_Rental_System.Presenters;
 using Car_Rental_System.ViewModels;
 using Car_Rental_System.Views;
+using Guna.UI2.WinForms;
 
 namespace Car_Rental_System
 {
@@ -15,6 +16,7 @@ namespace Car_Rental_System
         {
             InitializeComponent();
             presenter = new CarsPresenter(this);
+            SetCarEditMode(isExistingCar: false);
         }
 
         public string SearchText => searchTextBox.Text;
@@ -32,6 +34,7 @@ namespace Car_Rental_System
 
             DataGridViewHelper.ApplyFriendlyHeaders(carsGrid);
             DataGridViewHelper.HideColumn(carsGrid, "CarId");
+            DataGridViewHelper.HideColumn(carsGrid, "CarTypeId");
             DataGridViewHelper.MoveColumnToEnd(carsGrid, "Status");
             DataGridViewHelper.ApplyStatusFormatting(carsGrid);
 
@@ -79,6 +82,7 @@ namespace Car_Rental_System
             if (carsGrid.CurrentRow?.DataBoundItem is not CarGridRow car || !carsGrid.CurrentRow.Selected)
             {
                 selectedCarId = null;
+                SetCarEditMode(isExistingCar: false);
                 return;
             }
 
@@ -90,16 +94,17 @@ namespace Car_Rental_System
             yearTextBox.Text = car.Year.ToString();
             colorTextBox.Text = car.Color;
             dailyRateTextBox.Text = car.DailyRate.ToString("0.##");
-            await LoadCarTypesAsync();
+            await LoadCarTypesAsync(car.CarTypeId);
 
             if (selectedCarId != carId)
             {
                 return;
             }
 
-            SelectCarType(car.CarType);
+            SelectCarType(car.CarTypeId);
 
             UpdateStatusOptions(car.Status);
+            SetCarEditMode(isExistingCar: true, car.Status);
         }
 
         private async void AddButton_Click(object? sender, EventArgs e)
@@ -309,12 +314,17 @@ namespace Car_Rental_System
             return true;
         }
 
-        private void SelectCarType(string typeName)
+        private void SelectCarType(int? carTypeId)
         {
+            if (!carTypeId.HasValue)
+            {
+                return;
+            }
+
             foreach (object item in carTypeComboBox.Items)
             {
                 if (item is CarTypeLookupItem carType &&
-                    string.Equals(carType.TypeName, typeName, StringComparison.OrdinalIgnoreCase))
+                    carType.CarTypeId == carTypeId.Value)
                 {
                     carTypeComboBox.SelectedItem = item;
                     return;
@@ -336,6 +346,40 @@ namespace Car_Rental_System
             await LoadCarTypesAsync();
 
             carsGrid.ClearSelection();
+            SetCarEditMode(isExistingCar: false);
+        }
+
+        private void SetCarEditMode(bool isExistingCar, CarStatus? currentStatus = null)
+        {
+            sectionLabel.Text = isExistingCar ? "Selected Car" : "Car Details";
+
+            addButton.Enabled = !isExistingCar;
+            updateButton.Enabled = isExistingCar;
+            deleteButton.Enabled = isExistingCar;
+
+            SetIdentityTextBoxState(plateTextBox, isExistingCar);
+            SetIdentityTextBoxState(brandTextBox, isExistingCar);
+            SetIdentityTextBoxState(modelTextBox, isExistingCar);
+            SetIdentityTextBoxState(yearTextBox, isExistingCar);
+            carTypeComboBox.Enabled = !isExistingCar;
+            statusComboBox.Enabled = !isExistingCar || currentStatus != CarStatus.Rented;
+        }
+
+        private static void SetIdentityTextBoxState(Guna2TextBox textBox, bool isLocked)
+        {
+            textBox.ReadOnly = isLocked;
+            textBox.FillColor = isLocked
+                ? Color.FromArgb(243, 244, 246)
+                : Color.White;
+            textBox.Cursor = isLocked
+                ? Cursors.Default
+                : Cursors.IBeam;
+            textBox.FocusedState.BorderColor = isLocked
+                ? Color.FromArgb(209, 213, 219)
+                : Color.FromArgb(37, 99, 235);
+            textBox.HoverState.BorderColor = isLocked
+                ? Color.FromArgb(209, 213, 219)
+                : Color.FromArgb(37, 99, 235);
         }
 
         private static bool TryGetCarStatus(string statusText, out CarStatus status)

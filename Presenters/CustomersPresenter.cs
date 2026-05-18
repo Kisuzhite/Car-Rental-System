@@ -35,33 +35,11 @@ namespace Car_Rental_System.Presenters
             view.BindCustomers(customers);
         }
 
-        public async Task<PresenterResult> AddCustomerAsync(CustomerFormInput input)
-        {
-            using var db = new AppDbContext();
-            var customerRepository = new CustomerRepository(db);
-            string licenseNumber = ValidationHelper.NormalizeLicenseNumber(input.LicenseNumber);
-
-            if (await customerRepository.LicenseNumberExistsAsync(licenseNumber))
-            {
-                return DuplicateLicenseResult(licenseNumber);
-            }
-
-            customerRepository.Add(new Customer
-            {
-                FullName = ValidationHelper.CollapseSpaces(input.FullName),
-                ContactNumber = ValidationHelper.CollapseSpaces(input.ContactNumber),
-                LicenseNumber = licenseNumber,
-                Address = ValidationHelper.CollapseSpaces(input.Address)
-            });
-
-            await customerRepository.SaveChangesAsync();
-            return PresenterResult.Ok("Saved", "Customer added successfully.");
-        }
-
         public async Task<PresenterResult> UpdateCustomerAsync(int customerId, CustomerFormInput input)
         {
             using var db = new AppDbContext();
             var customerRepository = new CustomerRepository(db);
+            var reservationRepository = new ReservationRepository(db);
 
             Customer? customer = await customerRepository.GetByIdAsync(customerId);
             if (customer == null)
@@ -79,6 +57,7 @@ namespace Car_Rental_System.Presenters
             customer.ContactNumber = ValidationHelper.CollapseSpaces(input.ContactNumber);
             customer.LicenseNumber = licenseNumber;
             customer.Address = ValidationHelper.CollapseSpaces(input.Address);
+            await reservationRepository.SyncCustomerSnapshotAsync(customer);
 
             await customerRepository.SaveChangesAsync();
             int? activeRentalId = await customerRepository.GetActiveRentalIdAsync(customer.CustomerId);

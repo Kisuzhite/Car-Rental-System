@@ -157,6 +157,11 @@ namespace Car_Rental_System.Helpers
             column.MinimumWidth = Math.Max(column.MinimumWidth, GetMinimumColumnWidth(column.Name));
             column.MinimumWidth = Math.Max(column.MinimumWidth, GetHeaderMinimumWidth(column));
             column.FillWeight = GetColumnFillWeight(column.Name);
+
+            if (IsCurrencyColumn(column.Name))
+            {
+                column.DefaultCellStyle.Format = RentalCalculator.CurrencyFormat;
+            }
         }
 
         private static int GetHeaderMinimumWidth(DataGridViewColumn column)
@@ -209,6 +214,20 @@ namespace Car_Rental_System.Helpers
             };
         }
 
+        private static bool IsCurrencyColumn(string columnName)
+        {
+            return columnName is
+                "DailyRate" or
+                "RatePerDay" or
+                "BaseAmount" or
+                "TotalAmount" or
+                "AmountPaid" or
+                "DepositAmount" or
+                "Balance" or
+                "Penalty" or
+                "Amount";
+        }
+
         private static void LockHeaderLayout(DataGridView grid)
         {
             grid.AllowUserToResizeColumns = false;
@@ -250,6 +269,11 @@ namespace Car_Rental_System.Helpers
             borderStyle.Bottom = DataGridViewAdvancedCellBorderStyle.None;
 
             DataGridViewColumn? column = grid.Columns[e.ColumnIndex];
+            if (column is DataGridViewButtonColumn)
+            {
+                return;
+            }
+
             if (column != null && IsStatusColumn(column.Name))
             {
                 PaintCellBackground(e, graphics, cellStyle);
@@ -467,6 +491,19 @@ namespace Car_Rental_System.Helpers
                 paymentStatusColumn.MinimumWidth = Math.Max(paymentStatusColumn.MinimumWidth, 125);
                 paymentStatusColumn.FillWeight = 90;
             }
+        }
+
+        public static void ApplyFullTextColumn(DataGridView grid, string columnName, int minimumWidth = 320)
+        {
+            DataGridViewColumn? column = grid.Columns[columnName];
+            if (column == null)
+            {
+                return;
+            }
+
+            column.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            column.MinimumWidth = Math.Max(column.MinimumWidth, minimumWidth);
+            column.DefaultCellStyle.WrapMode = DataGridViewTriState.False;
         }
 
         private static void PaintStatusChip(Graphics graphics, Rectangle cellBounds, string status, Font chipFont)

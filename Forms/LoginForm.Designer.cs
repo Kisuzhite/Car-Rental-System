@@ -71,7 +71,7 @@ namespace Car_Rental_System
             // 
             brandSubtitleLabel.Font = new Font("Inter", 10F);
             brandSubtitleLabel.ForeColor = Color.FromArgb(209, 213, 219);
-            brandSubtitleLabel.Location = new Point(31, 236);
+            brandSubtitleLabel.Location = new Point(30, 257);
             brandSubtitleLabel.Name = "brandSubtitleLabel";
             brandSubtitleLabel.Size = new Size(199, 93);
             brandSubtitleLabel.TabIndex = 2;
@@ -82,7 +82,7 @@ namespace Car_Rental_System
             brandLogoPictureBox.CustomizableEdges = customizableEdges1;
             brandLogoPictureBox.Image = (Image)resources.GetObject("brandLogoPictureBox.Image");
             brandLogoPictureBox.ImageRotate = 0F;
-            brandLogoPictureBox.Location = new Point(30, 38);
+            brandLogoPictureBox.Location = new Point(29, 121);
             brandLogoPictureBox.Name = "brandLogoPictureBox";
             brandLogoPictureBox.ShadowDecoration.CustomizableEdges = customizableEdges2;
             brandLogoPictureBox.Size = new Size(200, 125);
@@ -183,7 +183,7 @@ namespace Car_Rental_System
             passwordTextBox.Margin = new Padding(3, 4, 3, 4);
             passwordTextBox.Name = "passwordTextBox";
             passwordTextBox.PlaceholderForeColor = Color.FromArgb(107, 114, 128);
-            passwordTextBox.PlaceholderText = "Owner password";
+            passwordTextBox.PlaceholderText = "password";
             passwordTextBox.SelectedText = "";
             passwordTextBox.ShadowDecoration.CustomizableEdges = customizableEdges10;
             passwordTextBox.Size = new Size(304, 42);
@@ -216,7 +216,7 @@ namespace Car_Rental_System
             userNameTextBox.Margin = new Padding(3, 4, 3, 4);
             userNameTextBox.Name = "userNameTextBox";
             userNameTextBox.PlaceholderForeColor = Color.FromArgb(107, 114, 128);
-            userNameTextBox.PlaceholderText = "Owner username";
+            userNameTextBox.PlaceholderText = "username";
             userNameTextBox.SelectedText = "";
             userNameTextBox.ShadowDecoration.CustomizableEdges = customizableEdges12;
             userNameTextBox.Size = new Size(304, 42);
@@ -250,9 +250,9 @@ namespace Car_Rental_System
             titleLabel.ForeColor = Color.FromArgb(31, 41, 55);
             titleLabel.Location = new Point(28, 29);
             titleLabel.Name = "titleLabel";
-            titleLabel.Size = new Size(252, 49);
+            titleLabel.Size = new Size(134, 49);
             titleLabel.TabIndex = 0;
-            titleLabel.Text = "Owner Sign In";
+            titleLabel.Text = "Sign In";
             // 
             // LoginForm
             // 

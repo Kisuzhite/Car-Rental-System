@@ -11,7 +11,12 @@ namespace Car_Rental_System
             if (loginForm.ShowDialog() == DialogResult.OK &&
                 loginForm.AuthenticatedUser != null)
             {
-                Application.Run(new MainForm(loginForm.AuthenticatedUser));
+                using var mainForm = new MainForm(loginForm.AuthenticatedUser)
+                {
+                    WindowState = FormWindowState.Maximized
+                };
+
+                Application.Run(mainForm);
             }
         }
     }

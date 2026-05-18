@@ -38,8 +38,6 @@ namespace Car_Rental_System.Presenters
                     Balance = r.Balance,
                     PaymentStatus = r.PaymentStatus,
                     PaymentMethod = PaymentHelper.FormatPaymentMethod(r.PaymentMethod),
-                    LateDays = RentalStatusHelper.GetLateDays(r, today),
-                    Penalty = RentalStatusHelper.GetLatePenalty(r, today),
                     Status = RentalStatusHelper.GetDisplayStatus(r, today)
                 })
                 .ToList();
@@ -54,7 +52,8 @@ namespace Car_Rental_System.Presenters
                 input.RentalId,
                 input.ActualReturnDate,
                 input.AdditionalPayment,
-                input.PaymentMethod);
+                input.PaymentMethod,
+                input.PaymentReferenceNumber);
         }
     }
 }

@@ -11,6 +11,8 @@ namespace Car_Rental_System
     public partial class Rentals : Form, IRentalsView
     {
         private readonly RentalsPresenter presenter;
+        private List<CustomerLookupItem> customerLookupItems = [];
+        private string matchedCustomerName = "";
 
         public Rentals()
         {
@@ -18,13 +20,20 @@ namespace Car_Rental_System
             presenter = new RentalsPresenter(this);
         }
 
-        public string SearchText => searchTextBox.Text;
+        public string SearchText => string.Empty;
 
         void IRentalsView.BindCustomers(List<CustomerLookupItem> customers)
         {
-            customerComboBox.DataSource = customers;
-            customerComboBox.DisplayMember = "FullName";
-            customerComboBox.ValueMember = "CustomerId";
+            customerLookupItems = customers;
+
+            var customerNames = new AutoCompleteStringCollection();
+            customerNames.AddRange(customers.Select(c => c.FullName).ToArray());
+
+            customerNameTextBox.AutoCompleteCustomSource = customerNames;
+            customerNameTextBox.AutoCompleteSource = AutoCompleteSource.CustomSource;
+            customerNameTextBox.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+
+            FillCustomerDetailsForMatchedName();
         }
 
         void IRentalsView.BindAvailableCars(List<RentalCarLookupItem> cars)
@@ -49,6 +58,7 @@ namespace Car_Rental_System
             DataGridViewHelper.ApplyFriendlyHeaders(rentalsGrid);
             DataGridViewHelper.HideColumn(rentalsGrid, "RentalId");
             DataGridViewHelper.ApplyStatusFormatting(rentalsGrid);
+            DataGridViewHelper.ApplyFullTextColumn(rentalsGrid, "Car", 340);
             DataGridViewHelper.ClearSelectionWhenReady(rentalsGrid);
         }
 
@@ -62,12 +72,14 @@ namespace Car_Rental_System
         private void PrepareForm()
         {
             paymentMethodComboBox.Format += PaymentMethodComboBox_Format;
-            paymentMethodComboBox.DropDownWidth = 190;
+            paymentMethodComboBox.SelectedIndexChanged += PaymentMethodComboBox_SelectedIndexChanged;
             paymentMethodComboBox.DataSource = PaymentHelper.GetSelectablePaymentMethods();
             paymentMethodComboBox.SelectedItem = PaymentMethod.Cash;
-            rentalDatePicker.MaxDate = DateTime.Today;
+            SetLicenseFieldLocked(false);
+            UpdatePaymentReferenceVisibility();
             rentalDatePicker.Value = DateTime.Today;
             returnDatePicker.Value = DateTime.Today.AddDays(1);
+            UpdateCreateButtonText();
             CalculateTotal();
         }
 
@@ -83,11 +95,27 @@ namespace Car_Rental_System
         {
             try
             {
-                await presenter.LoadLookupsAsync();
+                await presenter.LoadLookupsAsync(
+                    RentalCalculator.ToDateOnly(rentalDatePicker.Value),
+                    RentalCalculator.ToDateOnly(returnDatePicker.Value));
             }
             catch (Exception ex)
             {
                 AppMessageBox.ShowLocalDbWarning(ex);
+            }
+        }
+
+        private async Task LoadAvailableCarsAsync()
+        {
+            try
+            {
+                await presenter.LoadAvailableCarsAsync(
+                    RentalCalculator.ToDateOnly(rentalDatePicker.Value),
+                    RentalCalculator.ToDateOnly(returnDatePicker.Value));
+            }
+            catch (Exception ex)
+            {
+                AppMessageBox.ShowDatabaseError("Unable to load available cars.", ex);
             }
         }
 
@@ -106,14 +134,14 @@ namespace Car_Rental_System
 
         private async void CreateButton_Click(object? sender, EventArgs e)
         {
-            if (!ValidateInputs(out RentalFormInput input))
+            if (!ValidateInputs(out BookingFormInput input))
             {
                 return;
             }
 
             try
             {
-                RentalOperationResult result = await presenter.CreateRentalAsync(input);
+                BookingOperationResult result = await presenter.CreateBookingAsync(input);
 
                 if (!result.Success)
                 {
@@ -132,7 +160,11 @@ namespace Car_Rental_System
                 }
 
                 MessageBox.Show(result.Message, result.Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
-                await RentalDocumentPrinter.PromptToPrintRentalAgreementAsync(this, result.RentalId);
+                if (result.CreatedRental)
+                {
+                    await RentalDocumentPrinter.PromptToPrintRentalAgreementAsync(this, result.RentalId);
+                }
+
                 ClearForm();
                 await LoadLookupsAsync();
                 await LoadRentalsAsync();
@@ -143,16 +175,11 @@ namespace Car_Rental_System
             }
         }
 
-        private async void SearchTextBox_TextChanged(object? sender, EventArgs e)
-        {
-            await LoadRentalsAsync();
-        }
-
         private void CarComboBox_SelectedIndexChanged(object? sender, EventArgs e)
         {
             if (carComboBox.SelectedItem is RentalCarLookupItem selected)
             {
-                rateTextBox.Text = selected.DailyRate.ToString("0.##");
+                rateTextBox.Text = RentalCalculator.FormatCurrency(selected.DailyRate);
             }
             else
             {
@@ -162,9 +189,73 @@ namespace Car_Rental_System
             CalculateTotal();
         }
 
-        private void DateOrRate_Changed(object? sender, EventArgs e)
+        private void CheckCalendarButton_Click(object? sender, EventArgs e)
         {
+            int? selectedCarId = TryGetSelectedValue(carComboBox, out int carId)
+                ? carId
+                : null;
+
+            using var calendar = new AvailabilityCalendar(
+                RentalCalculator.ToDateOnly(rentalDatePicker.Value),
+                RentalCalculator.ToDateOnly(returnDatePicker.Value),
+                selectedCarId);
+
+            calendar.ShowDialog(this);
+        }
+
+        private void CustomerNameTextBox_TextChanged(object? sender, EventArgs e)
+        {
+            FillCustomerDetailsForMatchedName();
+        }
+
+        private void FillCustomerDetailsForMatchedName()
+        {
+            string customerName = ValidationHelper.CollapseSpaces(customerNameTextBox.Text);
+            CustomerLookupItem? selected = customerLookupItems.FirstOrDefault(c =>
+                string.Equals(c.FullName, customerName, StringComparison.OrdinalIgnoreCase));
+
+            if (selected == null)
+            {
+                if (!string.IsNullOrWhiteSpace(matchedCustomerName))
+                {
+                    contactTextBox.Clear();
+                    licenseTextBox.Clear();
+                    addressTextBox.Clear();
+                    matchedCustomerName = "";
+                }
+
+                SetLicenseFieldLocked(false);
+                return;
+            }
+
+            if (string.Equals(matchedCustomerName, selected.FullName, StringComparison.OrdinalIgnoreCase))
+            {
+                SetLicenseFieldLocked(true);
+                return;
+            }
+
+            matchedCustomerName = selected.FullName;
+            contactTextBox.Text = selected.ContactNumber == AppConstants.NotProvided
+                ? ""
+                : selected.ContactNumber;
+            licenseTextBox.Text = selected.LicenseNumber == AppConstants.NotProvided
+                ? ""
+                : selected.LicenseNumber;
+            addressTextBox.Text = selected.Address == AppConstants.NotProvided
+                ? ""
+                : selected.Address;
+            SetLicenseFieldLocked(true);
+        }
+
+        private async void DateOrRate_Changed(object? sender, EventArgs e)
+        {
+            UpdateCreateButtonText();
             CalculateTotal();
+
+            if (ReferenceEquals(sender, rentalDatePicker) || ReferenceEquals(sender, returnDatePicker))
+            {
+                await LoadAvailableCarsAsync();
+            }
         }
 
         private void PaymentAmountTextBox_TextChanged(object? sender, EventArgs e)
@@ -172,28 +263,64 @@ namespace Car_Rental_System
             CalculateBalance();
         }
 
-        private bool ValidateInputs(out RentalFormInput input)
+        private void PaymentMethodComboBox_SelectedIndexChanged(object? sender, EventArgs e)
         {
-            input = new RentalFormInput(0, 0, rentalDatePicker.Value, returnDatePicker.Value, 0, PaymentMethod.Cash);
+            UpdatePaymentReferenceVisibility();
+        }
 
-            if (!TryGetSelectedValue(customerComboBox, out int customerId) ||
-                !TryGetSelectedValue(carComboBox, out int carId))
+        private bool ValidateInputs(out BookingFormInput input)
+        {
+            input = new BookingFormInput("", AppConstants.NotProvided, AppConstants.NotProvided, AppConstants.NotProvided, 0, rentalDatePicker.Value, returnDatePicker.Value, 0, PaymentMethod.Cash, AppConstants.NotProvided);
+
+            string customerName = ValidationHelper.CollapseSpaces(customerNameTextBox.Text);
+            string contactNumber = ValidationHelper.CollapseSpaces(contactTextBox.Text);
+            string licenseNumber = ValidationHelper.NormalizeLicenseNumber(licenseTextBox.Text);
+            string address = ValidationHelper.CollapseSpaces(addressTextBox.Text);
+            string paymentReferenceNumber = ValidationHelper.CollapseSpaces(paymentReferenceTextBox.Text);
+
+            if (!ValidationHelper.IsValidPersonName(customerName))
             {
-                MessageBox.Show("Please select a customer and an available car.", "Missing Details", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Customer name must be 2-100 characters and contain only letters, spaces, apostrophes, periods, or hyphens.", "Invalid Customer", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
 
-            if (!ValidationHelper.TryValidateActiveRentalDates(
-                    rentalDatePicker.Value,
-                    returnDatePicker.Value,
-                    DateTime.Today,
-                    out string dateError))
+            if (!ValidationHelper.IsValidContactNumber(contactNumber))
+            {
+                MessageBox.Show("Please enter a valid customer contact number.", "Invalid Contact Number", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (!ValidationHelper.IsValidLicenseNumber(licenseNumber))
+            {
+                MessageBox.Show("License number must be 3-50 letters/numbers and may only include spaces or hyphens.", "Invalid License Number", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (address.Length < 5 || address.Length > 200)
+            {
+                MessageBox.Show("Billing address must be between 5 and 200 characters.", "Invalid Billing Address", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (!TryGetSelectedValue(carComboBox, out int carId))
+            {
+                MessageBox.Show("Please select a car available for those dates.", "Missing Details", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (rentalDatePicker.Value.Date < DateTime.Today)
+            {
+                MessageBox.Show("Pickup date cannot be in the past.", "Invalid Pickup Date", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (!ValidationHelper.TryValidateRentalDates(rentalDatePicker.Value, returnDatePicker.Value, out string dateError))
             {
                 MessageBox.Show(dateError, "Invalid Dates", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
 
-            if (!decimal.TryParse(rateTextBox.Text, out decimal dailyRate))
+            if (!RentalCalculator.TryParseCurrency(rateTextBox.Text, out decimal dailyRate))
             {
                 MessageBox.Show("Daily rate must be a valid amount.", "Invalid Rate", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
@@ -227,11 +354,42 @@ namespace Car_Rental_System
                 ? selectedMethod
                 : PaymentMethod.Cash;
 
-            input = new RentalFormInput(customerId, carId, rentalDatePicker.Value, returnDatePicker.Value, amountPaid, paymentMethod);
+            bool requiresReference = PaymentHelper.RequiresReferenceNumber(paymentMethod);
+            if (requiresReference && string.IsNullOrWhiteSpace(paymentReferenceNumber))
+            {
+                MessageBox.Show(
+                    $"Please enter the payment reference for {PaymentHelper.FormatPaymentMethod(paymentMethod)}.",
+                    "Missing Payment Reference",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return false;
+            }
+
+            paymentReferenceNumber = requiresReference
+                ? paymentReferenceNumber
+                : AppConstants.NotProvided;
+
+            if (paymentReferenceNumber.Length > 80)
+            {
+                MessageBox.Show("Payment reference number cannot be longer than 80 characters.", "Invalid Reference", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            input = new BookingFormInput(
+                customerName,
+                contactNumber,
+                licenseNumber,
+                address,
+                carId,
+                rentalDatePicker.Value,
+                returnDatePicker.Value,
+                amountPaid,
+                paymentMethod,
+                paymentReferenceNumber);
             return true;
         }
 
-        private static MessageBoxIcon GetRentalFailureIcon(RentalOperationResult result)
+        private static MessageBoxIcon GetRentalFailureIcon(BookingOperationResult result)
         {
             return result.CarWasUnavailable || result.HasScheduleConflict
                 ? MessageBoxIcon.Information
@@ -247,9 +405,10 @@ namespace Car_Rental_System
 
         private decimal CalculateTotal()
         {
-            if (!decimal.TryParse(rateTextBox.Text, out decimal dailyRate))
+            if (!RentalCalculator.TryParseCurrency(rateTextBox.Text, out decimal dailyRate))
             {
                 totalTextBox.Text = RentalCalculator.FormatCurrency(0);
+                minimumDepositTextBox.Text = RentalCalculator.FormatCurrency(0);
                 CalculateBalance();
                 return 0;
             }
@@ -260,6 +419,7 @@ namespace Car_Rental_System
                 dailyRate);
 
             totalTextBox.Text = RentalCalculator.FormatCurrency(total);
+            minimumDepositTextBox.Text = RentalCalculator.FormatCurrency(PaymentHelper.GetMinimumDepositAmount(total));
             CalculateBalance();
             return total;
         }
@@ -275,12 +435,13 @@ namespace Car_Rental_System
 
             decimal balance = PaymentHelper.GetBalance(total, amountPaid);
             balanceTextBox.Text = RentalCalculator.FormatCurrency(balance);
+            paymentAmountTextBox.PlaceholderText = "0";
             return balance;
         }
 
         private decimal CalculateDisplayedTotalAmount()
         {
-            if (!decimal.TryParse(rateTextBox.Text, out decimal dailyRate))
+            if (!RentalCalculator.TryParseCurrency(rateTextBox.Text, out decimal dailyRate))
             {
                 return 0;
             }
@@ -295,21 +456,78 @@ namespace Car_Rental_System
         {
             return string.IsNullOrWhiteSpace(value)
                 ? 0
-                : decimal.TryParse(value, out decimal amount) ? amount : -1;
+                : RentalCalculator.TryParseCurrency(value, out decimal amount) ? amount : -1;
         }
 
         private void ClearForm()
         {
-            if (customerComboBox.Items.Count > 0) customerComboBox.SelectedIndex = 0;
+            matchedCustomerName = "";
+            customerNameTextBox.Clear();
             if (carComboBox.Items.Count > 0) carComboBox.SelectedIndex = 0;
+
+            contactTextBox.Clear();
+            licenseTextBox.Clear();
+            addressTextBox.Clear();
+            SetLicenseFieldLocked(false);
 
             rentalDatePicker.Value = DateTime.Today;
             returnDatePicker.Value = DateTime.Today.AddDays(1);
             paymentAmountTextBox.Clear();
+            paymentReferenceTextBox.Clear();
             paymentMethodComboBox.SelectedItem = PaymentMethod.Cash;
+            UpdatePaymentReferenceVisibility();
+            UpdateCreateButtonText();
 
             rentalsGrid.ClearSelection();
             CalculateTotal();
+        }
+
+        private void UpdateCreateButtonText()
+        {
+            createButton.Text = rentalDatePicker.Value.Date == DateTime.Today
+                ? "Start Rental"
+                : "Save Reservation";
+        }
+
+        private void UpdatePaymentReferenceVisibility()
+        {
+            PaymentMethod paymentMethod = paymentMethodComboBox.SelectedItem is PaymentMethod selectedMethod
+                ? selectedMethod
+                : PaymentMethod.Cash;
+            bool requiresReference = PaymentHelper.RequiresReferenceNumber(paymentMethod);
+
+            paymentReferenceLabel.Visible = true;
+            paymentReferenceTextBox.Visible = true;
+            paymentReferenceTextBox.Enabled = true;
+            paymentReferenceTextBox.ReadOnly = !requiresReference;
+            paymentReferenceTextBox.FillColor = requiresReference
+                ? Color.White
+                : Color.FromArgb(243, 244, 246);
+            paymentReferenceTextBox.PlaceholderText = requiresReference
+                ? "Receipt or transaction reference"
+                : "Not needed for cash";
+
+            if (!requiresReference)
+            {
+                paymentReferenceTextBox.Clear();
+            }
+        }
+
+        private void SetLicenseFieldLocked(bool isLocked)
+        {
+            licenseTextBox.ReadOnly = isLocked;
+            licenseTextBox.FillColor = isLocked
+                ? Color.FromArgb(243, 244, 246)
+                : Color.White;
+            licenseTextBox.FocusedState.BorderColor = isLocked
+                ? Color.FromArgb(209, 213, 219)
+                : Color.FromArgb(37, 99, 235);
+            licenseTextBox.HoverState.BorderColor = isLocked
+                ? Color.FromArgb(209, 213, 219)
+                : Color.FromArgb(37, 99, 235);
+            licenseTextBox.PlaceholderText = isLocked
+                ? "Saved in customer record"
+                : "Driver's license number";
         }
     }
 }

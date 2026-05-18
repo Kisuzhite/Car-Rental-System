@@ -4,14 +4,13 @@ using Car_Rental_System.Presenters;
 using Car_Rental_System.Services;
 using Car_Rental_System.ViewModels;
 using Car_Rental_System.Views;
-using Guna.UI2.WinForms;
-
 namespace Car_Rental_System
 {
     public partial class Reservations : Form, IReservationsView
     {
         private readonly ReservationsPresenter presenter;
         private int? selectedReservationId;
+        private int? selectedReservationCarId;
         private bool isLoadingReservations;
 
         public Reservations()
@@ -24,17 +23,7 @@ namespace Car_Rental_System
 
         void IReservationsView.BindAvailableCars(List<ReservationCarLookupItem> cars)
         {
-            carComboBox.DataSource = cars;
-            carComboBox.DisplayMember = "CarName";
-            carComboBox.ValueMember = "CarId";
-
-            if (cars.Count == 0)
-            {
-                rateTextBox.Clear();
-                estimatedTotalTextBox.Text = RentalCalculator.FormatCurrency(0);
-            }
-
-            CarComboBox_SelectedIndexChanged(this, EventArgs.Empty);
+            // Reservations show the already-reserved car in a read-only textbox.
         }
 
         void IReservationsView.BindReservations(List<ReservationGridRow> reservations)
@@ -44,7 +33,10 @@ namespace Car_Rental_System
             DataGridViewHelper.ApplyFriendlyHeaders(reservationsGrid);
             DataGridViewHelper.HideColumn(reservationsGrid, "ReservationId");
             DataGridViewHelper.HideColumn(reservationsGrid, "CarId");
+            DataGridViewHelper.HideColumn(reservationsGrid, "DailyRate");
+            DataGridViewHelper.HideColumn(reservationsGrid, "PaymentMethodValue");
             DataGridViewHelper.ApplyStatusFormatting(reservationsGrid);
+            DataGridViewHelper.ApplyFullTextColumn(reservationsGrid, "Car", 340);
             FormatReservationsGridColumns();
             ClearFormAfterGridLoad();
         }
@@ -52,19 +44,19 @@ namespace Car_Rental_System
         private async void Reservations_Load(object? sender, EventArgs e)
         {
             PrepareForm();
-            await LoadLookupsAsync();
             await LoadReservationsAsync();
         }
 
         private void PrepareForm()
         {
-            pickupDatePicker.Value = DateTime.Today.AddDays(1);
-            returnDatePicker.Value = DateTime.Today.AddDays(2);
+            pickupDatePicker.Value = DateTime.Today;
+            returnDatePicker.Value = DateTime.Today.AddDays(1);
 
             paymentMethodComboBox.Format += PaymentMethodComboBox_Format;
-            paymentMethodComboBox.DropDownWidth = 190;
+            paymentMethodComboBox.SelectedIndexChanged += PaymentMethodComboBox_SelectedIndexChanged;
             paymentMethodComboBox.DataSource = PaymentHelper.GetSelectablePaymentMethods();
             paymentMethodComboBox.SelectedItem = PaymentMethod.GCash;
+            UpdatePaymentReferenceVisibility();
 
             CalculateEstimatedTotal();
         }
@@ -74,18 +66,6 @@ namespace Car_Rental_System
             if (e.ListItem is PaymentMethod paymentMethod)
             {
                 e.Value = PaymentHelper.FormatPaymentMethod(paymentMethod);
-            }
-        }
-
-        private async Task LoadLookupsAsync()
-        {
-            try
-            {
-                await presenter.LoadLookupsAsync();
-            }
-            catch (Exception ex)
-            {
-                AppMessageBox.ShowLocalDbWarning(ex);
             }
         }
 
@@ -101,29 +81,6 @@ namespace Car_Rental_System
             {
                 isLoadingReservations = false;
                 AppMessageBox.ShowDatabaseError("Unable to load reservations.", ex);
-            }
-        }
-
-        private async void AddButton_Click(object? sender, EventArgs e)
-        {
-            if (!ValidateInputs(out ReservationFormInput input))
-            {
-                return;
-            }
-
-            try
-            {
-                PresenterResult result = await presenter.AddReservationAsync(input);
-                AppMessageBox.ShowPresenterResult(result);
-
-                if (result.Success)
-                {
-                    await LoadReservationsAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                AppMessageBox.ShowDatabaseError("Unable to add reservation.", ex);
             }
         }
 
@@ -222,14 +179,12 @@ namespace Car_Rental_System
                         MessageBoxButtons.OK,
                         result.HasScheduleConflict || result.CarWasUnavailable ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
 
-                    await LoadLookupsAsync();
                     await LoadReservationsAsync();
                     return;
                 }
 
                 MessageBox.Show(result.Message, result.Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 await RentalDocumentPrinter.PromptToPrintRentalAgreementAsync(this, result.RentalId);
-                await LoadLookupsAsync();
                 await LoadReservationsAsync();
             }
             catch (Exception ex)
@@ -248,20 +203,6 @@ namespace Car_Rental_System
             await LoadReservationsAsync();
         }
 
-        private void CarComboBox_SelectedIndexChanged(object? sender, EventArgs e)
-        {
-            if (carComboBox.SelectedItem is ReservationCarLookupItem selected)
-            {
-                rateTextBox.Text = selected.DailyRate.ToString("0.##");
-            }
-            else
-            {
-                rateTextBox.Clear();
-            }
-
-            CalculateEstimatedTotal();
-        }
-
         private void DateOrRate_Changed(object? sender, EventArgs e)
         {
             CalculateEstimatedTotal();
@@ -272,7 +213,12 @@ namespace Car_Rental_System
             CalculateEstimatedTotal();
         }
 
-        private void ReservationsGrid_SelectionChanged(object? sender, EventArgs e)
+        private void PaymentMethodComboBox_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            UpdatePaymentReferenceVisibility();
+        }
+
+        private async void ReservationsGrid_SelectionChanged(object? sender, EventArgs e)
         {
             if (isLoadingReservations)
             {
@@ -283,18 +229,26 @@ namespace Car_Rental_System
                 !reservationsGrid.CurrentRow.Selected)
             {
                 selectedReservationId = null;
+                selectedReservationCarId = null;
+                UpdateCarSelectionLock();
                 return;
             }
 
             selectedReservationId = row.ReservationId;
+            selectedReservationCarId = row.CarId;
+
             customerNameTextBox.Text = row.CustomerName;
             contactTextBox.Text = row.ContactNumber;
             pickupDatePicker.Value = row.PickupDate.ToDateTime(TimeOnly.MinValue);
             returnDatePicker.Value = row.ExpectedReturnDate.ToDateTime(TimeOnly.MinValue);
+            reservedCarTextBox.Text = row.Car;
+            rateTextBox.Text = RentalCalculator.FormatCurrency(row.DailyRate);
             depositTextBox.Text = row.DepositAmount.ToString("0.##");
+            paymentMethodComboBox.SelectedItem = row.PaymentMethodValue;
             paymentReferenceTextBox.Text = row.PaymentReferenceNumber == AppConstants.NotProvided ? "" : row.PaymentReferenceNumber;
-            SelectCar(row.CarId);
-            UpdateActionButtons(row.Status);
+            UpdatePaymentReferenceVisibility();
+
+            UpdateCarSelectionLock();
         }
 
         private bool ValidateInputs(out ReservationFormInput input)
@@ -355,9 +309,20 @@ namespace Car_Rental_System
                 ? selectedMethod
                 : PaymentMethod.Cash;
 
-            paymentReferenceNumber = string.IsNullOrWhiteSpace(paymentReferenceNumber)
-                ? AppConstants.NotProvided
-                : paymentReferenceNumber;
+            bool requiresReference = PaymentHelper.RequiresReferenceNumber(paymentMethod);
+            if (requiresReference && string.IsNullOrWhiteSpace(paymentReferenceNumber))
+            {
+                MessageBox.Show(
+                    $"Please enter the payment reference for {PaymentHelper.FormatPaymentMethod(paymentMethod)}.",
+                    "Missing Payment Reference",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return false;
+            }
+
+            paymentReferenceNumber = requiresReference
+                ? paymentReferenceNumber
+                : AppConstants.NotProvided;
 
             if (paymentReferenceNumber.Length > 80)
             {
@@ -379,16 +344,16 @@ namespace Car_Rental_System
 
         private bool TryGetSelectedCarId(out int carId)
         {
-            carId = 0;
-            return carComboBox.SelectedValue != null &&
-                int.TryParse(carComboBox.SelectedValue.ToString(), out carId);
+            carId = selectedReservationCarId.GetValueOrDefault();
+            return selectedReservationCarId.HasValue;
         }
 
         private decimal CalculateEstimatedTotal()
         {
-            if (!decimal.TryParse(rateTextBox.Text, out decimal dailyRate))
+            if (!RentalCalculator.TryParseCurrency(rateTextBox.Text, out decimal dailyRate))
             {
                 estimatedTotalTextBox.Text = RentalCalculator.FormatCurrency(0);
+                minimumDepositTextBox.Text = RentalCalculator.FormatCurrency(0);
                 balanceTextBox.Text = RentalCalculator.FormatCurrency(0);
                 return 0;
             }
@@ -404,7 +369,9 @@ namespace Car_Rental_System
             }
 
             estimatedTotalTextBox.Text = RentalCalculator.FormatCurrency(total);
+            minimumDepositTextBox.Text = RentalCalculator.FormatCurrency(PaymentHelper.GetMinimumDepositAmount(total));
             balanceTextBox.Text = RentalCalculator.FormatCurrency(PaymentHelper.GetBalance(total, deposit));
+            depositTextBox.PlaceholderText = "0";
             return total;
         }
 
@@ -412,24 +379,7 @@ namespace Car_Rental_System
         {
             return string.IsNullOrWhiteSpace(value)
                 ? 0
-                : decimal.TryParse(value, out decimal amount) ? amount : -1;
-        }
-
-        private bool SelectCar(int carId)
-        {
-            foreach (object item in carComboBox.Items)
-            {
-                if (item is ReservationCarLookupItem car && car.CarId == carId)
-                {
-                    carComboBox.SelectedItem = item;
-                    return true;
-                }
-            }
-
-            carComboBox.SelectedIndex = -1;
-            rateTextBox.Clear();
-            CalculateEstimatedTotal();
-            return false;
+                : RentalCalculator.TryParseCurrency(value, out decimal amount) ? amount : -1;
         }
 
         private void FormatReservationsGridColumns()
@@ -437,7 +387,7 @@ namespace Car_Rental_System
             DataGridViewColumn? depositColumn = reservationsGrid.Columns["DepositAmount"];
             if (depositColumn != null)
             {
-                depositColumn.DefaultCellStyle.Format = "N2";
+                depositColumn.DefaultCellStyle.Format = RentalCalculator.CurrencyFormat;
             }
 
             DataGridViewHelper.MoveColumnToEnd(reservationsGrid, "Status");
@@ -462,35 +412,54 @@ namespace Car_Rental_System
         private void ClearForm()
         {
             selectedReservationId = null;
+            selectedReservationCarId = null;
             customerNameTextBox.Clear();
             contactTextBox.Clear();
-            pickupDatePicker.Value = DateTime.Today.AddDays(1);
-            returnDatePicker.Value = DateTime.Today.AddDays(2);
+            reservedCarTextBox.Clear();
+            rateTextBox.Clear();
+            pickupDatePicker.Value = DateTime.Today;
+            returnDatePicker.Value = DateTime.Today.AddDays(1);
             depositTextBox.Clear();
             paymentReferenceTextBox.Clear();
             paymentMethodComboBox.SelectedItem = PaymentMethod.GCash;
-            if (carComboBox.Items.Count > 0)
-            {
-                carComboBox.SelectedIndex = 0;
-            }
-
+            UpdatePaymentReferenceVisibility();
             reservationsGrid.ClearSelection();
             reservationsGrid.CurrentCell = null;
-            UpdateActionButtons(null);
             CalculateEstimatedTotal();
+            UpdateCarSelectionLock();
         }
 
-        private void UpdateActionButtons(ReservationStatus? status)
+        private void UpdatePaymentReferenceVisibility()
         {
-            SetActionButtonStyle(updateButton);
-            SetActionButtonStyle(cancelReservationButton);
-            SetActionButtonStyle(convertButton);
+            PaymentMethod paymentMethod = paymentMethodComboBox.SelectedItem is PaymentMethod selectedMethod
+                ? selectedMethod
+                : PaymentMethod.Cash;
+            bool requiresReference = PaymentHelper.RequiresReferenceNumber(paymentMethod);
+
+            paymentReferenceLabel.Visible = true;
+            paymentReferenceTextBox.Visible = true;
+            paymentReferenceTextBox.Enabled = true;
+            paymentReferenceTextBox.ReadOnly = !requiresReference;
+            paymentReferenceTextBox.FillColor = requiresReference
+                ? Color.White
+                : Color.FromArgb(243, 244, 246);
+            paymentReferenceTextBox.PlaceholderText = requiresReference
+                ? "Reference number"
+                : "Not needed for cash";
+
+            if (!requiresReference)
+            {
+                paymentReferenceTextBox.Clear();
+            }
         }
 
-        private static void SetActionButtonStyle(Guna2Button button)
+        private void UpdateCarSelectionLock()
         {
-            button.Enabled = true;
-            button.ForeColor = Color.White;
+            bool hasReservationSelected = selectedReservationId.HasValue;
+            reservedCarTextBox.ReadOnly = true;
+            reservedCarTextBox.FillColor = hasReservationSelected
+                ? Color.FromArgb(243, 244, 246)
+                : Color.FromArgb(249, 250, 251);
         }
     }
 }

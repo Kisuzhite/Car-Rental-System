@@ -45,6 +45,16 @@ namespace Car_Rental_System.Repositories
             return db.Customers.FirstOrDefaultAsync(c => c.CustomerId == customerId);
         }
 
+        public Task<Customer?> GetActiveByNameAsync(string customerName)
+        {
+            customerName = ValidationHelper.CollapseSpaces(customerName);
+
+            return db.Customers
+                .Where(c => !c.IsArchived && c.FullName == customerName)
+                .OrderByDescending(c => c.CustomerId)
+                .FirstOrDefaultAsync();
+        }
+
         public Task<Customer?> GetByIdWithRentalsAsync(int customerId)
         {
             return db.Customers
@@ -102,7 +112,7 @@ namespace Car_Rental_System.Repositories
             return newCustomer.CustomerId;
         }
 
-        public async Task<int> GetOrCreateByNameAndContactAsync(string customerName, string contactNumber)
+        public async Task<Customer> GetOrCreateCustomerByNameAndContactAsync(string customerName, string contactNumber)
         {
             customerName = ValidationHelper.CollapseSpaces(customerName);
             contactNumber = ValidationHelper.CollapseSpaces(contactNumber);
@@ -114,13 +124,14 @@ namespace Car_Rental_System.Repositories
 
             if (existing != null)
             {
-                if (string.Equals(existing.ContactNumber, AppConstants.NotProvided, StringComparison.OrdinalIgnoreCase))
+                if (!IsMissingValue(contactNumber) &&
+                    !string.Equals(existing.ContactNumber, contactNumber, StringComparison.OrdinalIgnoreCase))
                 {
                     existing.ContactNumber = contactNumber;
                     await db.SaveChangesAsync();
                 }
 
-                return existing.CustomerId;
+                return existing;
             }
 
             var newCustomer = new Customer
@@ -133,7 +144,70 @@ namespace Car_Rental_System.Repositories
 
             db.Customers.Add(newCustomer);
             await db.SaveChangesAsync();
-            return newCustomer.CustomerId;
+            return newCustomer;
+        }
+
+        public async Task<Customer> GetOrCreateCustomerByBookingDetailsAsync(
+            string customerName,
+            string contactNumber,
+            string licenseNumber,
+            string address)
+        {
+            customerName = ValidationHelper.CollapseSpaces(customerName);
+            contactNumber = ValidationHelper.CollapseSpaces(contactNumber);
+            licenseNumber = string.IsNullOrWhiteSpace(licenseNumber)
+                ? AppConstants.NotProvided
+                : ValidationHelper.NormalizeLicenseNumber(licenseNumber);
+            address = string.IsNullOrWhiteSpace(address)
+                ? AppConstants.NotProvided
+                : ValidationHelper.CollapseSpaces(address);
+
+            Customer? existing = await db.Customers
+                .Where(c => !c.IsArchived && c.FullName == customerName)
+                .OrderByDescending(c => c.CustomerId)
+                .FirstOrDefaultAsync();
+
+            if (existing != null)
+            {
+                bool changed = false;
+
+                if (ShouldUpdate(existing.ContactNumber, contactNumber))
+                {
+                    existing.ContactNumber = contactNumber;
+                    changed = true;
+                }
+
+                if (ShouldUpdate(existing.Address, address))
+                {
+                    existing.Address = address;
+                    changed = true;
+                }
+
+                if (changed)
+                {
+                    await db.SaveChangesAsync();
+                }
+
+                return existing;
+            }
+
+            var newCustomer = new Customer
+            {
+                FullName = customerName,
+                ContactNumber = contactNumber,
+                LicenseNumber = licenseNumber,
+                Address = address
+            };
+
+            db.Customers.Add(newCustomer);
+            await db.SaveChangesAsync();
+            return newCustomer;
+        }
+
+        public async Task<int> GetOrCreateByNameAndContactAsync(string customerName, string contactNumber)
+        {
+            Customer customer = await GetOrCreateCustomerByNameAndContactAsync(customerName, contactNumber);
+            return customer.CustomerId;
         }
 
         public void Add(Customer customer)
@@ -149,6 +223,18 @@ namespace Car_Rental_System.Repositories
         public Task SaveChangesAsync()
         {
             return db.SaveChangesAsync();
+        }
+
+        private static bool IsMissingValue(string value)
+        {
+            return string.IsNullOrWhiteSpace(value) ||
+                string.Equals(value, AppConstants.NotProvided, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool ShouldUpdate(string currentValue, string newValue)
+        {
+            return !IsMissingValue(newValue) &&
+                !string.Equals(currentValue, newValue, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

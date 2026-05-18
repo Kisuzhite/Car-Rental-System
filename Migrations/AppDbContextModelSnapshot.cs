@@ -248,6 +248,45 @@ namespace Car_Rental_System.Migrations
                     b.ToTable("Rentals");
                 });
 
+            modelBuilder.Entity("Car_Rental_System.Models.RentalPayment", b =>
+                {
+                    b.Property<int>("RentalPaymentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RentalPaymentId"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<DateOnly>("PaymentDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("PaymentReferenceNumber")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("PaymentType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("RentalId")
+                        .HasColumnType("int");
+
+                    b.HasKey("RentalPaymentId");
+
+                    b.HasIndex("RentalId");
+
+                    b.ToTable("RentalPayments");
+                });
+
             modelBuilder.Entity("Car_Rental_System.Models.Reservation", b =>
                 {
                     b.Property<int>("ReservationId")
@@ -337,6 +376,17 @@ namespace Car_Rental_System.Migrations
                     b.Navigation("Customer");
                 });
 
+            modelBuilder.Entity("Car_Rental_System.Models.RentalPayment", b =>
+                {
+                    b.HasOne("Car_Rental_System.Models.Rental", "Rental")
+                        .WithMany("Payments")
+                        .HasForeignKey("RentalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Rental");
+                });
+
             modelBuilder.Entity("Car_Rental_System.Models.Reservation", b =>
                 {
                     b.HasOne("Car_Rental_System.Models.Car", "Car")
@@ -372,6 +422,11 @@ namespace Car_Rental_System.Migrations
                     b.Navigation("Rentals");
 
                     b.Navigation("Reservations");
+                });
+
+            modelBuilder.Entity("Car_Rental_System.Models.Rental", b =>
+                {
+                    b.Navigation("Payments");
                 });
 #pragma warning restore 612, 618
         }

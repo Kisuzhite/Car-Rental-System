@@ -42,6 +42,7 @@ namespace Car_Rental_System.Presenters
                 .Select(c => new CarGridRow
                 {
                     CarId = c.CarId,
+                    CarTypeId = c.CarTypeId,
                     PlateNumber = c.PlateNumber,
                     Brand = c.Brand,
                     Model = c.Model,
@@ -95,21 +96,18 @@ namespace Car_Rental_System.Presenters
                 return PresenterResult.Error("Error", "Car not found.");
             }
 
-            string plateNumber = ValidationHelper.NormalizePlateNumber(input.PlateNumber);
-            if (await carRepository.PlateNumberExistsAsync(plateNumber, carId))
+            string submittedPlateNumber = ValidationHelper.NormalizePlateNumber(input.PlateNumber);
+            if (!string.Equals(car.PlateNumber, submittedPlateNumber, StringComparison.OrdinalIgnoreCase) &&
+                await carRepository.PlateNumberExistsAsync(submittedPlateNumber, carId))
             {
-                return DuplicatePlateResult(plateNumber);
+                return DuplicatePlateResult(submittedPlateNumber);
             }
 
-            car.PlateNumber = plateNumber;
-            car.Brand = ValidationHelper.CollapseSpaces(input.Brand);
-            car.Model = ValidationHelper.CollapseSpaces(input.Model);
-            car.Year = input.Year;
             car.Color = ValidationHelper.CollapseSpaces(input.Color);
-            car.DailyRate = input.DailyRate;
-            car.CarTypeId = input.CarTypeId;
-            car.Status = input.Status;
-            car.ImagePath = null;
+            if (car.Status != CarStatus.Rented)
+            {
+                car.Status = input.Status;
+            }
 
             await carRepository.SaveChangesAsync();
             return PresenterResult.Ok("Updated", "Car updated successfully.");

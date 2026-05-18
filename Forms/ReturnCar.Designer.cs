@@ -22,8 +22,8 @@ namespace Car_Rental_System
         {
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges1 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges2 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges31 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges32 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges33 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges34 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges3 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ReturnCar));
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges4 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
@@ -53,15 +53,17 @@ namespace Car_Rental_System
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges28 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges29 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges30 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges37 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges38 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges31 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges32 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges39 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges40 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges37 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges38 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges35 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges36 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges33 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
-            Guna.UI2.WinForms.Suite.CustomizableEdges customizableEdges34 = new Guna.UI2.WinForms.Suite.CustomizableEdges();
             headerPanel = new Guna2Panel();
             helperLabel = new Label();
             titleLabel = new Label();
@@ -70,6 +72,8 @@ namespace Car_Rental_System
             processReturnButton = new Guna2Button();
             paymentMethodComboBox = new Guna2ComboBox();
             paymentMethodLabel = new Label();
+            paymentReferenceTextBox = new Guna2TextBox();
+            paymentReferenceLabel = new Label();
             additionalPaymentTextBox = new Guna2TextBox();
             additionalPaymentLabel = new Label();
             balanceTextBox = new Guna2TextBox();
@@ -110,7 +114,10 @@ namespace Car_Rental_System
             // 
             // headerPanel
             // 
-            headerPanel.BackColor = Color.White;
+            headerPanel.BackColor = Color.Transparent;
+            headerPanel.BorderColor = Color.FromArgb(226, 232, 240);
+            headerPanel.BorderRadius = 18;
+            headerPanel.BorderThickness = 1;
             headerPanel.Controls.Add(helperLabel);
             headerPanel.Controls.Add(titleLabel);
             headerPanel.CustomizableEdges = customizableEdges1;
@@ -119,7 +126,11 @@ namespace Car_Rental_System
             headerPanel.Location = new Point(0, 0);
             headerPanel.Margin = new Padding(3, 4, 3, 4);
             headerPanel.Name = "headerPanel";
+            headerPanel.ShadowDecoration.BorderRadius = 18;
+            headerPanel.ShadowDecoration.Color = Color.FromArgb(203, 213, 225);
             headerPanel.ShadowDecoration.CustomizableEdges = customizableEdges2;
+            headerPanel.ShadowDecoration.Depth = 4;
+            headerPanel.ShadowDecoration.Enabled = true;
             headerPanel.Size = new Size(1234, 139);
             headerPanel.TabIndex = 0;
             // 
@@ -172,6 +183,8 @@ namespace Car_Rental_System
             detailsPanel.Controls.Add(processReturnButton);
             detailsPanel.Controls.Add(paymentMethodComboBox);
             detailsPanel.Controls.Add(paymentMethodLabel);
+            detailsPanel.Controls.Add(paymentReferenceTextBox);
+            detailsPanel.Controls.Add(paymentReferenceLabel);
             detailsPanel.Controls.Add(additionalPaymentTextBox);
             detailsPanel.Controls.Add(additionalPaymentLabel);
             detailsPanel.Controls.Add(balanceTextBox);
@@ -197,14 +210,14 @@ namespace Car_Rental_System
             detailsPanel.Controls.Add(customerTextBox);
             detailsPanel.Controls.Add(customerLabel);
             detailsPanel.Controls.Add(sectionLabel);
-            detailsPanel.CustomizableEdges = customizableEdges31;
+            detailsPanel.CustomizableEdges = customizableEdges33;
             detailsPanel.Dock = DockStyle.Fill;
             detailsPanel.FillColor = Color.White;
             detailsPanel.Font = new Font("Inter", 9F);
             detailsPanel.Location = new Point(32, 37);
             detailsPanel.Margin = new Padding(0, 0, 21, 0);
             detailsPanel.Name = "detailsPanel";
-            detailsPanel.ShadowDecoration.CustomizableEdges = customizableEdges32;
+            detailsPanel.ShadowDecoration.CustomizableEdges = customizableEdges34;
             detailsPanel.Size = new Size(390, 694);
             detailsPanel.TabIndex = 0;
             // 
@@ -219,12 +232,12 @@ namespace Car_Rental_System
             processReturnButton.HoverState.FillColor = Color.FromArgb(29, 78, 216);
             processReturnButton.Image = (Image)resources.GetObject("processReturnButton.Image");
             processReturnButton.ImageSize = new Size(22, 22);
-            processReturnButton.Location = new Point(23, 566);
+            processReturnButton.Location = new Point(23, 630);
             processReturnButton.Margin = new Padding(3, 4, 3, 4);
             processReturnButton.Name = "processReturnButton";
             processReturnButton.ShadowDecoration.CustomizableEdges = customizableEdges4;
             processReturnButton.Size = new Size(343, 45);
-            processReturnButton.TabIndex = 27;
+            processReturnButton.TabIndex = 29;
             processReturnButton.Text = "Process Return";
             processReturnButton.TextOffset = new Point(1, 0);
             processReturnButton.Click += ProcessReturnButton_Click;
@@ -237,6 +250,7 @@ namespace Car_Rental_System
             paymentMethodComboBox.CustomizableEdges = customizableEdges5;
             paymentMethodComboBox.DrawMode = DrawMode.OwnerDrawFixed;
             paymentMethodComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            paymentMethodComboBox.DropDownWidth = 190;
             paymentMethodComboBox.FocusedColor = Color.FromArgb(37, 99, 235);
             paymentMethodComboBox.FocusedState.BorderColor = Color.FromArgb(37, 99, 235);
             paymentMethodComboBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
@@ -244,11 +258,11 @@ namespace Car_Rental_System
             paymentMethodComboBox.FormattingEnabled = true;
             paymentMethodComboBox.ItemHeight = 30;
             paymentMethodComboBox.ItemsAppearance.ForeColor = Color.FromArgb(17, 24, 39);
-            paymentMethodComboBox.Location = new Point(208, 516);
+            paymentMethodComboBox.Location = new Point(191, 516);
             paymentMethodComboBox.Margin = new Padding(3, 4, 3, 4);
             paymentMethodComboBox.Name = "paymentMethodComboBox";
             paymentMethodComboBox.ShadowDecoration.CustomizableEdges = customizableEdges6;
-            paymentMethodComboBox.Size = new Size(160, 36);
+            paymentMethodComboBox.Size = new Size(177, 36);
             paymentMethodComboBox.TabIndex = 26;
             // 
             // paymentMethodLabel
@@ -256,18 +270,50 @@ namespace Car_Rental_System
             paymentMethodLabel.AutoSize = true;
             paymentMethodLabel.Font = new Font("Inter", 9F);
             paymentMethodLabel.ForeColor = Color.FromArgb(31, 41, 55);
-            paymentMethodLabel.Location = new Point(208, 493);
+            paymentMethodLabel.Location = new Point(191, 493);
             paymentMethodLabel.Name = "paymentMethodLabel";
-            paymentMethodLabel.Size = new Size(65, 22);
+            paymentMethodLabel.Size = new Size(131, 22);
             paymentMethodLabel.TabIndex = 25;
-            paymentMethodLabel.Text = "Method";
+            paymentMethodLabel.Text = "Payment Method";
+            // 
+            // paymentReferenceTextBox
+            // 
+            paymentReferenceTextBox.BorderColor = Color.FromArgb(209, 213, 219);
+            paymentReferenceTextBox.BorderRadius = 6;
+            paymentReferenceTextBox.Cursor = Cursors.IBeam;
+            paymentReferenceTextBox.CustomizableEdges = customizableEdges7;
+            paymentReferenceTextBox.DefaultText = "";
+            paymentReferenceTextBox.FocusedState.BorderColor = Color.FromArgb(37, 99, 235);
+            paymentReferenceTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            paymentReferenceTextBox.ForeColor = Color.FromArgb(17, 24, 39);
+            paymentReferenceTextBox.HoverState.BorderColor = Color.FromArgb(37, 99, 235);
+            paymentReferenceTextBox.Location = new Point(25, 585);
+            paymentReferenceTextBox.Margin = new Padding(3, 4, 3, 4);
+            paymentReferenceTextBox.Name = "paymentReferenceTextBox";
+            paymentReferenceTextBox.PlaceholderForeColor = Color.FromArgb(107, 114, 128);
+            paymentReferenceTextBox.PlaceholderText = "Receipt or transaction reference";
+            paymentReferenceTextBox.SelectedText = "";
+            paymentReferenceTextBox.ShadowDecoration.CustomizableEdges = customizableEdges8;
+            paymentReferenceTextBox.Size = new Size(343, 28);
+            paymentReferenceTextBox.TabIndex = 28;
+            // 
+            // paymentReferenceLabel
+            // 
+            paymentReferenceLabel.AutoSize = true;
+            paymentReferenceLabel.Font = new Font("Inter", 9F);
+            paymentReferenceLabel.ForeColor = Color.FromArgb(31, 41, 55);
+            paymentReferenceLabel.Location = new Point(25, 558);
+            paymentReferenceLabel.Name = "paymentReferenceLabel";
+            paymentReferenceLabel.Size = new Size(152, 22);
+            paymentReferenceLabel.TabIndex = 27;
+            paymentReferenceLabel.Text = "Payment Reference";
             // 
             // additionalPaymentTextBox
             // 
             additionalPaymentTextBox.BorderColor = Color.FromArgb(209, 213, 219);
             additionalPaymentTextBox.BorderRadius = 6;
             additionalPaymentTextBox.Cursor = Cursors.IBeam;
-            additionalPaymentTextBox.CustomizableEdges = customizableEdges7;
+            additionalPaymentTextBox.CustomizableEdges = customizableEdges9;
             additionalPaymentTextBox.DefaultText = "";
             additionalPaymentTextBox.FocusedState.BorderColor = Color.FromArgb(37, 99, 235);
             additionalPaymentTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
@@ -279,7 +325,7 @@ namespace Car_Rental_System
             additionalPaymentTextBox.PlaceholderForeColor = Color.FromArgb(107, 114, 128);
             additionalPaymentTextBox.PlaceholderText = "0";
             additionalPaymentTextBox.SelectedText = "";
-            additionalPaymentTextBox.ShadowDecoration.CustomizableEdges = customizableEdges8;
+            additionalPaymentTextBox.ShadowDecoration.CustomizableEdges = customizableEdges10;
             additionalPaymentTextBox.Size = new Size(160, 28);
             additionalPaymentTextBox.TabIndex = 24;
             additionalPaymentTextBox.TextChanged += AdditionalPaymentTextBox_TextChanged;
@@ -300,7 +346,7 @@ namespace Car_Rental_System
             balanceTextBox.BorderColor = Color.FromArgb(209, 213, 219);
             balanceTextBox.BorderRadius = 6;
             balanceTextBox.Cursor = Cursors.IBeam;
-            balanceTextBox.CustomizableEdges = customizableEdges9;
+            balanceTextBox.CustomizableEdges = customizableEdges11;
             balanceTextBox.DefaultText = "";
             balanceTextBox.FillColor = Color.FromArgb(243, 244, 246);
             balanceTextBox.FocusedState.BorderColor = Color.FromArgb(209, 213, 219);
@@ -314,7 +360,7 @@ namespace Car_Rental_System
             balanceTextBox.PlaceholderText = "";
             balanceTextBox.ReadOnly = true;
             balanceTextBox.SelectedText = "";
-            balanceTextBox.ShadowDecoration.CustomizableEdges = customizableEdges10;
+            balanceTextBox.ShadowDecoration.CustomizableEdges = customizableEdges12;
             balanceTextBox.Size = new Size(160, 28);
             balanceTextBox.TabIndex = 22;
             // 
@@ -334,7 +380,7 @@ namespace Car_Rental_System
             amountPaidTextBox.BorderColor = Color.FromArgb(209, 213, 219);
             amountPaidTextBox.BorderRadius = 6;
             amountPaidTextBox.Cursor = Cursors.IBeam;
-            amountPaidTextBox.CustomizableEdges = customizableEdges11;
+            amountPaidTextBox.CustomizableEdges = customizableEdges13;
             amountPaidTextBox.DefaultText = "";
             amountPaidTextBox.FillColor = Color.FromArgb(243, 244, 246);
             amountPaidTextBox.FocusedState.BorderColor = Color.FromArgb(209, 213, 219);
@@ -348,7 +394,7 @@ namespace Car_Rental_System
             amountPaidTextBox.PlaceholderText = "";
             amountPaidTextBox.ReadOnly = true;
             amountPaidTextBox.SelectedText = "";
-            amountPaidTextBox.ShadowDecoration.CustomizableEdges = customizableEdges12;
+            amountPaidTextBox.ShadowDecoration.CustomizableEdges = customizableEdges14;
             amountPaidTextBox.Size = new Size(160, 28);
             amountPaidTextBox.TabIndex = 20;
             // 
@@ -368,7 +414,7 @@ namespace Car_Rental_System
             finalAmountTextBox.BorderColor = Color.FromArgb(209, 213, 219);
             finalAmountTextBox.BorderRadius = 6;
             finalAmountTextBox.Cursor = Cursors.IBeam;
-            finalAmountTextBox.CustomizableEdges = customizableEdges13;
+            finalAmountTextBox.CustomizableEdges = customizableEdges15;
             finalAmountTextBox.DefaultText = "";
             finalAmountTextBox.FillColor = Color.FromArgb(243, 244, 246);
             finalAmountTextBox.FocusedState.BorderColor = Color.FromArgb(209, 213, 219);
@@ -382,7 +428,7 @@ namespace Car_Rental_System
             finalAmountTextBox.PlaceholderText = "";
             finalAmountTextBox.ReadOnly = true;
             finalAmountTextBox.SelectedText = "";
-            finalAmountTextBox.ShadowDecoration.CustomizableEdges = customizableEdges14;
+            finalAmountTextBox.ShadowDecoration.CustomizableEdges = customizableEdges16;
             finalAmountTextBox.Size = new Size(160, 28);
             finalAmountTextBox.TabIndex = 18;
             // 
@@ -401,8 +447,8 @@ namespace Car_Rental_System
             // 
             penaltyTextBox.BorderColor = Color.FromArgb(209, 213, 219);
             penaltyTextBox.BorderRadius = 6;
-            penaltyTextBox.Cursor = Cursors.IBeam;
-            penaltyTextBox.CustomizableEdges = customizableEdges15;
+            penaltyTextBox.Cursor = Cursors.Default;
+            penaltyTextBox.CustomizableEdges = customizableEdges17;
             penaltyTextBox.DefaultText = "";
             penaltyTextBox.FillColor = Color.FromArgb(243, 244, 246);
             penaltyTextBox.FocusedState.BorderColor = Color.FromArgb(209, 213, 219);
@@ -416,9 +462,10 @@ namespace Car_Rental_System
             penaltyTextBox.PlaceholderText = "";
             penaltyTextBox.ReadOnly = true;
             penaltyTextBox.SelectedText = "";
-            penaltyTextBox.ShadowDecoration.CustomizableEdges = customizableEdges16;
+            penaltyTextBox.ShadowDecoration.CustomizableEdges = customizableEdges18;
             penaltyTextBox.Size = new Size(160, 28);
             penaltyTextBox.TabIndex = 16;
+            penaltyTextBox.TabStop = false;
             // 
             // penaltyLabel
             // 
@@ -435,8 +482,8 @@ namespace Car_Rental_System
             // 
             lateDaysTextBox.BorderColor = Color.FromArgb(209, 213, 219);
             lateDaysTextBox.BorderRadius = 6;
-            lateDaysTextBox.Cursor = Cursors.IBeam;
-            lateDaysTextBox.CustomizableEdges = customizableEdges17;
+            lateDaysTextBox.Cursor = Cursors.Default;
+            lateDaysTextBox.CustomizableEdges = customizableEdges19;
             lateDaysTextBox.DefaultText = "";
             lateDaysTextBox.FillColor = Color.FromArgb(243, 244, 246);
             lateDaysTextBox.FocusedState.BorderColor = Color.FromArgb(209, 213, 219);
@@ -450,9 +497,10 @@ namespace Car_Rental_System
             lateDaysTextBox.PlaceholderText = "";
             lateDaysTextBox.ReadOnly = true;
             lateDaysTextBox.SelectedText = "";
-            lateDaysTextBox.ShadowDecoration.CustomizableEdges = customizableEdges18;
+            lateDaysTextBox.ShadowDecoration.CustomizableEdges = customizableEdges20;
             lateDaysTextBox.Size = new Size(160, 28);
             lateDaysTextBox.TabIndex = 14;
+            lateDaysTextBox.TabStop = false;
             // 
             // lateDaysLabel
             // 
@@ -475,7 +523,7 @@ namespace Car_Rental_System
             actualReturnDatePicker.CheckedState.FillColor = Color.White;
             actualReturnDatePicker.CheckedState.ForeColor = Color.FromArgb(17, 24, 39);
             actualReturnDatePicker.Cursor = Cursors.Hand;
-            actualReturnDatePicker.CustomizableEdges = customizableEdges19;
+            actualReturnDatePicker.CustomizableEdges = customizableEdges21;
             actualReturnDatePicker.FillColor = Color.White;
             actualReturnDatePicker.FocusedColor = Color.FromArgb(37, 99, 235);
             actualReturnDatePicker.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
@@ -489,7 +537,7 @@ namespace Car_Rental_System
             actualReturnDatePicker.MaxDate = new DateTime(9998, 12, 31, 0, 0, 0, 0);
             actualReturnDatePicker.MinDate = new DateTime(1753, 1, 1, 0, 0, 0, 0);
             actualReturnDatePicker.Name = "actualReturnDatePicker";
-            actualReturnDatePicker.ShadowDecoration.CustomizableEdges = customizableEdges20;
+            actualReturnDatePicker.ShadowDecoration.CustomizableEdges = customizableEdges22;
             actualReturnDatePicker.Size = new Size(160, 29);
             actualReturnDatePicker.TabIndex = 12;
             actualReturnDatePicker.Value = new DateTime(2026, 5, 14, 17, 30, 41, 537);
@@ -511,7 +559,7 @@ namespace Car_Rental_System
             baseAmountTextBox.BorderColor = Color.FromArgb(209, 213, 219);
             baseAmountTextBox.BorderRadius = 6;
             baseAmountTextBox.Cursor = Cursors.IBeam;
-            baseAmountTextBox.CustomizableEdges = customizableEdges21;
+            baseAmountTextBox.CustomizableEdges = customizableEdges23;
             baseAmountTextBox.DefaultText = "";
             baseAmountTextBox.FillColor = Color.FromArgb(243, 244, 246);
             baseAmountTextBox.FocusedState.BorderColor = Color.FromArgb(209, 213, 219);
@@ -525,7 +573,7 @@ namespace Car_Rental_System
             baseAmountTextBox.PlaceholderText = "";
             baseAmountTextBox.ReadOnly = true;
             baseAmountTextBox.SelectedText = "";
-            baseAmountTextBox.ShadowDecoration.CustomizableEdges = customizableEdges22;
+            baseAmountTextBox.ShadowDecoration.CustomizableEdges = customizableEdges24;
             baseAmountTextBox.Size = new Size(160, 28);
             baseAmountTextBox.TabIndex = 10;
             // 
@@ -545,7 +593,7 @@ namespace Car_Rental_System
             dailyRateTextBox.BorderColor = Color.FromArgb(209, 213, 219);
             dailyRateTextBox.BorderRadius = 6;
             dailyRateTextBox.Cursor = Cursors.IBeam;
-            dailyRateTextBox.CustomizableEdges = customizableEdges23;
+            dailyRateTextBox.CustomizableEdges = customizableEdges25;
             dailyRateTextBox.DefaultText = "";
             dailyRateTextBox.FillColor = Color.FromArgb(243, 244, 246);
             dailyRateTextBox.FocusedState.BorderColor = Color.FromArgb(209, 213, 219);
@@ -559,7 +607,7 @@ namespace Car_Rental_System
             dailyRateTextBox.PlaceholderText = "";
             dailyRateTextBox.ReadOnly = true;
             dailyRateTextBox.SelectedText = "";
-            dailyRateTextBox.ShadowDecoration.CustomizableEdges = customizableEdges24;
+            dailyRateTextBox.ShadowDecoration.CustomizableEdges = customizableEdges26;
             dailyRateTextBox.Size = new Size(160, 28);
             dailyRateTextBox.TabIndex = 8;
             // 
@@ -579,7 +627,7 @@ namespace Car_Rental_System
             expectedReturnTextBox.BorderColor = Color.FromArgb(209, 213, 219);
             expectedReturnTextBox.BorderRadius = 6;
             expectedReturnTextBox.Cursor = Cursors.IBeam;
-            expectedReturnTextBox.CustomizableEdges = customizableEdges25;
+            expectedReturnTextBox.CustomizableEdges = customizableEdges27;
             expectedReturnTextBox.DefaultText = "";
             expectedReturnTextBox.FillColor = Color.FromArgb(243, 244, 246);
             expectedReturnTextBox.FocusedState.BorderColor = Color.FromArgb(209, 213, 219);
@@ -593,7 +641,7 @@ namespace Car_Rental_System
             expectedReturnTextBox.PlaceholderText = "";
             expectedReturnTextBox.ReadOnly = true;
             expectedReturnTextBox.SelectedText = "";
-            expectedReturnTextBox.ShadowDecoration.CustomizableEdges = customizableEdges26;
+            expectedReturnTextBox.ShadowDecoration.CustomizableEdges = customizableEdges28;
             expectedReturnTextBox.Size = new Size(343, 30);
             expectedReturnTextBox.TabIndex = 6;
             // 
@@ -613,7 +661,7 @@ namespace Car_Rental_System
             carTextBox.BorderColor = Color.FromArgb(209, 213, 219);
             carTextBox.BorderRadius = 6;
             carTextBox.Cursor = Cursors.IBeam;
-            carTextBox.CustomizableEdges = customizableEdges27;
+            carTextBox.CustomizableEdges = customizableEdges29;
             carTextBox.DefaultText = "";
             carTextBox.FillColor = Color.FromArgb(243, 244, 246);
             carTextBox.FocusedState.BorderColor = Color.FromArgb(209, 213, 219);
@@ -627,7 +675,7 @@ namespace Car_Rental_System
             carTextBox.PlaceholderText = "";
             carTextBox.ReadOnly = true;
             carTextBox.SelectedText = "";
-            carTextBox.ShadowDecoration.CustomizableEdges = customizableEdges28;
+            carTextBox.ShadowDecoration.CustomizableEdges = customizableEdges30;
             carTextBox.Size = new Size(343, 30);
             carTextBox.TabIndex = 4;
             // 
@@ -647,7 +695,7 @@ namespace Car_Rental_System
             customerTextBox.BorderColor = Color.FromArgb(209, 213, 219);
             customerTextBox.BorderRadius = 6;
             customerTextBox.Cursor = Cursors.IBeam;
-            customerTextBox.CustomizableEdges = customizableEdges29;
+            customerTextBox.CustomizableEdges = customizableEdges31;
             customerTextBox.DefaultText = "";
             customerTextBox.FillColor = Color.FromArgb(243, 244, 246);
             customerTextBox.FocusedState.BorderColor = Color.FromArgb(209, 213, 219);
@@ -661,7 +709,7 @@ namespace Car_Rental_System
             customerTextBox.PlaceholderText = "";
             customerTextBox.ReadOnly = true;
             customerTextBox.SelectedText = "";
-            customerTextBox.ShadowDecoration.CustomizableEdges = customizableEdges30;
+            customerTextBox.ShadowDecoration.CustomizableEdges = customizableEdges32;
             customerTextBox.Size = new Size(343, 30);
             customerTextBox.TabIndex = 2;
             // 
@@ -695,13 +743,13 @@ namespace Car_Rental_System
             listPanel.BorderThickness = 1;
             listPanel.Controls.Add(activeRentalsGrid);
             listPanel.Controls.Add(listHeaderPanel);
-            listPanel.CustomizableEdges = customizableEdges37;
+            listPanel.CustomizableEdges = customizableEdges39;
             listPanel.Dock = DockStyle.Fill;
             listPanel.FillColor = Color.White;
             listPanel.Location = new Point(443, 37);
             listPanel.Margin = new Padding(0);
             listPanel.Name = "listPanel";
-            listPanel.ShadowDecoration.CustomizableEdges = customizableEdges38;
+            listPanel.ShadowDecoration.CustomizableEdges = customizableEdges40;
             listPanel.Size = new Size(759, 694);
             listPanel.TabIndex = 1;
             // 
@@ -712,10 +760,6 @@ namespace Car_Rental_System
             dataGridViewCellStyle1.BackColor = Color.FromArgb(249, 250, 251);
             activeRentalsGrid.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
             activeRentalsGrid.CellBorderStyle = DataGridViewCellBorderStyle.None;
-            activeRentalsGrid.AutoGenerateColumns = true;
-            activeRentalsGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            activeRentalsGrid.ColumnHeadersVisible = true;
-            activeRentalsGrid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = Color.FromArgb(31, 41, 55);
             dataGridViewCellStyle2.Font = new Font("Inter SemiBold", 9F, FontStyle.Bold);
@@ -774,12 +818,12 @@ namespace Car_Rental_System
             listHeaderPanel.BorderThickness = 1;
             listHeaderPanel.Controls.Add(searchTextBox);
             listHeaderPanel.Controls.Add(activeRentalsLabel);
-            listHeaderPanel.CustomizableEdges = customizableEdges35;
+            listHeaderPanel.CustomizableEdges = customizableEdges37;
             listHeaderPanel.Dock = DockStyle.Top;
             listHeaderPanel.Location = new Point(0, 0);
             listHeaderPanel.Margin = new Padding(3, 4, 3, 4);
             listHeaderPanel.Name = "listHeaderPanel";
-            listHeaderPanel.ShadowDecoration.CustomizableEdges = customizableEdges36;
+            listHeaderPanel.ShadowDecoration.CustomizableEdges = customizableEdges38;
             listHeaderPanel.Size = new Size(759, 77);
             listHeaderPanel.TabIndex = 0;
             // 
@@ -789,7 +833,7 @@ namespace Car_Rental_System
             searchTextBox.BorderColor = Color.FromArgb(209, 213, 219);
             searchTextBox.BorderRadius = 6;
             searchTextBox.Cursor = Cursors.IBeam;
-            searchTextBox.CustomizableEdges = customizableEdges33;
+            searchTextBox.CustomizableEdges = customizableEdges35;
             searchTextBox.DefaultText = "";
             searchTextBox.FocusedState.BorderColor = Color.FromArgb(37, 99, 235);
             searchTextBox.Font = new Font("Inter", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
@@ -801,7 +845,7 @@ namespace Car_Rental_System
             searchTextBox.PlaceholderForeColor = Color.FromArgb(107, 114, 128);
             searchTextBox.PlaceholderText = "Search active rental";
             searchTextBox.SelectedText = "";
-            searchTextBox.ShadowDecoration.CustomizableEdges = customizableEdges34;
+            searchTextBox.ShadowDecoration.CustomizableEdges = customizableEdges36;
             searchTextBox.Size = new Size(297, 28);
             searchTextBox.TabIndex = 1;
             searchTextBox.TextChanged += SearchTextBox_TextChanged;
@@ -854,6 +898,8 @@ namespace Car_Rental_System
         private Guna2Button processReturnButton;
         private Guna2ComboBox paymentMethodComboBox;
         private Label paymentMethodLabel;
+        private Guna2TextBox paymentReferenceTextBox;
+        private Label paymentReferenceLabel;
         private Guna2TextBox additionalPaymentTextBox;
         private Label additionalPaymentLabel;
         private Guna2TextBox balanceTextBox;

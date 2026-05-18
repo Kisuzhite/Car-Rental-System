@@ -9,77 +9,12 @@ namespace Car_Rental_System.Services
 {
     internal sealed class RentalService
     {
-        public async Task<RentalOperationResult> CreateQuickRentalAsync(
-            string customerName,
-            int carId,
-            DateTime rentalDate,
-            DateTime expectedReturnDate,
-            decimal amountPaid = 0,
-            PaymentMethod paymentMethod = PaymentMethod.Cash)
-        {
-            using var db = new AppDbContext();
-            await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
-
-            var customerRepository = new CustomerRepository(db);
-            int customerId = await customerRepository.GetOrCreateByNameAsync(customerName);
-            RentalOperationResult result = await CreateRentalAsync(
-                db,
-                customerId,
-                carId,
-                rentalDate,
-                expectedReturnDate,
-                amountPaid,
-                paymentMethod);
-
-            if (result.Success)
-            {
-                await transaction.CommitAsync();
-            }
-            else
-            {
-                await transaction.RollbackAsync();
-            }
-
-            return result;
-        }
-
-        public async Task<RentalOperationResult> CreateRentalAsync(
-            int customerId,
-            int carId,
-            DateTime rentalDate,
-            DateTime expectedReturnDate,
-            decimal amountPaid = 0,
-            PaymentMethod paymentMethod = PaymentMethod.Cash)
-        {
-            using var db = new AppDbContext();
-            await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
-
-            RentalOperationResult result = await CreateRentalAsync(
-                db,
-                customerId,
-                carId,
-                rentalDate,
-                expectedReturnDate,
-                amountPaid,
-                paymentMethod);
-
-            if (result.Success)
-            {
-                await transaction.CommitAsync();
-            }
-            else
-            {
-                await transaction.RollbackAsync();
-            }
-
-            return result;
-        }
-
         public async Task<RentalOperationResult> ProcessReturnAsync(
             int rentalId,
             DateTime actualReturnDate,
             decimal additionalPayment = 0,
-            PaymentMethod paymentMethod = PaymentMethod.Cash)
+            PaymentMethod paymentMethod = PaymentMethod.Cash,
+            string paymentReferenceNumber = "")
         {
             using var db = new AppDbContext();
             await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
@@ -114,6 +49,9 @@ namespace Car_Rental_System.Services
                 rental.DailyRate,
                 rental.TotalAmount);
             decimal newAmountPaid = rental.AmountPaid + additionalPayment;
+            paymentReferenceNumber = string.IsNullOrWhiteSpace(paymentReferenceNumber)
+                ? AppConstants.NotProvided
+                : ValidationHelper.CollapseSpaces(paymentReferenceNumber);
 
             if (!PaymentHelper.IsValidPaymentAmount(newAmountPaid, finalAmount))
             {
@@ -131,6 +69,15 @@ namespace Car_Rental_System.Services
             if (additionalPayment > 0)
             {
                 rental.PaymentMethod = paymentMethod;
+                rentalRepository.AddPayment(new RentalPayment
+                {
+                    RentalId = rental.RentalId,
+                    PaymentDate = RentalCalculator.ToDateOnly(DateTime.Today),
+                    Amount = additionalPayment,
+                    PaymentMethod = paymentMethod,
+                    PaymentReferenceNumber = paymentReferenceNumber,
+                    PaymentType = RentalPaymentType.Return
+                });
             }
             rental.Status = RentalStatus.Returned;
             rental.Car.Status = CarStatus.Available;
@@ -147,105 +94,6 @@ namespace Car_Rental_System.Services
                 newAmountPaid,
                 rental.Balance,
                 lateDays);
-        }
-
-        private static async Task<RentalOperationResult> CreateRentalAsync(
-            AppDbContext db,
-            int customerId,
-            int carId,
-            DateTime rentalDate,
-            DateTime expectedReturnDate,
-            decimal amountPaid,
-            PaymentMethod paymentMethod)
-        {
-            var rentalRepository = new RentalRepository(db);
-            var carRepository = new CarRepository(db);
-
-            DateOnly rentalStart = RentalCalculator.ToDateOnly(rentalDate);
-            DateOnly rentalEnd = RentalCalculator.ToDateOnly(expectedReturnDate);
-
-            if (!ValidationHelper.TryValidateActiveRentalDates(
-                    rentalDate,
-                    expectedReturnDate,
-                    DateTime.Today,
-                    out string dateError))
-            {
-                return RentalOperationResult.Fail(
-                    RentalOperationError.InvalidRentalDate,
-                    dateError.Contains("future", StringComparison.OrdinalIgnoreCase) ? "Use Reservation" : "Invalid Dates",
-                    dateError);
-            }
-
-            bool hasActiveRental = await rentalRepository.CustomerHasActiveRentalAsync(customerId);
-
-            if (hasActiveRental)
-            {
-                return RentalOperationResult.Fail(
-                    RentalOperationError.CustomerHasActiveRental,
-                    "Customer Has Active Rental",
-                    "This customer already has an active rental.\nProcess the return first before renting another car.");
-            }
-
-            if (await rentalRepository.HasCarScheduleConflictAsync(carId, rentalStart, rentalEnd))
-            {
-                return RentalOperationResult.Fail(
-                    RentalOperationError.ScheduleConflict,
-                    "Reservation Conflict",
-                    "This car has an active rental or confirmed reservation that overlaps those dates. Choose another car or adjust the rental dates.");
-            }
-
-            Car? car = await carRepository.GetAvailableByIdWithTypeAsync(carId);
-
-            if (car == null)
-            {
-                return RentalOperationResult.Fail(
-                    RentalOperationError.CarNotAvailable,
-                    "Car Not Available",
-                    "The selected car is no longer available. Please choose another car.");
-            }
-
-            decimal dailyRate = car.CarType?.DailyRate ?? car.DailyRate;
-            decimal totalAmount = RentalCalculator.CalculateBaseAmount(
-                rentalDate,
-                expectedReturnDate,
-                dailyRate);
-
-            if (!PaymentHelper.IsValidInitialPaymentAmount(amountPaid, totalAmount))
-            {
-                decimal minimumDeposit = PaymentHelper.GetMinimumDepositAmount(totalAmount);
-                return RentalOperationResult.Fail(
-                    RentalOperationError.InvalidPaymentAmount,
-                    "Invalid Payment",
-                    $"Amount paid must be at least the minimum deposit of {RentalCalculator.FormatCurrency(minimumDeposit)} and cannot be greater than the total amount.");
-            }
-
-            car.Status = CarStatus.Rented;
-
-            var rental = new Rental
-            {
-                CustomerId = customerId,
-                CarId = carId,
-                RentalDate = rentalStart,
-                ExpectedReturnDate = rentalEnd,
-                DailyRate = dailyRate,
-                TotalAmount = totalAmount,
-                AmountPaid = amountPaid,
-                PaymentStatus = PaymentHelper.GetPaymentStatus(totalAmount, amountPaid),
-                PaymentMethod = paymentMethod,
-                Status = RentalStatus.Active
-            };
-
-            rentalRepository.Add(rental);
-            await rentalRepository.SaveChangesAsync();
-
-            return RentalOperationResult.Ok(
-                "Saved",
-                "Rental transaction created successfully.",
-                rental.RentalId,
-                dailyRate,
-                totalAmount,
-                amountPaid,
-                rental.Balance);
         }
 
     }

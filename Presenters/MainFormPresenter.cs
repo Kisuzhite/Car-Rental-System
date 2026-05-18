@@ -2,10 +2,10 @@ using Car_Rental_System.Data;
 using Car_Rental_System.Helpers;
 using Car_Rental_System.Models;
 using Car_Rental_System.Repositories;
-using Car_Rental_System.Services;
 using Car_Rental_System.ViewModels;
 using Car_Rental_System.Views;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace Car_Rental_System.Presenters
 {
@@ -36,80 +36,86 @@ namespace Car_Rental_System.Presenters
             using var db = new AppDbContext();
             var carRepository = new CarRepository(db);
             var rentalRepository = new RentalRepository(db);
+            var reservationRepository = new ReservationRepository(db);
             DateOnly today = RentalCalculator.ToDateOnly(DateTime.Today);
 
-            int totalCars = await carRepository.CountAsync();
-            int availableCars = await carRepository.CountByStatusAsync(CarStatus.Available);
+            int rentedCars = await rentalRepository.CountActiveAsync();
+            int activeBookings = rentedCars + await reservationRepository.CountOpenAsync();
             int overdueRentals = await rentalRepository.CountOverdueAsync(today);
 
             DateOnly firstOfMonth = new(DateTime.Today.Year, DateTime.Today.Month, 1);
-            DateOnly firstOfNextMonth = firstOfMonth.AddMonths(1);
-            decimal income = await rentalRepository.GetMonthlyCollectedAsync(firstOfMonth, firstOfNextMonth);
+            decimal totalRevenue = await rentalRepository.GetTotalCollectedAsync() +
+                await reservationRepository.GetOpenDepositCollectedAsync();
 
-            List<Car> availableCarsForDashboard = await carRepository.GetAvailableCarsAsync(view.DashboardSearchText);
+            List<Car> availableCarsForDashboard = await carRepository.GetAvailableForScheduleAsync(
+                today,
+                today.AddDays(1));
+            int availableCars = availableCarsForDashboard.Count;
 
-            List<DashboardCarGridRow> carRows = availableCarsForDashboard
-                .Select(c => new DashboardCarGridRow
-                {
-                    CarId = c.CarId,
-                    PlateNo = c.PlateNumber,
-                    Type = c.CarType != null ? c.CarType.TypeName : AppConstants.NotProvided,
-                    Brand = c.Brand,
-                    Model = c.Model,
-                    RatePerDay = c.CarType != null ? c.CarType.DailyRate : c.DailyRate,
-                    Status = c.Status
-                })
-                .ToList();
+            List<DashboardScheduleDay> weeklySchedule = new();
+            for (int i = 0; i < 7; i++)
+            {
+                DateOnly scheduleDate = today.AddDays(i);
+                weeklySchedule.Add(new DashboardScheduleDay(
+                    scheduleDate,
+                    await reservationRepository.CountOpenPickupsForDateAsync(scheduleDate),
+                    await rentalRepository.CountReturnsDueAsync(scheduleDate)));
+            }
 
-            List<RecentRentalGridRow> recentRentals = (await rentalRepository.GetRecentRentalsAsync(10))
-                .Select(r => new RecentRentalGridRow
-                {
-                    RentalId = r.RentalId,
-                    Customer = r.Customer.FullName,
-                    Car = r.Car.PlateNumber + " - " + r.Car.Brand + " " + r.Car.Model +
-                        (r.Car.CarType != null ? " (" + r.Car.CarType.TypeName + ")" : ""),
-                    ReturnDate = r.ExpectedReturnDate,
-                    Amount = r.TotalAmount,
-                    AmountPaid = r.AmountPaid,
-                    Balance = r.Balance,
-                    PaymentStatus = r.PaymentStatus,
-                    Status = RentalStatusHelper.GetDisplayStatus(r, today)
-                })
-                .ToList();
+            List<DashboardRevenuePoint> monthlyRevenue = new();
+            DateOnly firstChartMonth = firstOfMonth.AddMonths(-5);
+            for (int i = 0; i < 6; i++)
+            {
+                DateOnly monthStart = firstChartMonth.AddMonths(i);
+                DateOnly monthEnd = monthStart.AddMonths(1);
+                decimal amount = await rentalRepository.GetCollectedForStartsInRangeAsync(monthStart, monthEnd) +
+                    await reservationRepository.GetOpenDepositCollectedInRangeAsync(monthStart, monthEnd);
+                string monthLabel = new DateTime(monthStart.Year, monthStart.Month, 1)
+                    .ToString("MMM", CultureInfo.CurrentCulture);
 
-            List<CarLookupItem> lookup = availableCarsForDashboard
-                .Select(c => new CarLookupItem
-                {
-                    CarId = c.CarId,
-                    CarName = c.PlateNumber + " - " + c.Brand + " " + c.Model +
-                        (c.CarType != null ? " (" + c.CarType.TypeName + ")" : ""),
-                    DailyRate = c.CarType != null ? c.CarType.DailyRate : c.DailyRate
-                })
-                .ToList();
+                monthlyRevenue.Add(new DashboardRevenuePoint(monthLabel, amount));
+            }
+
+            List<(decimal TotalAmount, decimal AmountPaid)> paymentAmounts = await rentalRepository.GetActivePaymentAmountsAsync();
+            paymentAmounts.AddRange(await reservationRepository.GetOpenPaymentAmountsAsync());
+            List<DashboardPaymentStatusPoint> paymentStatus = BuildPaymentStatusPoints(paymentAmounts);
 
             var dashboardData = new DashboardData(
-                totalCars,
+                totalRevenue,
+                activeBookings,
+                rentedCars,
                 availableCars,
                 overdueRentals,
-                income,
-                carRows,
-                recentRentals,
-                lookup);
+                weeklySchedule,
+                monthlyRevenue,
+                paymentStatus);
 
             view.BindDashboard(dashboardData);
-            view.RefreshAvailableCarSelection(lookup);
         }
 
-        public Task<RentalOperationResult> CreateQuickRentalAsync(QuickRentalFormInput input)
+        private static List<DashboardPaymentStatusPoint> BuildPaymentStatusPoints(
+            List<(decimal TotalAmount, decimal AmountPaid)> paymentAmounts)
         {
-            var rentalService = new RentalService();
-            return rentalService.CreateQuickRentalAsync(
-                input.CustomerName,
-                input.CarId,
-                input.RentalDate,
-                input.ExpectedReturnDate,
-                input.AmountPaid,
-                input.PaymentMethod);
+            int fullyPaid = 0;
+            int balanceRemaining = 0;
+
+            foreach ((decimal totalAmount, decimal amountPaid) in paymentAmounts)
+            {
+                if (amountPaid >= totalAmount)
+                {
+                    fullyPaid++;
+                }
+                else
+                {
+                    balanceRemaining++;
+                }
+            }
+
+            return
+            [
+                new DashboardPaymentStatusPoint("Fully Paid", fullyPaid),
+                new DashboardPaymentStatusPoint("Balance Remaining", balanceRemaining)
+            ];
         }
     }
 }

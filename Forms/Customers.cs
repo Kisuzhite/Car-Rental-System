@@ -44,30 +44,6 @@ namespace Car_Rental_System
             }
         }
 
-        private async void AddButton_Click(object? sender, EventArgs e)
-        {
-            if (!ValidateInputs(out CustomerFormInput input))
-            {
-                return;
-            }
-
-            try
-            {
-                PresenterResult result = await presenter.AddCustomerAsync(input);
-                AppMessageBox.ShowPresenterResult(result);
-
-                if (result.Success)
-                {
-                    ClearForm();
-                    await LoadCustomersAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                AppMessageBox.ShowDatabaseError("Unable to add customer.", ex);
-            }
-        }
-
         private async void UpdateButton_Click(object? sender, EventArgs e)
         {
             if (selectedCustomerId == null)
@@ -91,7 +67,6 @@ namespace Car_Rental_System
                     return;
                 }
 
-                await RentalDocumentPrinter.PromptToPrintRentalAgreementAsync(this, result.RentalId);
                 ClearForm();
                 await LoadCustomersAsync();
             }

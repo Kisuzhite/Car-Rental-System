@@ -75,6 +75,20 @@ namespace Car_Rental_System.Services
                     "This customer already has an active rental. Process the return first before converting this reservation.");
             }
 
+            if (await reservationRepository.HasCustomerScheduleConflictAsync(
+                    customerId,
+                    reservation.CustomerName,
+                    reservation.PickupDate,
+                    reservation.ExpectedReturnDate,
+                    reservation.ReservationId))
+            {
+                await transaction.RollbackAsync();
+                return ReservationOperationResult.Fail(
+                    ReservationOperationError.ScheduleConflict,
+                    "Customer Schedule Conflict",
+                    "This customer already has another active rental or confirmed reservation that overlaps those dates.");
+            }
+
             if (reservation.Car.Status != CarStatus.Available)
             {
                 await transaction.RollbackAsync();
@@ -116,6 +130,18 @@ namespace Car_Rental_System.Services
                 PaymentMethod = reservation.PaymentMethod,
                 Status = RentalStatus.Active
             };
+
+            if (reservation.DepositAmount > 0)
+            {
+                rental.Payments.Add(new RentalPayment
+                {
+                    PaymentDate = reservation.ReservationDate,
+                    Amount = reservation.DepositAmount,
+                    PaymentMethod = reservation.PaymentMethod,
+                    PaymentReferenceNumber = reservation.PaymentReferenceNumber,
+                    PaymentType = RentalPaymentType.Initial
+                });
+            }
 
             rentalRepository.Add(rental);
             await rentalRepository.SaveChangesAsync();

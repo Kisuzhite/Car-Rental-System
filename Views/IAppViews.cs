@@ -46,14 +46,14 @@ namespace Car_Rental_System.Views
     internal interface IReportsView
     {
         string SearchText { get; }
+        DateOnly DateFrom { get; }
+        DateOnly DateTo { get; }
         void BindReports(ReportsData reports);
     }
 
     internal interface IMainFormView
     {
-        string DashboardSearchText { get; }
         void BindDashboard(DashboardData dashboardData);
-        void RefreshAvailableCarSelection(List<CarLookupItem> availableCars);
     }
 
     internal interface ILoginView

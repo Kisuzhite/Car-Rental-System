@@ -18,6 +18,12 @@ namespace Car_Rental_System.Presenters
 
         public async Task LoadLookupsAsync()
         {
+            DateOnly today = RentalCalculator.ToDateOnly(DateTime.Today);
+            await LoadLookupsAsync(today, today.AddDays(1));
+        }
+
+        public async Task LoadLookupsAsync(DateOnly pickupDate, DateOnly expectedReturnDate)
+        {
             using var db = new AppDbContext();
             var customerRepository = new CustomerRepository(db);
             var carRepository = new CarRepository(db);
@@ -26,21 +32,34 @@ namespace Car_Rental_System.Presenters
                 .Select(c => new CustomerLookupItem
                 {
                     CustomerId = c.CustomerId,
-                    FullName = c.FullName
+                    FullName = c.FullName,
+                    ContactNumber = c.ContactNumber,
+                    LicenseNumber = c.LicenseNumber,
+                    Address = c.Address
                 })
                 .ToList();
 
-            List<RentalCarLookupItem> cars = (await carRepository.GetAvailableCarsAsync())
+            view.BindCustomers(customers);
+            await LoadAvailableCarsAsync(pickupDate, expectedReturnDate);
+        }
+
+        public async Task LoadAvailableCarsAsync(DateOnly pickupDate, DateOnly expectedReturnDate)
+        {
+            using var db = new AppDbContext();
+            var carRepository = new CarRepository(db);
+
+            List<RentalCarLookupItem> cars = (await carRepository.GetAvailableForScheduleAsync(
+                    pickupDate,
+                    expectedReturnDate))
                 .Select(c => new RentalCarLookupItem
                 {
                     CarId = c.CarId,
-                    CarName = c.PlateNumber + " - " + c.Brand + " " + c.Model +
+                    CarName = c.Brand + " " + c.Model +
                         (c.CarType != null ? " (" + c.CarType.TypeName + ")" : ""),
                     DailyRate = c.CarType != null ? c.CarType.DailyRate : c.DailyRate
                 })
                 .ToList();
 
-            view.BindCustomers(customers);
             view.BindAvailableCars(cars);
         }
 
@@ -72,16 +91,20 @@ namespace Car_Rental_System.Presenters
             view.BindRentals(rentals);
         }
 
-        public Task<RentalOperationResult> CreateRentalAsync(RentalFormInput input)
+        public Task<BookingOperationResult> CreateBookingAsync(BookingFormInput input)
         {
-            var rentalService = new RentalService();
-            return rentalService.CreateRentalAsync(
-                input.CustomerId,
+            var bookingService = new BookingService();
+            return bookingService.CreateBookingAsync(
+                input.CustomerName,
+                input.ContactNumber,
+                input.LicenseNumber,
+                input.Address,
                 input.CarId,
-                input.RentalDate,
+                input.PickupDate,
                 input.ExpectedReturnDate,
                 input.AmountPaid,
-                input.PaymentMethod);
+                input.PaymentMethod,
+                input.PaymentReferenceNumber);
         }
     }
 }

@@ -67,12 +67,12 @@ namespace Car_Rental_System.Presenters
                 return PresenterResult.Error("Error", "Car type not found.");
             }
 
-            if (await carTypeRepository.TypeNameExistsAsync(input.TypeName, carTypeId))
+            if (!string.Equals(carType.TypeName, input.TypeName, StringComparison.OrdinalIgnoreCase) &&
+                await carTypeRepository.TypeNameExistsAsync(input.TypeName, carTypeId))
             {
                 return DuplicateTypeResult(input.TypeName);
             }
 
-            carType.TypeName = input.TypeName;
             carType.DailyRate = input.DailyRate;
             carType.Description = input.Description;
             carType.IsActive = input.IsActive;

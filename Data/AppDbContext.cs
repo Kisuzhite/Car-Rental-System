@@ -10,6 +10,7 @@ namespace Car_Rental_System.Data
         public DbSet<CarType> CarTypes { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Rental> Rentals { get; set; }
+        public DbSet<RentalPayment> RentalPayments { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
@@ -90,6 +91,24 @@ namespace Car_Rental_System.Data
                     .WithMany(c => c.Rentals)
                     .HasForeignKey(r => r.CarId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<RentalPayment>(e =>
+            {
+                e.Property(p => p.Amount).HasColumnType(moneyColumnType);
+                e.Property(p => p.PaymentMethod)
+                    .HasConversion<string>()
+                    .HasMaxLength(30)
+                    .IsRequired();
+                e.Property(p => p.PaymentReferenceNumber).HasMaxLength(80).IsRequired();
+                e.Property(p => p.PaymentType)
+                    .HasConversion<string>()
+                    .HasMaxLength(20)
+                    .IsRequired();
+                e.HasOne(p => p.Rental)
+                    .WithMany(r => r.Payments)
+                    .HasForeignKey(p => p.RentalId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<Reservation>(e =>

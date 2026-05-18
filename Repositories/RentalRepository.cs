@@ -26,11 +26,42 @@ namespace Car_Rental_System.Repositories
                 r.ExpectedReturnDate < today);
         }
 
+        public Task<int> CountReturnsDueAsync(DateOnly returnDate)
+        {
+            return db.Rentals.CountAsync(r =>
+                r.Status == RentalStatus.Active &&
+                r.ExpectedReturnDate == returnDate);
+        }
+
+        public async Task<List<(decimal TotalAmount, decimal AmountPaid)>> GetActivePaymentAmountsAsync()
+        {
+            var amounts = await db.Rentals
+                .Where(r => r.Status == RentalStatus.Active)
+                .Select(r => new
+                {
+                    r.TotalAmount,
+                    r.AmountPaid
+                })
+                .ToListAsync();
+
+            return amounts
+                .Select(r => (r.TotalAmount, r.AmountPaid))
+                .ToList();
+        }
+
         public async Task<decimal> GetMonthlyCollectedAsync(DateOnly firstOfMonth, DateOnly firstOfNextMonth)
         {
             return await db.Rentals
                 .Where(r => r.ActualReturnDate >= firstOfMonth &&
                     r.ActualReturnDate < firstOfNextMonth)
+                .SumAsync(r => (decimal?)r.AmountPaid) ?? 0;
+        }
+
+        public async Task<decimal> GetCollectedForStartsInRangeAsync(DateOnly startDate, DateOnly endDate)
+        {
+            return await db.Rentals
+                .Where(r => r.RentalDate >= startDate &&
+                    r.RentalDate < endDate)
                 .SumAsync(r => (decimal?)r.AmountPaid) ?? 0;
         }
 
@@ -96,6 +127,7 @@ namespace Car_Rental_System.Repositories
             return db.Rentals
                 .Include(r => r.Customer)
                 .Include(r => r.Car).ThenInclude(c => c.CarType)
+                .Include(r => r.Payments)
                 .FirstOrDefaultAsync(r => r.RentalId == rentalId);
         }
 
@@ -132,6 +164,11 @@ namespace Car_Rental_System.Repositories
         public void Add(Rental rental)
         {
             db.Rentals.Add(rental);
+        }
+
+        public void AddPayment(RentalPayment payment)
+        {
+            db.RentalPayments.Add(payment);
         }
 
         public Task SaveChangesAsync()

@@ -1,7 +1,11 @@
+using System.Globalization;
+
 namespace Car_Rental_System.Helpers
 {
     internal static class RentalCalculator
     {
+        public static string CurrencyFormat => $"{AppConstants.CurrencyPrefix}#,##0.00";
+
         public static DateOnly ToDateOnly(DateTime dateTime)
         {
             return DateOnly.FromDateTime(dateTime.Date);
@@ -35,6 +39,24 @@ namespace Car_Rental_System.Helpers
         public static string FormatCurrency(decimal amount)
         {
             return $"{AppConstants.CurrencyPrefix}{amount:N2}";
+        }
+
+        public static bool TryParseCurrency(string value, out decimal amount)
+        {
+            string normalized = value
+                .Replace(AppConstants.CurrencyPrefix, "", StringComparison.Ordinal)
+                .Trim();
+
+            return decimal.TryParse(
+                    normalized,
+                    NumberStyles.Number | NumberStyles.AllowCurrencySymbol,
+                    CultureInfo.CurrentCulture,
+                    out amount) ||
+                decimal.TryParse(
+                    normalized,
+                    NumberStyles.Number | NumberStyles.AllowCurrencySymbol,
+                    CultureInfo.InvariantCulture,
+                    out amount);
         }
     }
 }

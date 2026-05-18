@@ -2,6 +2,7 @@
 using Car_Rental_System.Presenters;
 using Car_Rental_System.ViewModels;
 using Car_Rental_System.Views;
+using Guna.UI2.WinForms;
 
 namespace Car_Rental_System
 {
@@ -15,9 +16,10 @@ namespace Car_Rental_System
         {
             InitializeComponent();
             presenter = new CarTypesPresenter(this);
+            SetCarTypeEditMode(isExistingType: false);
         }
 
-        public string SearchText => searchTextBox.Text;
+        public string SearchText => string.Empty;
 
         void ICarTypesView.BindCarTypes(List<CarTypeGridRow> carTypes)
         {
@@ -149,11 +151,6 @@ namespace Car_Rental_System
             ClearForm();
         }
 
-        private async void SearchTextBox_TextChanged(object? sender, EventArgs e)
-        {
-            await LoadCarTypesAsync();
-        }
-
         private void CarTypesGrid_SelectionChanged(object? sender, EventArgs e)
         {
             if (isLoadingCarTypes)
@@ -165,10 +162,12 @@ namespace Car_Rental_System
                 !carTypesGrid.CurrentRow.Selected)
             {
                 selectedCarTypeId = null;
+                SetCarTypeEditMode(isExistingType: false);
                 return;
             }
 
             selectedCarTypeId = row.CarTypeId;
+            SetCarTypeEditMode(isExistingType: true);
             typeNameTextBox.Text = row.TypeName;
             dailyRateTextBox.Text = row.DailyRate.ToString("0.##");
             descriptionTextBox.Text = row.Description;
@@ -279,6 +278,35 @@ namespace Car_Rental_System
             isActiveCheckBox.Checked = true;
             carTypesGrid.ClearSelection();
             carTypesGrid.CurrentCell = null;
+            SetCarTypeEditMode(isExistingType: false);
+        }
+
+        private void SetCarTypeEditMode(bool isExistingType)
+        {
+            sectionLabel.Text = isExistingType ? "Selected Rate" : "Rate Details";
+
+            addButton.Enabled = !isExistingType;
+            updateButton.Enabled = isExistingType;
+            deleteButton.Enabled = isExistingType;
+
+            SetTypeNameState(typeNameTextBox, isExistingType);
+        }
+
+        private static void SetTypeNameState(Guna2TextBox textBox, bool isLocked)
+        {
+            textBox.ReadOnly = isLocked;
+            textBox.FillColor = isLocked
+                ? Color.FromArgb(243, 244, 246)
+                : Color.White;
+            textBox.Cursor = isLocked
+                ? Cursors.Default
+                : Cursors.IBeam;
+            textBox.FocusedState.BorderColor = isLocked
+                ? Color.FromArgb(209, 213, 219)
+                : Color.FromArgb(37, 99, 235);
+            textBox.HoverState.BorderColor = isLocked
+                ? Color.FromArgb(209, 213, 219)
+                : Color.FromArgb(37, 99, 235);
         }
     }
 }
