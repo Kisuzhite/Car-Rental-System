@@ -10,12 +10,14 @@ namespace Car_Rental_System
     public partial class Cars : Form, ICarsView
     {
         private readonly CarsPresenter presenter;
+        private readonly UiDebouncer searchDebouncer = new();
         private int? selectedCarId;
 
         public Cars()
         {
             InitializeComponent();
             presenter = new CarsPresenter(this);
+            FormClosed += (_, _) => searchDebouncer.Dispose();
             SetCarEditMode(isExistingCar: false);
         }
 
@@ -37,8 +39,9 @@ namespace Car_Rental_System
             DataGridViewHelper.HideColumn(carsGrid, "CarTypeId");
             DataGridViewHelper.MoveColumnToEnd(carsGrid, "Status");
             DataGridViewHelper.ApplyStatusFormatting(carsGrid);
+            DataGridViewHelper.ApplyEmptyState(carsGrid, "No cars found.");
 
-            BeginInvoke(new Action(async () => await ClearFormAsync()));
+            BeginInvoke(new Action(() => _ = ClearFormAfterGridLoadAsync()));
         }
 
         private async void Cars_Load(object? sender, EventArgs e)
@@ -114,23 +117,29 @@ namespace Car_Rental_System
                 return;
             }
 
+            PresenterResult result;
             try
             {
-                PresenterResult result = await presenter.AddCarAsync(input);
-                AppMessageBox.ShowPresenterResult(result);
-
-                if (!result.Success)
+                using (UiBusyScope.Disable(addButton, updateButton, deleteButton, clearButton))
                 {
-                    return;
+                    result = await presenter.AddCarAsync(input);
                 }
-
-                await ClearFormAsync();
-                await LoadCarsAsync();
             }
             catch (Exception ex)
             {
                 AppMessageBox.ShowDatabaseError("Unable to add car.", ex);
+                return;
             }
+
+            AppMessageBox.ShowPresenterResult(result);
+
+            if (!result.Success)
+            {
+                return;
+            }
+
+            await ClearFormAsync();
+            await LoadCarsAsync();
         }
 
         private async void UpdateButton_Click(object? sender, EventArgs e)
@@ -146,23 +155,29 @@ namespace Car_Rental_System
                 return;
             }
 
+            PresenterResult result;
             try
             {
-                PresenterResult result = await presenter.UpdateCarAsync(selectedCarId.Value, input);
-                AppMessageBox.ShowPresenterResult(result);
-
-                if (!result.Success)
+                using (UiBusyScope.Disable(addButton, updateButton, deleteButton, clearButton))
                 {
-                    return;
+                    result = await presenter.UpdateCarAsync(selectedCarId.Value, input);
                 }
-
-                await ClearFormAsync();
-                await LoadCarsAsync();
             }
             catch (Exception ex)
             {
                 AppMessageBox.ShowDatabaseError("Unable to update car.", ex);
+                return;
             }
+
+            AppMessageBox.ShowPresenterResult(result);
+
+            if (!result.Success)
+            {
+                return;
+            }
+
+            await ClearFormAsync();
+            await LoadCarsAsync();
         }
 
         private async void DeleteButton_Click(object? sender, EventArgs e)
@@ -173,51 +188,77 @@ namespace Car_Rental_System
                 return;
             }
 
+            PresenterResult canDelete;
             try
             {
-                PresenterResult canDelete = await presenter.CanDeleteCarAsync(selectedCarId.Value);
-                if (!canDelete.Success)
+                using (UiBusyScope.Disable(addButton, updateButton, deleteButton, clearButton))
                 {
-                    AppMessageBox.ShowPresenterResult(canDelete);
-                    return;
+                    canDelete = await presenter.CanDeleteCarAsync(selectedCarId.Value);
                 }
-
-                DialogResult confirmation = MessageBox.Show(
-                    "Are you sure you want to delete this car?",
-                    "Confirm Delete",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question);
-
-                if (confirmation != DialogResult.Yes)
-                {
-                    return;
-                }
-
-                PresenterResult result = await presenter.DeleteCarAsync(selectedCarId.Value);
-                AppMessageBox.ShowPresenterResult(result);
-
-                if (!result.Success)
-                {
-                    return;
-                }
-
-                await ClearFormAsync();
-                await LoadCarsAsync();
             }
             catch (Exception ex)
             {
                 AppMessageBox.ShowDatabaseError("Unable to delete car.", ex);
+                return;
             }
+
+            if (!canDelete.Success)
+            {
+                AppMessageBox.ShowPresenterResult(canDelete);
+                return;
+            }
+
+            DialogResult confirmation = MessageBox.Show(
+                "Are you sure you want to delete this car?",
+                "Confirm Delete",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (confirmation != DialogResult.Yes)
+            {
+                return;
+            }
+
+            PresenterResult result;
+            try
+            {
+                using (UiBusyScope.Disable(addButton, updateButton, deleteButton, clearButton))
+                {
+                    result = await presenter.DeleteCarAsync(selectedCarId.Value);
+                }
+            }
+            catch (Exception ex)
+            {
+                AppMessageBox.ShowDatabaseError("Unable to delete car.", ex);
+                return;
+            }
+
+            AppMessageBox.ShowPresenterResult(result);
+
+            if (!result.Success)
+            {
+                return;
+            }
+
+            await ClearFormAsync();
+            await LoadCarsAsync();
         }
 
         private async void ClearButton_Click(object? sender, EventArgs e)
         {
-            await ClearFormAsync();
+            try
+            {
+                await ClearFormAsync();
+            }
+            catch (Exception ex)
+            {
+                AppMessageBox.ShowDatabaseError("Unable to clear the car form.", ex);
+            }
         }
 
-        private async void SearchTextBox_TextChanged(object? sender, EventArgs e)
+        private void SearchTextBox_TextChanged(object? sender, EventArgs e)
         {
-            await LoadCarsAsync();
+            searchDebouncer.Run(LoadCarsAsync);
         }
 
         private void CarTypeComboBox_SelectedIndexChanged(object? sender, EventArgs e)
@@ -347,6 +388,18 @@ namespace Car_Rental_System
 
             carsGrid.ClearSelection();
             SetCarEditMode(isExistingCar: false);
+        }
+
+        private async Task ClearFormAfterGridLoadAsync()
+        {
+            try
+            {
+                await ClearFormAsync();
+            }
+            catch (Exception ex)
+            {
+                AppMessageBox.ShowDatabaseError("Unable to reset the car form.", ex);
+            }
         }
 
         private void SetCarEditMode(bool isExistingCar, CarStatus? currentStatus = null)

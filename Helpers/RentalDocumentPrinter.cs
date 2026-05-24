@@ -61,6 +61,8 @@ namespace Car_Rental_System.Helpers
             }
             catch (Exception ex)
             {
+                AppLogger.LogException("Unable to prepare printable rental document", ex);
+
                 MessageBox.Show(
                     $"Unable to prepare the printable document.\n\nDetails: {ex.Message}",
                     "Print Document",

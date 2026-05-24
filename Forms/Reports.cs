@@ -17,6 +17,7 @@ namespace Car_Rental_System
         private static readonly XNamespace OfficeRelationshipNamespace = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
 
         private readonly ReportsPresenter presenter;
+        private List<ReportRentalHistoryRow> allReportRows = new();
         private List<ReportRentalHistoryRow> currentReportRows = new();
 
         public Reports()
@@ -45,7 +46,7 @@ namespace Car_Rental_System
 
             BindRevenueChart(reports.MonthlyRevenue);
 
-            currentReportRows = reports.RentalHistory;
+            allReportRows = reports.RentalHistory;
             BindReportRows();
         }
 
@@ -93,6 +94,7 @@ namespace Car_Rental_System
 
         private void BindReportRows()
         {
+            currentReportRows = FilterReportRows(allReportRows, SearchText);
             int totalRecords = currentReportRows.Count;
             reportGrid.DataSource = currentReportRows;
 
@@ -100,9 +102,44 @@ namespace Car_Rental_System
             DataGridViewHelper.HideColumn(reportGrid, "RentalId");
             DataGridViewHelper.ApplyStatusFormatting(reportGrid);
             DataGridViewHelper.ApplyFullTextColumn(reportGrid, "Car", 340);
+            DataGridViewHelper.ApplyEmptyState(reportGrid, "No rental transactions found for this date range.");
             DataGridViewHelper.ClearSelectionWhenReady(reportGrid);
 
             recordsSummaryLabel.Text = $"Showing {totalRecords} record{(totalRecords == 1 ? "" : "s")}";
+        }
+
+        private static List<ReportRentalHistoryRow> FilterReportRows(
+            List<ReportRentalHistoryRow> rows,
+            string search)
+        {
+            string trimmed = search.Trim();
+            if (string.IsNullOrWhiteSpace(trimmed))
+            {
+                return rows;
+            }
+
+            return rows
+                .Where(row => ReportRowMatchesSearch(row, trimmed))
+                .ToList();
+        }
+
+        private static bool ReportRowMatchesSearch(ReportRentalHistoryRow row, string search)
+        {
+            return Contains(row.Customer, search) ||
+                Contains(row.Car, search) ||
+                Contains(row.CarType, search) ||
+                Contains(row.PaymentMethod, search) ||
+                Contains(row.PaymentStatus.ToString(), search) ||
+                Contains(row.Status, search) ||
+                Contains(row.RentalDate.ToString("d", CultureInfo.CurrentCulture), search) ||
+                Contains(row.ExpectedReturn.ToString("d", CultureInfo.CurrentCulture), search) ||
+                (row.ActualReturn.HasValue &&
+                    Contains(row.ActualReturn.Value.ToString("d", CultureInfo.CurrentCulture), search));
+        }
+
+        private static bool Contains(string value, string search)
+        {
+            return value.Contains(search, StringComparison.OrdinalIgnoreCase);
         }
 
         private void ExportExcelReport()
@@ -558,6 +595,7 @@ namespace Car_Rental_System
 
         private void ExcelButton_Click(object? sender, EventArgs e)
         {
+            using var busy = UiBusyScope.Disable(excelButton, generateButton, refreshButton);
             ExportExcelReport();
         }
 
@@ -566,13 +604,15 @@ namespace Car_Rental_System
             await LoadReportsAsync();
         }
 
-        private async void SearchTextBox_TextChanged(object? sender, EventArgs e)
+        private void SearchTextBox_TextChanged(object? sender, EventArgs e)
         {
-            await LoadReportsAsync();
+            BindReportRows();
         }
 
         private async Task LoadReportsAsync()
         {
+            using var busy = UiBusyScope.Disable(generateButton, refreshButton, excelButton);
+
             try
             {
                 await presenter.LoadReportsAsync();

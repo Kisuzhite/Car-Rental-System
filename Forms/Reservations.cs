@@ -9,6 +9,7 @@ namespace Car_Rental_System
     public partial class Reservations : Form, IReservationsView
     {
         private readonly ReservationsPresenter presenter;
+        private readonly UiDebouncer searchDebouncer = new();
         private int? selectedReservationId;
         private int? selectedReservationCarId;
         private bool isLoadingReservations;
@@ -17,6 +18,7 @@ namespace Car_Rental_System
         {
             InitializeComponent();
             presenter = new ReservationsPresenter(this);
+            FormClosed += (_, _) => searchDebouncer.Dispose();
         }
 
         public string SearchText => searchTextBox.Text;
@@ -37,6 +39,7 @@ namespace Car_Rental_System
             DataGridViewHelper.HideColumn(reservationsGrid, "PaymentMethodValue");
             DataGridViewHelper.ApplyStatusFormatting(reservationsGrid);
             DataGridViewHelper.ApplyFullTextColumn(reservationsGrid, "Car", 340);
+            DataGridViewHelper.ApplyEmptyState(reservationsGrid, "No reservations found.");
             FormatReservationsGridColumns();
             ClearFormAfterGridLoad();
         }
@@ -97,19 +100,25 @@ namespace Car_Rental_System
                 return;
             }
 
+            PresenterResult result;
             try
             {
-                PresenterResult result = await presenter.UpdateReservationAsync(selectedReservationId.Value, input);
-                AppMessageBox.ShowPresenterResult(result);
-
-                if (result.Success)
+                using (UiBusyScope.Disable(updateButton, cancelReservationButton, convertButton, clearButton))
                 {
-                    await LoadReservationsAsync();
+                    result = await presenter.UpdateReservationAsync(selectedReservationId.Value, input);
                 }
             }
             catch (Exception ex)
             {
                 AppMessageBox.ShowDatabaseError("Unable to update reservation.", ex);
+                return;
+            }
+
+            AppMessageBox.ShowPresenterResult(result);
+
+            if (result.Success)
+            {
+                await LoadReservationsAsync();
             }
         }
 
@@ -132,19 +141,25 @@ namespace Car_Rental_System
                 return;
             }
 
+            PresenterResult result;
             try
             {
-                PresenterResult result = await presenter.CancelReservationAsync(selectedReservationId.Value);
-                AppMessageBox.ShowPresenterResult(result);
-
-                if (result.Success)
+                using (UiBusyScope.Disable(updateButton, cancelReservationButton, convertButton, clearButton))
                 {
-                    await LoadReservationsAsync();
+                    result = await presenter.CancelReservationAsync(selectedReservationId.Value);
                 }
             }
             catch (Exception ex)
             {
                 AppMessageBox.ShowDatabaseError("Unable to cancel reservation.", ex);
+                return;
+            }
+
+            AppMessageBox.ShowPresenterResult(result);
+
+            if (result.Success)
+            {
+                await LoadReservationsAsync();
             }
         }
 
@@ -167,9 +182,13 @@ namespace Car_Rental_System
                 return;
             }
 
+            ReservationOperationResult result;
             try
             {
-                ReservationOperationResult result = await presenter.ConvertToRentalAsync(selectedReservationId.Value);
+                using (UiBusyScope.Disable(updateButton, cancelReservationButton, convertButton, clearButton))
+                {
+                    result = await presenter.ConvertToRentalAsync(selectedReservationId.Value);
+                }
 
                 if (!result.Success)
                 {
@@ -198,9 +217,9 @@ namespace Car_Rental_System
             ClearForm();
         }
 
-        private async void SearchTextBox_TextChanged(object? sender, EventArgs e)
+        private void SearchTextBox_TextChanged(object? sender, EventArgs e)
         {
-            await LoadReservationsAsync();
+            searchDebouncer.Run(LoadReservationsAsync);
         }
 
         private void DateOrRate_Changed(object? sender, EventArgs e)

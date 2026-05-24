@@ -1,4 +1,5 @@
 using System.Drawing.Drawing2D;
+using System.Runtime.CompilerServices;
 using Car_Rental_System.Models;
 
 namespace Car_Rental_System.Helpers
@@ -6,6 +7,8 @@ namespace Car_Rental_System.Helpers
     internal static class DataGridViewHelper
     {
         private const int DefaultRowHeight = 46;
+
+        private static readonly ConditionalWeakTable<DataGridView, EmptyGridState> EmptyGridStates = new();
 
         private static readonly Dictionary<string, string> FriendlyHeaders = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -440,6 +443,82 @@ namespace Car_Rental_System.Helpers
             grid.BeginInvoke(new Action(() => ClearSelectionAndCurrentCell(grid)));
         }
 
+        public static void ApplyEmptyState(DataGridView grid, string message)
+        {
+            EmptyGridState state = EmptyGridStates.GetOrCreateValue(grid);
+            state.Message = message;
+
+            grid.Paint -= PaintEmptyGridMessage;
+            grid.Paint += PaintEmptyGridMessage;
+            grid.DataBindingComplete -= InvalidateEmptyGridState;
+            grid.DataBindingComplete += InvalidateEmptyGridState;
+            grid.RowsAdded -= InvalidateEmptyGridState;
+            grid.RowsAdded += InvalidateEmptyGridState;
+            grid.RowsRemoved -= InvalidateEmptyGridState;
+            grid.RowsRemoved += InvalidateEmptyGridState;
+            grid.Invalidate();
+        }
+
+        private static void InvalidateEmptyGridState(object? sender, DataGridViewBindingCompleteEventArgs e)
+        {
+            InvalidateEmptyGridState(sender);
+        }
+
+        private static void InvalidateEmptyGridState(object? sender, DataGridViewRowsAddedEventArgs e)
+        {
+            InvalidateEmptyGridState(sender);
+        }
+
+        private static void InvalidateEmptyGridState(object? sender, DataGridViewRowsRemovedEventArgs e)
+        {
+            InvalidateEmptyGridState(sender);
+        }
+
+        private static void InvalidateEmptyGridState(object? sender)
+        {
+            if (sender is DataGridView grid && !grid.IsDisposed)
+            {
+                grid.Invalidate();
+            }
+        }
+
+        private static void PaintEmptyGridMessage(object? sender, PaintEventArgs e)
+        {
+            if (sender is not DataGridView grid ||
+                grid.IsDisposed ||
+                grid.Rows.Count > 0 ||
+                !EmptyGridStates.TryGetValue(grid, out EmptyGridState? state) ||
+                string.IsNullOrWhiteSpace(state.Message))
+            {
+                return;
+            }
+
+            Rectangle bounds = grid.ClientRectangle;
+            bounds.Y += grid.ColumnHeadersVisible ? grid.ColumnHeadersHeight : 0;
+            bounds.Height -= grid.ColumnHeadersVisible ? grid.ColumnHeadersHeight : 0;
+
+            if (bounds.Width <= 0 || bounds.Height <= 0)
+            {
+                return;
+            }
+
+            using var brush = new SolidBrush(Color.FromArgb(107, 114, 128));
+            using var format = new StringFormat
+            {
+                Alignment = StringAlignment.Center,
+                LineAlignment = StringAlignment.Center
+            };
+
+            using var font = new Font("Inter", 10F, FontStyle.Regular);
+
+            e.Graphics.DrawString(
+                state.Message,
+                font,
+                brush,
+                bounds,
+                format);
+        }
+
         public static void KeepDisplayOnly(DataGridView grid)
         {
             grid.TabStop = false;
@@ -619,6 +698,11 @@ namespace Car_Rental_System.Helpers
             path.CloseFigure();
 
             return path;
+        }
+
+        private sealed class EmptyGridState
+        {
+            public string Message { get; set; } = "";
         }
     }
 }

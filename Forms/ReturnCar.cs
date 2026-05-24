@@ -11,6 +11,7 @@ namespace Car_Rental_System
     public partial class ReturnCar : Form, IReturnCarView
     {
         private readonly ReturnCarPresenter presenter;
+        private readonly UiDebouncer searchDebouncer = new();
         private int? selectedRentalId;
         private int? selectedCarId;
         private DateOnly _selectedExpectedReturn;
@@ -29,6 +30,7 @@ namespace Car_Rental_System
             InitializeComponent();
             initialRentalId = rentalIdToSelect;
             presenter = new ReturnCarPresenter(this);
+            FormClosed += (_, _) => searchDebouncer.Dispose();
         }
 
         public string SearchText => searchTextBox.Text;
@@ -42,6 +44,7 @@ namespace Car_Rental_System
             DataGridViewHelper.HideColumn(activeRentalsGrid, "CarId");
             DataGridViewHelper.ApplyStatusFormatting(activeRentalsGrid);
             DataGridViewHelper.ApplyFullTextColumn(activeRentalsGrid, "Car", 340);
+            DataGridViewHelper.ApplyEmptyState(activeRentalsGrid, "No active rentals to return.");
             activeRentalsGrid.ClearSelection();
             ClearDetails();
 
@@ -201,6 +204,8 @@ namespace Car_Rental_System
                 return;
             }
 
+            using var busy = UiBusyScope.Disable(processReturnButton);
+
             PaymentMethod paymentMethod = paymentMethodComboBox.SelectedItem is PaymentMethod selectedMethod
                 ? selectedMethod
                 : PaymentMethod.Cash;
@@ -281,9 +286,9 @@ namespace Car_Rental_System
             return result == DialogResult.Yes;
         }
 
-        private async void SearchTextBox_TextChanged(object? sender, EventArgs e)
+        private void SearchTextBox_TextChanged(object? sender, EventArgs e)
         {
-            await LoadActiveRentalsAsync();
+            searchDebouncer.Run(LoadActiveRentalsAsync);
         }
 
         private void ClearDetails()

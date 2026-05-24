@@ -19,6 +19,7 @@ namespace Car_Rental_System.Repositories
             string trimmed = search.Trim();
 
             IQueryable<Reservation> query = db.Reservations
+                .AsNoTracking()
                 .Include(r => r.Customer)
                 .Include(r => r.Car).ThenInclude(c => c.CarType)
                 .Where(r => r.Status == ReservationStatus.Pending ||
@@ -74,6 +75,7 @@ namespace Car_Rental_System.Repositories
         public async Task<List<(decimal TotalAmount, decimal AmountPaid)>> GetOpenPaymentAmountsAsync()
         {
             List<Reservation> reservations = await db.Reservations
+                .AsNoTracking()
                 .Include(r => r.Car).ThenInclude(c => c.CarType)
                 .Where(r =>
                     r.Status == ReservationStatus.Pending ||

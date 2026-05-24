@@ -27,7 +27,7 @@ namespace Car_Rental_System.Presenters
             DateOnly previousEndDate = startDate.AddDays(-1);
             DateOnly previousStartDate = previousEndDate.AddDays(-dayCount + 1);
 
-            List<Rental> rentals = await rentalRepository.GetRentalHistoryAsync(view.SearchText, today);
+            List<Rental> rentals = await rentalRepository.GetRentalHistoryInDateRangeAsync(previousStartDate, endDate);
             List<Rental> filteredRentals = ApplyReportFilters(rentals, today, startDate, endDate);
             List<Rental> previousRentals = ApplyReportFilters(rentals, today, previousStartDate, previousEndDate);
             List<ReportRentalHistoryRow> history = BuildRentalHistoryRows(filteredRentals, today);

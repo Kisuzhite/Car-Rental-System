@@ -220,8 +220,8 @@ namespace Car_Rental_System
             // 
             // AvailabilityCalendar
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(120F, 120F);
+            AutoScaleMode = AutoScaleMode.None;
             BackColor = Color.FromArgb(243, 244, 246);
             ClientSize = new Size(1514, 790);
             Controls.Add(contentPanel);

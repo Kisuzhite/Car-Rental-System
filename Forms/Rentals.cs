@@ -59,6 +59,7 @@ namespace Car_Rental_System
             DataGridViewHelper.HideColumn(rentalsGrid, "RentalId");
             DataGridViewHelper.ApplyStatusFormatting(rentalsGrid);
             DataGridViewHelper.ApplyFullTextColumn(rentalsGrid, "Car", 340);
+            DataGridViewHelper.ApplyEmptyState(rentalsGrid, "No active rentals found.");
             DataGridViewHelper.ClearSelectionWhenReady(rentalsGrid);
         }
 
@@ -138,6 +139,8 @@ namespace Car_Rental_System
             {
                 return;
             }
+
+            using var busy = UiBusyScope.Disable(createButton, checkCalendarButton);
 
             try
             {

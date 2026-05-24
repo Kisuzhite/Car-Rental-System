@@ -36,6 +36,7 @@ namespace Car_Rental_System.Repositories
         public async Task<List<(decimal TotalAmount, decimal AmountPaid)>> GetActivePaymentAmountsAsync()
         {
             var amounts = await db.Rentals
+                .AsNoTracking()
                 .Where(r => r.Status == RentalStatus.Active)
                 .Select(r => new
                 {
@@ -90,6 +91,7 @@ namespace Car_Rental_System.Repositories
         public Task<List<Rental>> GetRecentRentalsAsync(int take)
         {
             return db.Rentals
+                .AsNoTracking()
                 .Include(r => r.Customer)
                 .Include(r => r.Car).ThenInclude(c => c.CarType)
                 .OrderByDescending(r => r.RentalId)
@@ -100,6 +102,7 @@ namespace Car_Rental_System.Repositories
         public Task<List<Rental>> GetRentalHistoryAsync(string search = "", DateOnly? today = null)
         {
             IQueryable<Rental> query = db.Rentals
+                .AsNoTracking()
                 .Include(r => r.Customer)
                 .Include(r => r.Car).ThenInclude(c => c.CarType);
 
@@ -107,6 +110,21 @@ namespace Car_Rental_System.Repositories
                 query,
                 search,
                 today ?? DateOnly.FromDateTime(DateTime.Today));
+
+            return query
+                .OrderByDescending(r => r.RentalId)
+                .ToListAsync();
+        }
+
+        public Task<List<Rental>> GetRentalHistoryInDateRangeAsync(
+            DateOnly startDate,
+            DateOnly endDate)
+        {
+            IQueryable<Rental> query = db.Rentals
+                .AsNoTracking()
+                .Include(r => r.Customer)
+                .Include(r => r.Car).ThenInclude(c => c.CarType)
+                .Where(r => r.RentalDate >= startDate && r.RentalDate <= endDate);
 
             return query
                 .OrderByDescending(r => r.RentalId)
@@ -181,6 +199,7 @@ namespace Car_Rental_System.Repositories
             string trimmed = search.Trim();
 
             IQueryable<Rental> query = db.Rentals
+                .AsNoTracking()
                 .Include(r => r.Customer)
                 .Include(r => r.Car).ThenInclude(c => c.CarType);
 

@@ -18,17 +18,29 @@ namespace Car_Rental_System.Presenters
             this.view = view;
         }
 
-        public static async Task<bool> DatabaseIsReadyAsync()
+        public static async Task PrepareDatabaseAsync()
         {
             using var db = new AppDbContext();
+            List<string> pendingMigrations = [];
 
-            if (!await db.Database.CanConnectAsync())
+            try
             {
-                throw new InvalidOperationException("The database connection could not be opened.");
+                pendingMigrations = (await db.Database.GetPendingMigrationsAsync()).ToList();
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogException("Unable to inspect pending EF Core migrations before startup", ex);
             }
 
-            List<string> pendingMigrations = (await db.Database.GetPendingMigrationsAsync()).ToList();
-            return pendingMigrations.Count == 0;
+            if (pendingMigrations.Count > 0)
+            {
+                AppLogger.LogMessage(
+                    "INFO",
+                    "Applying pending EF Core migrations",
+                    string.Join(Environment.NewLine, pendingMigrations));
+            }
+
+            await db.Database.MigrateAsync();
         }
 
         public async Task LoadDashboardDataAsync()
@@ -47,10 +59,9 @@ namespace Car_Rental_System.Presenters
             decimal totalRevenue = await rentalRepository.GetTotalCollectedAsync() +
                 await reservationRepository.GetOpenDepositCollectedAsync();
 
-            List<Car> availableCarsForDashboard = await carRepository.GetAvailableForScheduleAsync(
+            int availableCars = await carRepository.CountAvailableForScheduleAsync(
                 today,
                 today.AddDays(1));
-            int availableCars = availableCarsForDashboard.Count;
 
             List<DashboardScheduleDay> weeklySchedule = new();
             for (int i = 0; i < 7; i++)

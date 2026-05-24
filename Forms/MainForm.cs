@@ -22,6 +22,7 @@ namespace Car_Rental_System
         internal MainForm(AppUser currentUser)
         {
             InitializeComponent();
+            AppIcon.ApplyTo(this);
             this.currentUser = currentUser;
             dashboardPadding = contentPanel.Padding;
             presenter = new MainFormPresenter(this);
@@ -58,22 +59,12 @@ namespace Car_Rental_System
         {
             try
             {
-                bool databaseIsReady = await MainFormPresenter.DatabaseIsReadyAsync();
-                if (!databaseIsReady)
-                {
-                    MessageBox.Show(
-                        "The database needs to be updated before the app can continue.\n\nRun this command from the project folder:\n\ndotnet ef database update",
-                        "Database Update Required",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
-                    return false;
-                }
-
+                await MainFormPresenter.PrepareDatabaseAsync();
                 return true;
             }
             catch (Exception ex)
             {
-                AppMessageBox.ShowLocalDbWarning(ex);
+                AppMessageBox.ShowDatabaseStartupError(ex);
                 return false;
             }
         }

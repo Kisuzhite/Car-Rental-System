@@ -13,6 +13,7 @@ namespace Car_Rental_System
         public LoginForm()
         {
             InitializeComponent();
+            Helpers.AppIcon.ApplyTo(this);
             presenter = new LoginPresenter(this);
             AcceptButton = loginButton;
             CancelButton = exitButton;
@@ -53,6 +54,8 @@ namespace Car_Rental_System
             }
             catch (Exception ex)
             {
+                Helpers.AppLogger.LogException("Login failed because configuration is invalid", ex);
+
                 MessageBox.Show(
                     ex.Message,
                     "Login Configuration Missing",

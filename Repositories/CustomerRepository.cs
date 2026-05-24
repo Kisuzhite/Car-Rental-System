@@ -17,7 +17,9 @@ namespace Car_Rental_System.Repositories
         public Task<List<Customer>> SearchActiveAsync(string search = "")
         {
             string trimmed = search.Trim();
-            IQueryable<Customer> query = db.Customers.Where(c => !c.IsArchived);
+            IQueryable<Customer> query = db.Customers
+                .AsNoTracking()
+                .Where(c => !c.IsArchived);
 
             if (!string.IsNullOrWhiteSpace(trimmed))
             {
@@ -35,6 +37,7 @@ namespace Car_Rental_System.Repositories
         public Task<List<Customer>> GetActiveForLookupAsync()
         {
             return db.Customers
+                .AsNoTracking()
                 .Where(c => !c.IsArchived)
                 .OrderBy(c => c.FullName)
                 .ToListAsync();

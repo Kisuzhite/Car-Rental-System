@@ -28,6 +28,7 @@ namespace Car_Rental_System
             DataGridViewHelper.ApplyFriendlyHeaders(carTypesGrid);
             DataGridViewHelper.HideColumn(carTypesGrid, "CarTypeId");
             FormatCarTypesGridColumns();
+            DataGridViewHelper.ApplyEmptyState(carTypesGrid, "No car types or rates found.");
             ClearFormAfterGridLoad();
         }
 
@@ -58,19 +59,25 @@ namespace Car_Rental_System
                 return;
             }
 
+            PresenterResult result;
             try
             {
-                PresenterResult result = await presenter.AddCarTypeAsync(input);
-                AppMessageBox.ShowPresenterResult(result);
-
-                if (result.Success)
+                using (UiBusyScope.Disable(addButton, updateButton, deleteButton, clearButton))
                 {
-                    await LoadCarTypesAsync();
+                    result = await presenter.AddCarTypeAsync(input);
                 }
             }
             catch (Exception ex)
             {
                 AppMessageBox.ShowDatabaseError("Unable to add car type.", ex);
+                return;
+            }
+
+            AppMessageBox.ShowPresenterResult(result);
+
+            if (result.Success)
+            {
+                await LoadCarTypesAsync();
             }
         }
 
@@ -87,19 +94,25 @@ namespace Car_Rental_System
                 return;
             }
 
+            PresenterResult result;
             try
             {
-                PresenterResult result = await presenter.UpdateCarTypeAsync(selectedCarTypeId.Value, input);
-                AppMessageBox.ShowPresenterResult(result);
-
-                if (result.Success)
+                using (UiBusyScope.Disable(addButton, updateButton, deleteButton, clearButton))
                 {
-                    await LoadCarTypesAsync();
+                    result = await presenter.UpdateCarTypeAsync(selectedCarTypeId.Value, input);
                 }
             }
             catch (Exception ex)
             {
                 AppMessageBox.ShowDatabaseError("Unable to update car type.", ex);
+                return;
+            }
+
+            AppMessageBox.ShowPresenterResult(result);
+
+            if (result.Success)
+            {
+                await LoadCarTypesAsync();
             }
         }
 
@@ -111,38 +124,57 @@ namespace Car_Rental_System
                 return;
             }
 
+            CarTypeDeletePreview preview;
             try
             {
-                CarTypeDeletePreview preview = await presenter.PreviewDeleteAsync(selectedCarTypeId.Value);
-                if (!preview.CanContinue)
+                using (UiBusyScope.Disable(addButton, updateButton, deleteButton, clearButton))
                 {
-                    MessageBox.Show(preview.Message, preview.Title, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    await LoadCarTypesAsync();
-                    return;
-                }
-
-                DialogResult confirmation = MessageBox.Show(
-                    preview.Message,
-                    preview.Title,
-                    MessageBoxButtons.YesNo,
-                    preview.HasCars ? MessageBoxIcon.Information : MessageBoxIcon.Question);
-
-                if (confirmation != DialogResult.Yes)
-                {
-                    return;
-                }
-
-                PresenterResult result = await presenter.DeleteCarTypeAsync(selectedCarTypeId.Value);
-                AppMessageBox.ShowPresenterResult(result);
-
-                if (result.Success)
-                {
-                    await LoadCarTypesAsync();
+                    preview = await presenter.PreviewDeleteAsync(selectedCarTypeId.Value);
                 }
             }
             catch (Exception ex)
             {
                 AppMessageBox.ShowDatabaseError("Unable to delete car type.", ex);
+                return;
+            }
+
+            if (!preview.CanContinue)
+            {
+                MessageBox.Show(preview.Message, preview.Title, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                await LoadCarTypesAsync();
+                return;
+            }
+
+            DialogResult confirmation = MessageBox.Show(
+                preview.Message,
+                preview.Title,
+                MessageBoxButtons.YesNo,
+                preview.HasCars ? MessageBoxIcon.Information : MessageBoxIcon.Question);
+
+            if (confirmation != DialogResult.Yes)
+            {
+                return;
+            }
+
+            PresenterResult result;
+            try
+            {
+                using (UiBusyScope.Disable(addButton, updateButton, deleteButton, clearButton))
+                {
+                    result = await presenter.DeleteCarTypeAsync(selectedCarTypeId.Value);
+                }
+            }
+            catch (Exception ex)
+            {
+                AppMessageBox.ShowDatabaseError("Unable to delete car type.", ex);
+                return;
+            }
+
+            AppMessageBox.ShowPresenterResult(result);
+
+            if (result.Success)
+            {
+                await LoadCarTypesAsync();
             }
         }
 

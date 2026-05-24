@@ -28,6 +28,7 @@ namespace Car_Rental_System.Repositories
             string trimmed = search.Trim();
 
             IQueryable<Car> query = db.Cars
+                .AsNoTracking()
                 .Include(c => c.CarType);
 
             query = ApplyCarSearchFilter(query, trimmed);
@@ -42,6 +43,7 @@ namespace Car_Rental_System.Repositories
             string trimmed = search.Trim();
 
             IQueryable<Car> query = db.Cars
+                .AsNoTracking()
                 .Include(c => c.CarType)
                 .Where(c => c.Status == CarStatus.Available);
 
@@ -63,6 +65,7 @@ namespace Car_Rental_System.Repositories
             DateOnly today = DateOnly.FromDateTime(DateTime.Today);
 
             IQueryable<Car> query = db.Cars
+                .AsNoTracking()
                 .Include(c => c.CarType)
                 .Where(c => c.Status != CarStatus.Maintenance);
 
@@ -90,6 +93,33 @@ namespace Car_Rental_System.Repositories
                 .OrderBy(c => c.Brand)
                 .ThenBy(c => c.Model)
                 .ToListAsync();
+        }
+
+        public Task<int> CountAvailableForScheduleAsync(
+            DateOnly pickupDate,
+            DateOnly expectedReturnDate)
+        {
+            DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+
+            IQueryable<Car> query = db.Cars
+                .Where(c => c.Status != CarStatus.Maintenance);
+
+            if (pickupDate <= today)
+            {
+                query = query.Where(c => c.Status == CarStatus.Available);
+            }
+
+            return query.CountAsync(c =>
+                !db.Rentals.Any(r =>
+                    r.CarId == c.CarId &&
+                    r.Status == RentalStatus.Active &&
+                    pickupDate <= r.ExpectedReturnDate &&
+                    r.RentalDate <= expectedReturnDate) &&
+                !db.Reservations.Any(r =>
+                    r.CarId == c.CarId &&
+                    (r.Status == ReservationStatus.Pending || r.Status == ReservationStatus.Confirmed) &&
+                    pickupDate <= r.ExpectedReturnDate &&
+                    r.PickupDate <= expectedReturnDate));
         }
 
         public Task<Car?> GetByIdAsync(int carId)

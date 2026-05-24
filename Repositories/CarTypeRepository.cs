@@ -16,6 +16,7 @@ namespace Car_Rental_System.Repositories
         public Task<List<CarType>> GetActiveCarTypesAsync(int? includeCarTypeId = null)
         {
             return db.CarTypes
+                .AsNoTracking()
                 .Where(ct => ct.IsActive || (includeCarTypeId.HasValue && ct.CarTypeId == includeCarTypeId.Value))
                 .OrderBy(ct => ct.TypeName)
                 .ToListAsync();
@@ -24,7 +25,7 @@ namespace Car_Rental_System.Repositories
         public Task<List<CarType>> SearchAsync(string search = "")
         {
             string trimmed = search.Trim();
-            IQueryable<CarType> query = db.CarTypes;
+            IQueryable<CarType> query = db.CarTypes.AsNoTracking();
 
             if (!string.IsNullOrWhiteSpace(trimmed))
             {

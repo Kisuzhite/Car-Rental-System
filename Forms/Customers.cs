@@ -8,12 +8,14 @@ namespace Car_Rental_System
     public partial class Customers : Form, ICustomersView
     {
         private readonly CustomersPresenter presenter;
+        private readonly UiDebouncer searchDebouncer = new();
         private int? selectedCustomerId;
 
         public Customers()
         {
             InitializeComponent();
             presenter = new CustomersPresenter(this);
+            FormClosed += (_, _) => searchDebouncer.Dispose();
         }
 
         public string SearchText => searchTextBox.Text;
@@ -24,6 +26,7 @@ namespace Car_Rental_System
 
             DataGridViewHelper.ApplyFriendlyHeaders(customersGrid);
             DataGridViewHelper.HideColumn(customersGrid, "CustomerId");
+            DataGridViewHelper.ApplyEmptyState(customersGrid, "No customers found.");
             BeginInvoke(new Action(ClearForm));
         }
 
@@ -57,23 +60,29 @@ namespace Car_Rental_System
                 return;
             }
 
+            PresenterResult result;
             try
             {
-                PresenterResult result = await presenter.UpdateCustomerAsync(selectedCustomerId.Value, input);
-                AppMessageBox.ShowPresenterResult(result);
-
-                if (!result.Success)
+                using (UiBusyScope.Disable(updateButton, deleteButton, clearButton))
                 {
-                    return;
+                    result = await presenter.UpdateCustomerAsync(selectedCustomerId.Value, input);
                 }
-
-                ClearForm();
-                await LoadCustomersAsync();
             }
             catch (Exception ex)
             {
                 AppMessageBox.ShowDatabaseError("Unable to update customer.", ex);
+                return;
             }
+
+            AppMessageBox.ShowPresenterResult(result);
+
+            if (!result.Success)
+            {
+                return;
+            }
+
+            ClearForm();
+            await LoadCustomersAsync();
         }
 
         private async void DeleteButton_Click(object? sender, EventArgs e)
@@ -84,38 +93,57 @@ namespace Car_Rental_System
                 return;
             }
 
+            CustomerDeletePreview preview;
             try
             {
-                CustomerDeletePreview preview = await presenter.PreviewDeleteAsync(selectedCustomerId.Value);
-                if (!preview.CanContinue)
+                using (UiBusyScope.Disable(updateButton, deleteButton, clearButton))
                 {
-                    MessageBox.Show(preview.Message, preview.Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
-
-                DialogResult confirmation = MessageBox.Show(
-                    preview.Message,
-                    preview.Title,
-                    MessageBoxButtons.YesNo,
-                    preview.HasRentalHistory ? MessageBoxIcon.Information : MessageBoxIcon.Question);
-
-                if (confirmation != DialogResult.Yes)
-                {
-                    return;
-                }
-
-                PresenterResult result = await presenter.DeleteCustomerAsync(selectedCustomerId.Value);
-                AppMessageBox.ShowPresenterResult(result);
-
-                if (result.Success)
-                {
-                    ClearForm();
-                    await LoadCustomersAsync();
+                    preview = await presenter.PreviewDeleteAsync(selectedCustomerId.Value);
                 }
             }
             catch (Exception ex)
             {
                 AppMessageBox.ShowDatabaseError("Unable to delete customer.", ex);
+                return;
+            }
+
+            if (!preview.CanContinue)
+            {
+                MessageBox.Show(preview.Message, preview.Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            DialogResult confirmation = MessageBox.Show(
+                preview.Message,
+                preview.Title,
+                MessageBoxButtons.YesNo,
+                preview.HasRentalHistory ? MessageBoxIcon.Information : MessageBoxIcon.Question);
+
+            if (confirmation != DialogResult.Yes)
+            {
+                return;
+            }
+
+            PresenterResult result;
+            try
+            {
+                using (UiBusyScope.Disable(updateButton, deleteButton, clearButton))
+                {
+                    result = await presenter.DeleteCustomerAsync(selectedCustomerId.Value);
+                }
+            }
+            catch (Exception ex)
+            {
+                AppMessageBox.ShowDatabaseError("Unable to delete customer.", ex);
+                return;
+            }
+
+            AppMessageBox.ShowPresenterResult(result);
+
+            if (result.Success)
+            {
+                ClearForm();
+                await LoadCustomersAsync();
             }
         }
 
@@ -124,9 +152,9 @@ namespace Car_Rental_System
             ClearForm();
         }
 
-        private async void SearchTextBox_TextChanged(object? sender, EventArgs e)
+        private void SearchTextBox_TextChanged(object? sender, EventArgs e)
         {
-            await LoadCustomersAsync();
+            searchDebouncer.Run(LoadCustomersAsync);
         }
 
         private void CustomersGrid_SelectionChanged(object? sender, EventArgs e)

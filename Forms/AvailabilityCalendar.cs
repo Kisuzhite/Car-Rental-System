@@ -36,6 +36,7 @@ namespace Car_Rental_System
         public AvailabilityCalendar(DateOnly pickupDate, DateOnly returnDate, int? selectedCarId = null)
         {
             InitializeComponent();
+            AppIcon.ApplyTo(this);
             requestedPickupDate = pickupDate;
             requestedReturnDate = returnDate;
             this.selectedCarId = selectedCarId;
@@ -50,12 +51,14 @@ namespace Car_Rental_System
 
         private async void PreviousButton_Click(object? sender, EventArgs e)
         {
+            using var busy = UiBusyScope.Disable(previousButton, nextButton);
             visibleStartDate = visibleStartDate.AddMonths(-1);
             await LoadCalendarAsync();
         }
 
         private async void NextButton_Click(object? sender, EventArgs e)
         {
+            using var busy = UiBusyScope.Disable(previousButton, nextButton);
             visibleStartDate = visibleStartDate.AddMonths(1);
             await LoadCalendarAsync();
         }
@@ -87,6 +90,7 @@ namespace Car_Rental_System
             using var db = new AppDbContext();
 
             List<Car> cars = await db.Cars
+                .AsNoTracking()
                 .Include(c => c.CarType)
                 .OrderBy(c => c.Brand)
                 .ThenBy(c => c.Model)
@@ -94,6 +98,7 @@ namespace Car_Rental_System
                 .ToListAsync();
 
             List<Rental> rentals = await db.Rentals
+                .AsNoTracking()
                 .Include(r => r.Customer)
                 .Where(r =>
                     r.Status == RentalStatus.Active &&
@@ -102,6 +107,7 @@ namespace Car_Rental_System
                 .ToListAsync();
 
             List<Reservation> reservations = await db.Reservations
+                .AsNoTracking()
                 .Where(r =>
                     (r.Status == ReservationStatus.Pending || r.Status == ReservationStatus.Confirmed) &&
                     visibleStartDate <= r.ExpectedReturnDate &&
