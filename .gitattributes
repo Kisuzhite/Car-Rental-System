@@ -4,6 +4,19 @@
 * text=auto
 
 ###############################################################################
+# Keep project text files consistent on Windows.
+###############################################################################
+*.cs      text eol=crlf
+*.csproj  text eol=crlf
+*.sln     text eol=crlf
+*.resx    text eol=crlf
+*.json    text eol=crlf
+*.config  text eol=crlf
+*.xml     text eol=crlf
+*.md      text eol=crlf
+*.txt     text eol=crlf
+
+###############################################################################
 # Set default behavior for command prompt diff.
 #
 # This is need for earlier builds of msysgit that does not have it on by
@@ -43,6 +56,11 @@
 #*.jpg   binary
 #*.png   binary
 #*.gif   binary
+*.jpg    binary
+*.jpeg   binary
+*.png    binary
+*.gif    binary
+*.ico    binary
 
 ###############################################################################
 # diff behavior for common document formats
